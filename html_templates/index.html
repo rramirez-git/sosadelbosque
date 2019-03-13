@@ -1,0 +1,252 @@
+{% extends "global/html_struct.html" %}
+
+{% load static %}
+{% load util_filters %}
+
+{% block extraaftermain %}
+
+<nav class="navbar navbar-dark bg-primary justify-content-between">
+    <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="30" class="d-inline-block align-top" alt="">
+        Sosa del Bosque
+    </a>
+    <form class="form-inline" method="POST">
+        {% csrf_token %}
+        <input id="usr" name="usr" class="form-control mr-sm-4" type="text" placeholder="Usuario" aria-label="Usuario">
+        <input id="pwd" name="pwd" class="form-control mr-sm-2" type="password" placeholder="Contaseña" aria-label="Contraseña">
+        <button class="btn btn-info my-2 my-sm-0" type="submit">
+            <i class="fas fa-sign-in-alt"></i>
+        </button>
+    </form>
+</nav>
+
+<style type="text/css">
+    .splah_block_1 {
+        background-image: url('{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_1.b1_imagen' | get_setting }}');
+    }
+    .splah_block_3 {
+        background-image: url('{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_3.b3_imagen' | get_setting }}');
+    }
+    .splah_block_6 {
+        background-image: url('{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_6.b6_imagen' | get_setting }}');
+    }
+    .splash_block.splah_block_7 {
+        min-height: 50px;
+    }
+    .splah_block_7 ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .splah_block_7 ul li {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .splah_block_7 ul li a {
+        text-align: center;
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 40px;
+        display: block;
+        font-size: 25px;
+        color: #fff;
+        margin: auto;
+    }
+    .splash_block {
+        background-position-x: center;
+        background-position-y: center;
+        background-size:cover;
+        padding: 50px 0px;
+        color: white;
+        min-height: 500px;
+    }
+    .splash_block h1, .splash_block h2, .splash_block h3, .splash_block h4, .splash_block h5, .splash_block h6,
+    .splash_block .h1, .splash_block .h2, .splash_block .h3, .splash_block .h4, .splash_block .h5, .splash_block .h6 {
+        color: white;
+    }
+</style>
+
+<div class="splash_block splah_block_1">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-5">
+                <h2>{{ '02_PaginaPrincipal_Bloque_1.b1_line1' | get_setting }}</h2>
+                <h1>{{ '02_PaginaPrincipal_Bloque_1.b1_line2' | get_setting }}</h1>
+                <p class="blockquote">{{ '02_PaginaPrincipal_Bloque_1.b1_Texto' | get_setting }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="container splah_block_2">
+    <h2 class="text-center">{{ '02_PaginaPrincipal_Bloque_2.b2_Title' | get_setting }}</h2>
+    {{ '02_PaginaPrincipal_Bloque_2.b2_Texto' | get_setting | as_paragraph | safe }}
+    
+    <div class="height_50"></div>
+    
+    <div class="row">
+        <div class="col-sm-4 offset-sm-1">
+            <p class="text-center">
+                <img src="http://intermedia.eus/wp-content/uploads/2015/09/mision.png" class="d-inline-block align-top" height="75" />
+            </p>
+            <h3 class="text-center">Misión</h3>
+            <p>Ser un respaldo de seguridad y tranquilidad para nuestros clientes dándoles un servicio de excelencia y el apoyo necesario para que tengan el mejor retiro de la vida laboral.</p>
+        </div>
+        <div class="col-sm-4 offset-sm-2">
+            <p class="text-center">
+                <img src="http://intermedia.eus/wp-content/uploads/2015/09/vision.png" class="d-inline-block align-top" height="75" />
+            </p>
+            <h3 class="text-center">Visión</h3>
+            <p>Ser una empresa mexicana líder en el Sistema de Seguridad Social y destacar como referente y autoridad dentro del medio.</p>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="splash_block splah_block_3">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10 offset-sm-1">
+                <h3 class="text-center">Apoyo Empresarial</h3>
+                <p class="blockquote">Brindamos apoyo a las empresas con asesoría a sus trabajadores próximos a pensionarse, así como en temas de Infonavit y Afore, evitando que sus áreas de Recursos Humanos inviertan tiempo en este proceso y puedan optimizarlo en otras áreas que requieran también su atención.</p>
+                <p class="blockquote">Trabajando en sinergia con las empresas, se ofrece una imagen de atención y preocupación por parte de la misma para con sus empleados y trabajadores.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="container splah_block_4">
+    <p class="h2 text-center">Servicio al Cliente</p>
+
+    <div class="row">
+
+        <div class="col-sm-4 offset-sm-1">
+            <h3>IMSS</h3>
+            <p>
+                - Revisión, corrección y homologación de datos<br />
+                - Revisión de posibles Homonimias y duplicidad de Número de Seguro Social<br />
+                - Revisión y recuperación de semanas cotizadas<br />
+                - Reactivación de derechos<br />
+                - Cálculo y diseño de pago en Continuación Voluntaria al Régimen Obligatorio "Mod 40"<br />
+                - Alta y baja en "Mod 40"<br />
+                - Estudio Previsional
+            </p>
+        </div>
+
+        <div class="col-sm-4 offset-sm-2">
+            <h3>PENSIONES</h3>
+            <p>
+                - Certificación de Semanas Cotizadas<br />
+                - Certificación de Salario Promedio<br />
+                - Cálculo y trámite de pensión<br />
+                - Recuperación del dinero de las Subcuentas SAR 92, RETIRO e INFONAVIT
+            </p>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-4 offset-sm-1">
+            <h3>INFONAVIT</h3>
+            <p>
+-                 Revisión de datos<br />
+                - Precalificación y asesoría sobre opciones de crédito<br />
+                - Gestoría en trámites de compra-venta a terceros, pago a pasivo y remodelación<br />
+                - Cancelación de hipoteca y liberación de escrituras<br />
+            </p>
+        </div>
+
+        <div class="col-sm-4 offset-sm-2">
+            <h3>AFORE</h3>
+            <p>
+                - Revisión de datos en PROCESAR<br />
+                - Revisión y recuperación de cuentas SAR 92<br />
+                - Expediente electrónico<br />
+                - Comparativo y opciones de AFORE<br />
+                - Registro y Traspaso de cuentas<br />
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<hr />
+
+<div class="height_50"></div>
+
+<div class="container splah_block_5">
+    <h2 class="text-center">Contactános</h2>
+    <div class="row">
+        <div class="col-sm-4">
+            <p class="h2 text-center">
+                <i class="fas fa-phone"></i>
+            </p>
+            <p class="text-center lead">Llámanos al</p>
+            <p class="h2 text-center">
+                <a href="tel:5534008008" target="_blank">5534008008</a>
+            </p>
+        </div>
+        <div class="col-sm-4">
+            <p class="h2 text-center">
+                <i class="fab fa-whatsapp"></i>
+            </p>
+            <p class="text-center lead">Envíanos un mensaje al</p>
+            <p class="h2 text-center">
+                <a href="https://api.whatsapp.com/send?phone=525534008008" target="_blank">5534008008</a>
+            </p>
+        </div>
+        <div class="col-sm-4">
+            <p class="h2 text-center">
+                <i class="far fa-envelope"></i>
+            </p>
+            <p class="text-center lead">Escríbenos a</p>
+            <p class="h2 text-center">
+                <a href="mailto:contacto@sosadelbosque.mx" target="_blank">contacto@sosadelbosque.mx</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="splash_block splah_block_6"></div>
+
+<div class="splash_block splah_block_7 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8 offset-sm-2">
+                <h2 class="text-center">Encuéntranos en</h2>
+                <p class="text-center">
+                    <ul class="social text-center">
+                        <li class="text-center">
+                            <a href="https://twitter.com/siss_07?lang=es" class="bg-info" target="_blank">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            @siss_07
+                        </li>
+                        <li class="text-center">
+                            <a href="https://www.facebook.com/solucionesenpensiones" class="bg-info" target="_blank">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            /solucionesenpensiones
+                        </li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+        <p class="text-center">
+            {{ '01 General.footer_text' | get_setting | safe }}
+        </p>
+    </div>
+</div>
+
+{% endblock %}

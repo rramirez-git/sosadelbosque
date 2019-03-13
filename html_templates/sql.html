@@ -1,0 +1,63 @@
+{% extends "global/html_struct.html" %}
+
+{% block content %}
+
+<form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+    {% csrf_token %}
+    <div class="form-row">
+        <div class="col form-group">
+            <label>SQL:</label>
+            <textarea class="form-control" name="sql" rows="10" style="font-face: Monotype;">{{ sql }}</textarea>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col form-group">
+            <label>
+                {% if getrows %}
+                <input type="checkbox" name="getrows" value="yes" checked="checked" />
+                {% else %}
+                <input type="checkbox" name="getrows" value="yes" />
+                {% endif %}
+                La instrucción retorna registros.
+            </label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-outline-primary" id="btn-save" >Ejecutar</button>
+</form>
+<p></p>
+
+{% if error %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endif %}
+
+{% if rows and header %}
+
+<h5>Resultados</h5>
+
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            {% for field in header %}
+            <th>
+                {{ field }}
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody id="data-tbl">
+        {% for row in rows %}
+        <tr>
+            {% for field in row %}
+            <td>
+                {{ field }}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+
+
+{% endblock %}

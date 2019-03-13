@@ -1,0 +1,52 @@
+{% extends "global/html_struct.html" %}
+
+{% block content %}
+
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Seccion</th>
+            <th>Mostrar como</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Es Multiple</th>
+            <th colspan="3"></th>
+        </tr>
+    </thead>
+    <tbody id="data-tbl">
+        {% for reg in data %}
+            <tr>
+                <td>{{ reg.seccion }}</td>
+                <td>{{ reg.nombre_para_mostrar }}</td>
+                <td>{{ reg.nombre }}</td>
+                <td>{{ reg.tipo }}</td>
+                <td>
+                    <input type="checkbox" disabled="disabled" {% if reg.es_multiple %}checked="checked"{% endif %} />
+                </td>
+                <td class="text-center">
+                    {% if perms.seguridad.administrar_settings_setting %}
+                        <a href="{% url 'setting_see' pk=reg.pk %}" class="btn btn-outline-secondary" title="Ver">
+                            <i class="far fa-eye"></i>
+                        </a>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if perms.seguridad.actualizar_settings_setting %}
+                        <a href="{% url 'setting_update' pk=reg.pk %}" class="btn btn-outline-secondary" title="Actualizar">
+                            <i class="far fa-edit"></i>
+                        </a>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if perms.seguridad.eliminar_settings_setting %}
+                        <a href="{% url 'setting_delete' pk=reg.pk %}" class="btn btn-outline-secondary" title="Eliminar">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% load static %}
+{% load util_filters %}
+¿Qué tal {{ usuario.first_name }}?
+
+{% block content %}
+{% endblock %}
+
+En caso de que tengas alguna duda, sugerencia o comentario, estamos complacidos en atenderte, ya sea que nos escribas un email a {{ '02 Pagina Inicial.contacto_email' | get_setting }}, llamando al {{ '02 Pagina Inicial.contacto_telefono' | get_setting }} o bien enviando un What's App al {{ '02 Pagina Inicial.contacto_whats_app' | get_setting }}.
+
+Atentamente:
+
+El equipo BMhaus (https://{{ request.get_host }}/).
+
+BMhaus
+{{ '02 Pagina Inicial.contacto_telefono' | get_setting }}
+{{ '02 Pagina Inicial.contacto_email' | get_setting }}
+Av. División del Norte 3259-A
+La Candelaria, Coyoacán
+04380, CDMX
+https://{{ request.get_host }}/

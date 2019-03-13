@@ -1,0 +1,40 @@
+{% load static %}
+{% load util_filters %}
+<div style="background-color: #000000; text-align: center; color: #bdc6d3; font-family: Arial; font-size: 16px; padding: 50px; min-width: 450px;">
+    <table border="0" style="margin: auto; color: #bdc6d3; max-width: 650px; min-width: 450px;">
+        <tr>
+            <td>
+                <img src="cid:img_encabezado" style="height: 50px; margin: 25px;" />
+            </td>
+            <td>
+                <h3>¿Qué tal {{ usuario.first_name }}?</h3>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"  style="text-align: left;">
+                {% block content %}
+                {% endblock %}
+                <p>En caso de que tengas alguna duda, sugerencia o comentario, estamos complacidos en atenderte, ya sea que nos escribas un email a <a href="mailto:{{ '02 Pagina Inicial.contacto_email' | get_setting }}" style="color: #bdc6d3;">{{ '02 Pagina Inicial.contacto_email' | get_setting }}</a>, llamando al <a href="tel:{{ '02 Pagina Inicial.contacto_telefono' | get_setting }}" style="color: #bdc6d3;">{{ '02 Pagina Inicial.contacto_telefono' | get_setting }}</a> o bien enviando un What's App al <a href="https://api.whatsapp.com/send?phone={{ '02 Pagina Inicial.contacto_whats_app' | get_setting }}" style="color: #bdc6d3;">{{ '02 Pagina Inicial.contacto_whats_app' | get_setting }}</a>.</p>
+                <p>Atentamente:</p>
+                <p>El equipo <strong><a href="//{{ request.get_host }}/" style="color: #bdc6d3;">BMhaus</a></strong>.</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: left; padding: 25px; font-size: 14px">
+                <img src="cid:img_firma" style="margin-right: 35px; float: left; height: 150px;" />
+                <p><strong>El equipo <a href="//{{ request.get_host }}/" style="color: #bdc6d3;">BMhaus</a>.</strong></p>
+                <p>
+                    <a href="tel:{{ '02 Pagina Inicial.contacto_telefono' | get_setting }}" style="color: #bdc6d3; text-decoration: none;">{{ '02 Pagina Inicial.contacto_telefono' | get_setting }}</a>
+                    <br />
+                    <strong><a href="mailto:{{ '02 Pagina Inicial.contacto_email' | get_setting }}" style="color: #bdc6d3; text-decoration: none;">{{ '02 Pagina Inicial.contacto_email' | get_setting }}</a></strong>
+                </p>
+                <p>
+                    Av. División del Norte 3259-A<br />
+                    La Candelaria, Coyoacán<br />
+                    04380, CDMX
+                </p>
+                <p><strong><a href="//{{ request.get_host }}/" style="color: #bdc6d3; text-decoration: none;">{{ request.get_host }}</a></strong>
+            </td>
+        </tr>
+    </table>
+</div>

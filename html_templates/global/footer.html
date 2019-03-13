@@ -1,0 +1,9 @@
+{% load util_filters %}
+<!-- footer.html (Open) -->
+<footer>
+    {% if request.session.usuario_pic %}
+        <img src="{{ MEDIA_URL }}{{ request.session.usuario_pic }}" title="{{ request.user.get_full_name }}" class="rounded-circle float-right" height="30" width="30" data-toggle="tooltip" />
+    {% endif %}
+    {{ '01 General.footer_text' | get_setting | safe }}
+</footer>
+<!-- footer.html (Close) -->

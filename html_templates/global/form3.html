@@ -1,0 +1,35 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-4">
+            {% if titulo_frm_1 %}<h5>{{ titulo_frm_1 }}</h5>{% endif %}
+            {{ frm | crispy }}
+            {% if titulo_frm_2 %}<h5>{{ titulo_frm_2 }}</h5>{% endif %}
+            {{ frm2 | crispy }}
+        </div>
+        <div class="col-sm-4">
+            {% if titulo_frm_3 %}<h5>{{ titulo_frm_3 }}</h5>{% endif %}
+            {{ frm3 | crispy }}
+            {% if titulo_frm_4 %}<h5>{{ titulo_frm_4 }}</h5>{% endif %}
+            {{ frm4 | crispy }}
+        </div>
+        <div class="col-sm-4">
+            {% if titulo_frm_5 %}<h5>{{ titulo_frm_5 }}</h5>{% endif %}
+            {{ frm5 | crispy }}
+            {% if titulo_frm_6 %}<h5>{{ titulo_frm_6 }}</h5>{% endif %}
+            {{ frm6 | crispy }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
