@@ -299,9 +299,6 @@ class Usr(User):
             p = "{}.{}".format(perm.content_type.app_label, perm.codename)
             if super(Usr, self).has_perm(p):
                 return_value = True
-        Logger.write("El usuario {} tiene el permiso {} is {}".format(
-            self, model_codename, return_value
-        ))
         return return_value
 
     def main_menu_struct(self):

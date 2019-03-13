@@ -53,7 +53,7 @@ def keyvalue(dict, key):
     try:
         data = dict[key]
     except:
-        Logger.exception("No se encontro la llave {} en {}".format(key,dict))
+        Logger.write("No se encontro la llave {} en {}".format(key,dict))
     return data
 
 

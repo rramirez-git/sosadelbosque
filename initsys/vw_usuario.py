@@ -14,7 +14,7 @@ from routines.mkitsafe import valida_acceso
 from routines.utils import move_uploaded_file, hipernormalize
 
 
-@valida_acceso(['usr.usuarios_usuario'])
+@valida_acceso(['usr.usuarios_usuario', 'usr.usuarios_user'])
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     root_usrs = Usr.objects.filter(depende_de__isnull=True)
@@ -37,12 +37,12 @@ def index(request):
                         or search_value in hipernormalize(reg.last_name))
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('usr.agregar_usuarios_usuario'):
+    if usuario.has_perm_or_has_perm_child('usr.agregar_usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.agregar_usuarios_user'):
         toolbar.append({
             'type': 'link',
             'view': 'usuario_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
-    if usuario.has_perm_or_has_perm_child('user.users_usuario'):
+    if usuario.has_perm_or_has_perm_child('user.users_usuario') or usuario.has_perm_or_has_perm_child('user.users_user'):
         toolbar.append({
             'type': 'link',
             'view': 'user_index',
@@ -59,7 +59,7 @@ def index(request):
             })
 
 
-@valida_acceso(['usr.agregar_usuarios_usuario'])
+@valida_acceso(['usr.agregar_usuarios_usuario', 'usr.agregar_usuarios_user'])
 def new(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if 'POST' == request.method:
@@ -86,7 +86,7 @@ def new(request):
         })
 
 
-@valida_acceso(['usr.usuarios_usuario'])
+@valida_acceso(['usr.usuarios_usuario', 'usr.usuarios_user'])
 def see(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Usr.objects.filter(pk=pk).exists():
@@ -98,19 +98,18 @@ def see(request, pk):
     for u in obj.descendencia():
         arbol.append(u)
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('usr.usuarios_usuario'):
+    if usuario.has_perm_or_has_perm_child('usr.usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.usuarios_user'):
         toolbar.append({
             'type': 'link',
             'view': 'usuario_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child(
-            'usr.actualizar_usuarios_usuario'):
+    if usuario.has_perm_or_has_perm_child('usr.actualizar_usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.actualizar_usuarios_user'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'usuario_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('usr.eliminar_usuarios_usuario'):
+    if usuario.has_perm_or_has_perm_child('usr.eliminar_usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.eliminar_usuarios_user'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'usuario_delete',
@@ -128,7 +127,7 @@ def see(request, pk):
         })
 
 
-@valida_acceso(['usr.actualizar_usuarios_usuario'])
+@valida_acceso(['usr.actualizar_usuarios_usuario', 'usr.actualizar_usuarios_user'])
 def update(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Usr.objects.filter(pk=pk).exists():
@@ -168,7 +167,7 @@ def update(request, pk):
             })
 
 
-@valida_acceso(['usr.eliminar_usuarios_usuario'])
+@valida_acceso(['usr.eliminar_usuarios_usuario', 'usr.eliminar_usuarios_user'])
 def delete(request, pk):
     try:
         if not Usr.objects.filter(pk=pk).exists():
@@ -181,7 +180,7 @@ def delete(request, pk):
             'item_con_relaciones'))
 
 
-@valida_acceso(['user.users_usuario'])
+@valida_acceso(['user.users_usuario', 'user.users_user'])
 def user_index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     search_value = ""
@@ -197,7 +196,7 @@ def user_index(request):
                         or search_value in hipernormalize(reg.last_name))
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('usr.usuarios_usuario'):
+    if usuario.has_perm_or_has_perm_child('usr.usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.usuarios_user'):
         toolbar.append({
             'type': 'link',
             'view': 'usuario_index',
