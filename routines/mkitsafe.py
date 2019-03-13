@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from initsys.models import Permiso
-from .utils import print_error
+from routines.logger import Logger
 
 
 def valida_acceso(permisos=None):
@@ -41,10 +41,9 @@ def valida_acceso(permisos=None):
             """
             usuario = args[0].user
             if not usuario.is_authenticated:
-                print_error(
+                Logger.write(
                     "Vista {} negada por autenticación".format(
-                        vista.__name__),
-                    "Exec Info")
+                        vista.__name__))
                 return HttpResponseRedirect(reverse(url_autenticacion))
             if permisos is None:
                 return vista(*args, **kwargs)
@@ -52,7 +51,7 @@ def valida_acceso(permisos=None):
             for perm in permisos:
                 permiso = Permiso.get_from_package_codename(perm)
                 if(permiso is None):
-                    print_error("No se ha encontrado el permiso: " + perm)
+                    Logger.write("No se ha encontrado el permiso: " + perm)
                 else:
                     perms.append(permiso.perm())
                     desc = permiso.descendencia()
@@ -62,10 +61,9 @@ def valida_acceso(permisos=None):
                 p = "{}.{}".format(perm.content_type.app_label, perm.codename)
                 if usuario.has_perm(p):
                     return vista(*args, **kwargs)
-            print_error(
+            Logger.write(
                 "Vista {} negada por permisos {}".format(
-                    vista.__name__, permisos),
-                "Exec Info")
+                    vista.__name__, permisos))
             return HttpResponseRedirect(reverse(url_error))
         return validacion
 

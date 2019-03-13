@@ -4,6 +4,7 @@ from random import randint
 
 from initsys.models import Setting
 from routines.utils import get_setting_fn, as_paragraph_fn
+from routines.logger import Logger
 
 register = template.Library()
 
@@ -52,7 +53,7 @@ def keyvalue(dict, key):
     try:
         data = dict[key]
     except:
-        print("No se encontro la llave {} en {}".format(key,dict))
+        Logger.exception("No se encontro la llave {} en {}".format(key,dict))
     return data
 
 

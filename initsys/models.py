@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from datetime import date
 
 from routines.utils import print_error, clean_name
+from routines.logger import Logger
 
 # Create your models here.
 
@@ -287,7 +288,7 @@ class Usr(User):
         perms = []
         permiso = Permiso.get_from_package_codename(model_codename)
         if permiso is None:
-            print_error("No se encontró el permiso: " + model_codename)
+            Logger.write("No se encontró el permiso: " + model_codename)
             return False
         perms.append(permiso.perm())
         desc = permiso.descendencia()
@@ -298,7 +299,7 @@ class Usr(User):
             p = "{}.{}".format(perm.content_type.app_label, perm.codename)
             if super(Usr, self).has_perm(p):
                 return_value = True
-        print("El usuario {} tiene el permiso {} is {}".format(
+        Logger.write("El usuario {} tiene el permiso {} is {}".format(
             self, model_codename, return_value
         ))
         return return_value

@@ -203,7 +203,6 @@ def user_index(request):
             'view': 'usuario_index',
             'label': '<i class="fas fa-glasses"></i> Usuarios'})
     toolbar.append({'type': 'search'})
-    print(toolbar)
     return render(
         request,
         'initsys/users/index.html',
