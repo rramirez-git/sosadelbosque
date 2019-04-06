@@ -1,0 +1,88 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+{% load util_filters %}
+
+{% block content %}
+
+<form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-4 offset-md-2">
+            {% if titulo_frm_1 %}<h5>{{ titulo_frm_1 }}</h5>{% endif %}
+            {{ frm | crispy }}
+            {% if titulo_frm_2 %}<h5>{{ titulo_frm_2 }}</h5>{% endif %}
+            {{ frm2 | crispy }}
+            {% if titulo_frm_3 %}<h5>{{ titulo_frm_3 }}</h5>{% endif %}
+            {{ frm3 | crispy }}
+        </div>
+        <div class="col-sm-4">
+            {% if titulo_frm_4 %}<h5>{{ titulo_frm_4 }}</h5>{% endif %}
+            {{ frm4 | crispy }}
+            {% if titulo_frm_5 %}<h5>{{ titulo_frm_5 }}</h5>{% endif %}
+            {{ frm5 | crispy }}
+            {% if titulo_frm_6 %}<h5>{{ titulo_frm_6 }}</h5>{% endif %}
+            {{ frm6 | crispy }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 offset-md-2">
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+        </div>
+    </div>
+</form>
+
+<script type="text/x-handlebars-template" id="notas-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add-note" />
+        <div class="row">
+            <div class="col form-group">
+                <label for="nota">Nueva Nota</label>
+                <textarea name="nota" id="nota" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label for="fecha_notificacion">¿Crear una notificación?</label>
+                <input class="form-control" type="date" name="fecha_notificacion" id="fecha_notificacion" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Agregar Nota</button>
+
+        {% for nota in cte.notas.all %}
+        <hr />
+        <div class="row">
+            <div class="col">
+                <span class="text-muted">
+                    {{ nota.created_at | date:"d/m/Y" }}: 
+                </span>
+                {{ nota.nota | as_paragraph | safe }}
+                <p class="blockquote-footer">{{ nota.created_by }}</p>
+            </div>
+        </div>
+        {% endfor %}
+
+    </form>
+</script>
+
+<script type="text/x-handlebars-template" id="alerta-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add-alert" />
+        <div class="row">
+            <div class="col form-group">
+                <label for="nota">Nueva Alerta</label>
+                <textarea name="nota" id="nota" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label for="fecha_notificacion">Fecha de Notificación</label>
+                <input class="form-control" type="date" name="fecha_notificacion" id="fecha_notificacion" required="required" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Agregar Alerta</button>
+    </form>
+</script>
+
+{% endblock %}

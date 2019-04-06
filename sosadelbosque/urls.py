@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -148,6 +148,9 @@ urlpatterns = [
         'settings/',
         vw_settings.index,
         name="setting_value"),
+
+    path('cliente/', include('app.url_cliente')),
+    path('taxonomia/', include('app.url_taxonomia'))
 ]
 
 urlpatterns += static(

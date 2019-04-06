@@ -79,7 +79,18 @@ class clsApp {
     }
 }
 
+class clsCliente {
+    showNotasSglCte() {
+        App.openPanel( $( "#notas-template" ).html(), "Notas del Cliente" );
+        App.setUIControls();
+    }
+    showAlertsSglCte() {
+        App.openPanel( $( "#alerta-template" ).html(), "Alertas del Cliente" );
+        App.setUIControls();
+    }
+}
 
+let Cte = new clsCliente();
 let App = new clsApp();
 
 $( document ).ready( () => { 

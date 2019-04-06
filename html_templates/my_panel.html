@@ -22,4 +22,17 @@
 
 <h3>{{usuario}}</h3>
 
+{% for taxonomia in taxonomias %}
+<div class="card" style="margin-bottom: 10px;">
+    <div class="card-header">
+        {{ taxonomia }}
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for cte in taxonomia.clientes.all %}
+        <li class="list-group-item"><a href="{% url 'cliente_see' pk=cte.pk %}">{{ cte }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+
 {% endblock %}

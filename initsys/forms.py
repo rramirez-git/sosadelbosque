@@ -35,7 +35,7 @@ class FrmUsuario(forms.ModelForm):
             'celular',
             'fotografia',
             'groups',
-            'depende_de'
+            'depende_de',
         ]
         labels = {
             'first_name': 'Nombre',

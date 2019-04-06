@@ -13,7 +13,7 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav">
                 {% for mp in menu_main.perms %}
-                    <li class="nav-item">
+                    <li class="nav-item {% if 0 < mp.items_qty %}dropdown{% endif %}">
                     {% if 0 == mp.items_qty %}
                         <a href="{% if mp.permiso.vista %}{% url mp.permiso.vista %}{% else %}#{% endif %}" class="nav-link">
                             {{ mp.permiso.mostrar_como }}

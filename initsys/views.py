@@ -16,6 +16,8 @@ from .models import Usr
 from routines.mkitsafe import valida_acceso
 from routines.utils import is_mobile
 
+from app.models import TaxonomiaExpediente
+
 # Create your views here.
 
 
@@ -79,14 +81,17 @@ def panel(request):
         alerta.fecha_alertado = date.today()
         alerta.updated_by = usuario
         alerta.save()
+    taxonomias = []
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
+        taxonomias = list(TaxonomiaExpediente.objects.all())
     return render(
         request,
         'my_panel.html', {
             'menu_main': usuario.main_menu_struct(),
-            # 'footer': True,
             'usuario': usuario.first_name,
             'alertas': usuario.alertas.filter(
                 mostrar_alerta=True, fecha_alerta__lte=date.today()),
+            'taxonomias': taxonomias
         })
 
 

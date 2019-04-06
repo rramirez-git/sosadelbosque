@@ -132,13 +132,14 @@ class Permiso(Permission):
             model,
             posicion,
             mostrar_como=None,
-            vista=None,
+            vista='',
             es_operacion=False,
             permiso_padre=None,
             groups=[]):
         ct = ContentType.objects.get(app_label=app_label, model=model)
         if mostrar_como is None:
             mostrar_como = name
+
         perm = Permiso.objects.create(
             nombre=name,
             name=name,

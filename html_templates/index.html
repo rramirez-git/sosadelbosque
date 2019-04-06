@@ -10,7 +10,7 @@
         <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="30" class="d-inline-block align-top" alt="">
         Sosa del Bosque
     </a>
-    <form class="form-inline" method="POST">
+    <form class="form-inline d-none" method="POST" id="frm_access">
         {% csrf_token %}
         <input id="usr" name="usr" class="form-control mr-sm-4" type="text" placeholder="Usuario" aria-label="Usuario">
         <input id="pwd" name="pwd" class="form-control mr-sm-2" type="password" placeholder="Contaseña" aria-label="Contraseña">
@@ -18,7 +18,17 @@
             <i class="fas fa-sign-in-alt"></i>
         </button>
     </form>
+    <button class="btn btn-info" type="button" id="btn_open_login_frm" onclick="open_login_frm()">
+        <i class="fas fa-sign-in-alt"></i>
+    </button>
 </nav>
+
+<script type="text/javascript">
+    let open_login_frm = () => {
+        $("#btn_open_login_frm").addClass("d-none");
+        $("#frm_access").removeClass("d-none");
+    }
+</script>
 
 <style type="text/css">
     .splah_block_1 {
@@ -90,17 +100,17 @@
     <div class="row">
         <div class="col-sm-4 offset-sm-1">
             <p class="text-center">
-                <img src="http://intermedia.eus/wp-content/uploads/2015/09/mision.png" class="d-inline-block align-top" height="75" />
+                <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_2.b2_1_Imagen' | get_setting }}" class="d-inline-block align-top" height="75" />
             </p>
-            <h3 class="text-center">Misión</h3>
-            <p>Ser un respaldo de seguridad y tranquilidad para nuestros clientes dándoles un servicio de excelencia y el apoyo necesario para que tengan el mejor retiro de la vida laboral.</p>
+            <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_2.b2_1_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_2.b2_1_texto' | get_setting | as_paragraph | safe }}
         </div>
         <div class="col-sm-4 offset-sm-2">
             <p class="text-center">
-                <img src="http://intermedia.eus/wp-content/uploads/2015/09/vision.png" class="d-inline-block align-top" height="75" />
+                <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_2.b2_2_Imagen' | get_setting }}" class="d-inline-block align-top" height="75" />
             </p>
-            <h3 class="text-center">Visión</h3>
-            <p>Ser una empresa mexicana líder en el Sistema de Seguridad Social y destacar como referente y autoridad dentro del medio.</p>
+            <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_2.b2_2_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_2.b2_2_texto' | get_setting | as_paragraph | safe }}
         </div>
     </div>
 </div>
@@ -111,9 +121,8 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-10 offset-sm-1">
-                <h3 class="text-center">Apoyo Empresarial</h3>
-                <p class="blockquote">Brindamos apoyo a las empresas con asesoría a sus trabajadores próximos a pensionarse, así como en temas de Infonavit y Afore, evitando que sus áreas de Recursos Humanos inviertan tiempo en este proceso y puedan optimizarlo en otras áreas que requieran también su atención.</p>
-                <p class="blockquote">Trabajando en sinergia con las empresas, se ofrece una imagen de atención y preocupación por parte de la misma para con sus empleados y trabajadores.</p>
+                <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_3.b3_titulo' | get_setting }}</h3>
+                {{ '02_PaginaPrincipal_Bloque_3.b3_texto' | get_setting | as_paragraph | safe }}
             </div>
         </div>
     </div>
@@ -122,31 +131,18 @@
 <div class="height_50"></div>
 
 <div class="container splah_block_4">
-    <p class="h2 text-center">Servicio al Cliente</p>
+    <p class="h2 text-center">{{ '02_PaginaPrincipal_Bloque_4.b4_titulo' | get_setting }}</p>
 
     <div class="row">
 
         <div class="col-sm-4 offset-sm-1">
-            <h3>IMSS</h3>
-            <p>
-                - Revisión, corrección y homologación de datos<br />
-                - Revisión de posibles Homonimias y duplicidad de Número de Seguro Social<br />
-                - Revisión y recuperación de semanas cotizadas<br />
-                - Reactivación de derechos<br />
-                - Cálculo y diseño de pago en Continuación Voluntaria al Régimen Obligatorio "Mod 40"<br />
-                - Alta y baja en "Mod 40"<br />
-                - Estudio Previsional
-            </p>
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_1_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_1_texto' | get_setting | as_paragraph | safe }}
         </div>
 
         <div class="col-sm-4 offset-sm-2">
-            <h3>PENSIONES</h3>
-            <p>
-                - Certificación de Semanas Cotizadas<br />
-                - Certificación de Salario Promedio<br />
-                - Cálculo y trámite de pensión<br />
-                - Recuperación del dinero de las Subcuentas SAR 92, RETIRO e INFONAVIT
-            </p>
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_2_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_2_texto' | get_setting | as_paragraph | safe }}
         </div>
 
     </div>
@@ -154,24 +150,13 @@
     <div class="row">
 
         <div class="col-sm-4 offset-sm-1">
-            <h3>INFONAVIT</h3>
-            <p>
--                 Revisión de datos<br />
-                - Precalificación y asesoría sobre opciones de crédito<br />
-                - Gestoría en trámites de compra-venta a terceros, pago a pasivo y remodelación<br />
-                - Cancelación de hipoteca y liberación de escrituras<br />
-            </p>
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_3_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_3_texto' | get_setting | as_paragraph | safe }}
         </div>
 
         <div class="col-sm-4 offset-sm-2">
-            <h3>AFORE</h3>
-            <p>
-                - Revisión de datos en PROCESAR<br />
-                - Revisión y recuperación de cuentas SAR 92<br />
-                - Expediente electrónico<br />
-                - Comparativo y opciones de AFORE<br />
-                - Registro y Traspaso de cuentas<br />
-            </p>
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_4_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_4_texto' | get_setting | as_paragraph | safe }}
         </div>
 
     </div>
@@ -184,15 +169,15 @@
 <div class="height_50"></div>
 
 <div class="container splah_block_5">
-    <h2 class="text-center">Contactános</h2>
+    <h2 class="text-center">{{ '02_PaginaPrincipal_Bloque_5.b5_titulo' | get_setting }}</h2>
     <div class="row">
         <div class="col-sm-4">
             <p class="h2 text-center">
                 <i class="fas fa-phone"></i>
             </p>
             <p class="text-center lead">Llámanos al</p>
-            <p class="h2 text-center">
-                <a href="tel:5534008008" target="_blank">5534008008</a>
+            <p class="h4 text-center">
+                <a href="tel:{{ '01 General.telefono' | get_setting }}" target="_blank">{{ '01 General.telefono' | get_setting }}</a>
             </p>
         </div>
         <div class="col-sm-4">
@@ -200,8 +185,8 @@
                 <i class="fab fa-whatsapp"></i>
             </p>
             <p class="text-center lead">Envíanos un mensaje al</p>
-            <p class="h2 text-center">
-                <a href="https://api.whatsapp.com/send?phone=525534008008" target="_blank">5534008008</a>
+            <p class="h4 text-center">
+                <a href="https://api.whatsapp.com/send?phone=52{{ '01 General.whats_app' | get_setting }}" target="_blank">{{ '01 General.whats_app' | get_setting }}</a>
             </p>
         </div>
         <div class="col-sm-4">
@@ -209,8 +194,8 @@
                 <i class="far fa-envelope"></i>
             </p>
             <p class="text-center lead">Escríbenos a</p>
-            <p class="h2 text-center">
-                <a href="mailto:contacto@sosadelbosque.mx" target="_blank">contacto@sosadelbosque.mx</a>
+            <p class="h4 text-center">
+                <a href="mailto:{{ '01 General.email' | get_setting }}" target="_blank">{{ '01 General.email' | get_setting }}</a>
             </p>
         </div>
     </div>
@@ -228,16 +213,16 @@
                 <p class="text-center">
                     <ul class="social text-center">
                         <li class="text-center">
-                            <a href="https://twitter.com/siss_07?lang=es" class="bg-info" target="_blank">
+                            <a href="https://twitter.com/{{ '01 General.usr_twitter' | get_setting }}?lang=es" class="bg-info" target="_blank">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            @siss_07
+                            @{{ '01 General.usr_twitter' | get_setting }}
                         </li>
                         <li class="text-center">
-                            <a href="https://www.facebook.com/solucionesenpensiones" class="bg-info" target="_blank">
+                            <a href="https://www.facebook.com/{{ '01 General.usr_facebook' | get_setting }}" class="bg-info" target="_blank">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            /solucionesenpensiones
+                            /{{ '01 General.usr_facebook' | get_setting }}
                         </li>
                     </ul>
                 </p>
