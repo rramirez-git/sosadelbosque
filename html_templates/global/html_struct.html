@@ -1,0 +1,162 @@
+{% load static %}
+{% load util_filters %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+
+        <meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Cache-Control" content="no-cache" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Lang" content="es-mx" />
+        <meta name="author" content="Rubén Ramírez Gómez RAGR8602025L7 rramirez@rramirez.com" />
+        <meta http-equiv="Reply-to" content="rramirez@rramirez.com" />
+        <meta name="creation-date" content="09/06/2012" />
+        <meta name="revisit-after" content="15 days" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        
+        <title>{{ '01 General.site_name' | get_setting }}</title>
+        
+        <link rel="icon" href="{{ MEDIA_URL }}{{ '01 General.favicon' | get_setting }}" type="image/png" />
+        <link rel="stylesheet" href="{% static 'api/bootstrap_4_1_3/css/bootstrap.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'api/fontawesome_5_3_1/css/all.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'api/css/default.css' %}" />
+        <link rel="stylesheet" href="{% static 'api/css/component.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}?rn={{ 1 | random_num:99999999 }}" />
+        
+        <script type="text/javascript" src="{% static 'api/js/jquery-3.3.1.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'api/js/popper_1_14_0.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'api/bootstrap_4_1_3/js/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'api/bootstrap_4_1_3/js/bootstrap.bundle.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'api/js/handlebars_4_0_11.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'api/fontawesome_5_3_1/js/all.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'api/js/modernizr.custom.js' %}"></script>
+        
+        {% if req_ui %}
+            <link rel="stylesheet" href="{% static 'api/css/jquery-ui.css' %}" />
+            <script type="text/javascript" src="{% static 'api/js/jquery-ui.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'api/js/datepicker-es.js' %}"></script>
+        {% endif %}
+        
+		{% if req_chart %}
+		<script type="text/javascript" src="{% static 'api/js/chart-272.min.js' %}"></script>
+		{% endif %}
+        
+        <script type="text/javascript" src="{% static 'js/app.js' %}?rn={{ 1 | random_num:99999999 }}"></script>
+        <script type="text/javascript">
+			let BASE_URL = '//{{ request.get_host }}'
+        </script>
+        
+    </head>
+    <body>
+
+        {% if menu_main %}
+            <!-- html_struct/menu_main.html -->
+            {% include "global/menu_main.html" %}
+            <!-- html_struct/menu_main.html end -->
+        {% endif %}
+
+        <!-- html_struct/extraaftermain -->
+        {% block extraaftermain %}
+        {% endblock%}
+        <!-- html_struct/extraaftermain end -->
+
+        <div class="container">
+            
+            <div class="height_25"></div>
+
+            {% if toolbar %}
+                <!-- html_struct/toolbal.html -->
+                {% include "global/toolbar.html" %}
+                <!-- html_struct/toolbal.html end -->
+            {% endif %}
+
+            {% if titulo %}
+                <h1>
+					{{ titulo | safe }}
+					
+					{% if titulo_descripcion %}
+						<small class="text-muted">
+							{{ titulo_descripcion | safe }}
+						</small>
+					{% endif %}
+
+				</h1>
+            {% endif %}
+            
+            <!-- html_struct/extrabefore -->
+            {% block extrabefore %}
+            {% endblock%}
+            <!-- html_struct/extrabefore end -->
+
+            <!-- html_struct/content -->
+			{% block content %}
+            {% endblock %}
+            <!-- html_struct/content end -->
+
+            <!-- html_struct/extraafter -->
+			{% block extraafter %}
+            {% endblock%}
+            <!-- html_struct/extraafter end -->
+
+        </div>
+
+        {% verbatim %}
+            <script type="text/x-handlebars-template" id="modal-panel-message-template">
+                <div id="modal-panel-message" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                        <div class="modal-content">
+                            {{#if title}}
+                            <div class="modal-header">
+                                {{#if title}}
+                                <h5 class="modal-title">{{title}}</h5>
+                                {{/if}}
+                                {{#if close}}
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                {{/if}}
+                            </div>
+                            {{/if}}
+                            {{#if body}}
+                            <div class="modal-body">
+                                {{{body}}}
+                            </div>
+                            {{/if}}
+                            {{#if footer}}
+                            <div class="modal-footer">
+                                {{footer}}
+                            </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </script>
+        {% endverbatim %}
+        
+        <script type="text/x-handlebars-template" id="privacy-policy-template">{{ '01 General.privacy_policy' | get_setting | as_paragraph | safe }}</script>
+
+        {% if True == footer %}
+            <!-- html_struct/footer.html -->
+            {% include "global/footer.html" %}
+            <!-- html_struct/footer.html end -->
+        {% endif %}
+        
+        <div class="height_25"></div>
+		
+        <script type="text/javascript">
+        
+			{% if req_ui %}
+				let req_ui = true;
+			{% else %}
+				let req_ui = false;
+            {% endif %}
+
+            {% if read_only %}
+                App.setReadOnlyForm();
+            {% endif %}
+            
+		</script>
+
+    </body>
+</html>

@@ -1,0 +1,32 @@
+@media screen {
+    .print {
+        display: none;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none;
+    }
+}
+
+/* #007bff!important */
+
+body {
+    color
+    : rgb( 70, 70, 70)
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6{
+    color: #007bff;
+}
+
+a, a:hover, a:active, a:visited, a:focus {
+    color: inherit
+}
+
+.height_25 { height: 25px; }
+.height_50 { height: 50px; }
+.height_75 { height: 75px; }
+.height_100 { height: 100px; }

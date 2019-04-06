@@ -1,0 +1,237 @@
+{% extends "global/html_struct.html" %}
+
+{% load static %}
+{% load util_filters %}
+
+{% block extraaftermain %}
+
+<nav class="navbar navbar-dark bg-primary justify-content-between">
+    <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="30" class="d-inline-block align-top" alt="">
+        Sosa del Bosque
+    </a>
+    <form class="form-inline d-none" method="POST" id="frm_access">
+        {% csrf_token %}
+        <input id="usr" name="usr" class="form-control mr-sm-4" type="text" placeholder="Usuario" aria-label="Usuario">
+        <input id="pwd" name="pwd" class="form-control mr-sm-2" type="password" placeholder="Contaseña" aria-label="Contraseña">
+        <button class="btn btn-info my-2 my-sm-0" type="submit">
+            <i class="fas fa-sign-in-alt"></i>
+        </button>
+    </form>
+    <button class="btn btn-info" type="button" id="btn_open_login_frm" onclick="open_login_frm()">
+        <i class="fas fa-sign-in-alt"></i>
+    </button>
+</nav>
+
+<script type="text/javascript">
+    let open_login_frm = () => {
+        $("#btn_open_login_frm").addClass("d-none");
+        $("#frm_access").removeClass("d-none");
+    }
+</script>
+
+<style type="text/css">
+    .splah_block_1 {
+        background-image: url('{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_1.b1_imagen' | get_setting }}');
+    }
+    .splah_block_3 {
+        background-image: url('{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_3.b3_imagen' | get_setting }}');
+    }
+    .splah_block_6 {
+        background-image: url('{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_6.b6_imagen' | get_setting }}');
+    }
+    .splash_block.splah_block_7 {
+        min-height: 50px;
+    }
+    .splah_block_7 ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .splah_block_7 ul li {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .splah_block_7 ul li a {
+        text-align: center;
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 40px;
+        display: block;
+        font-size: 25px;
+        color: #fff;
+        margin: auto;
+    }
+    .splash_block {
+        background-position-x: center;
+        background-position-y: center;
+        background-size:cover;
+        padding: 50px 0px;
+        color: white;
+        min-height: 500px;
+    }
+    .splash_block h1, .splash_block h2, .splash_block h3, .splash_block h4, .splash_block h5, .splash_block h6,
+    .splash_block .h1, .splash_block .h2, .splash_block .h3, .splash_block .h4, .splash_block .h5, .splash_block .h6 {
+        color: white;
+    }
+</style>
+
+<div class="splash_block splah_block_1">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-5">
+                <h2>{{ '02_PaginaPrincipal_Bloque_1.b1_line1' | get_setting }}</h2>
+                <h1>{{ '02_PaginaPrincipal_Bloque_1.b1_line2' | get_setting }}</h1>
+                <p class="blockquote">{{ '02_PaginaPrincipal_Bloque_1.b1_Texto' | get_setting }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="container splah_block_2">
+    <h2 class="text-center">{{ '02_PaginaPrincipal_Bloque_2.b2_Title' | get_setting }}</h2>
+    {{ '02_PaginaPrincipal_Bloque_2.b2_Texto' | get_setting | as_paragraph | safe }}
+    
+    <div class="height_50"></div>
+    
+    <div class="row">
+        <div class="col-sm-4 offset-sm-1">
+            <p class="text-center">
+                <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_2.b2_1_Imagen' | get_setting }}" class="d-inline-block align-top" height="75" />
+            </p>
+            <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_2.b2_1_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_2.b2_1_texto' | get_setting | as_paragraph | safe }}
+        </div>
+        <div class="col-sm-4 offset-sm-2">
+            <p class="text-center">
+                <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Bloque_2.b2_2_Imagen' | get_setting }}" class="d-inline-block align-top" height="75" />
+            </p>
+            <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_2.b2_2_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_2.b2_2_texto' | get_setting | as_paragraph | safe }}
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="splash_block splah_block_3">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10 offset-sm-1">
+                <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_3.b3_titulo' | get_setting }}</h3>
+                {{ '02_PaginaPrincipal_Bloque_3.b3_texto' | get_setting | as_paragraph | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="container splah_block_4">
+    <p class="h2 text-center">{{ '02_PaginaPrincipal_Bloque_4.b4_titulo' | get_setting }}</p>
+
+    <div class="row">
+
+        <div class="col-sm-4 offset-sm-1">
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_1_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_1_texto' | get_setting | as_paragraph | safe }}
+        </div>
+
+        <div class="col-sm-4 offset-sm-2">
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_2_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_2_texto' | get_setting | as_paragraph | safe }}
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-sm-4 offset-sm-1">
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_3_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_3_texto' | get_setting | as_paragraph | safe }}
+        </div>
+
+        <div class="col-sm-4 offset-sm-2">
+            <h3>{{ '02_PaginaPrincipal_Bloque_4.b4_4_titulo' | get_setting }}</h3>
+            {{ '02_PaginaPrincipal_Bloque_4.b4_4_texto' | get_setting | as_paragraph | safe }}
+        </div>
+
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<hr />
+
+<div class="height_50"></div>
+
+<div class="container splah_block_5">
+    <h2 class="text-center">{{ '02_PaginaPrincipal_Bloque_5.b5_titulo' | get_setting }}</h2>
+    <div class="row">
+        <div class="col-sm-4">
+            <p class="h2 text-center">
+                <i class="fas fa-phone"></i>
+            </p>
+            <p class="text-center lead">Llámanos al</p>
+            <p class="h4 text-center">
+                <a href="tel:{{ '01 General.telefono' | get_setting }}" target="_blank">{{ '01 General.telefono' | get_setting }}</a>
+            </p>
+        </div>
+        <div class="col-sm-4">
+            <p class="h2 text-center">
+                <i class="fab fa-whatsapp"></i>
+            </p>
+            <p class="text-center lead">Envíanos un mensaje al</p>
+            <p class="h4 text-center">
+                <a href="https://api.whatsapp.com/send?phone=52{{ '01 General.whats_app' | get_setting }}" target="_blank">{{ '01 General.whats_app' | get_setting }}</a>
+            </p>
+        </div>
+        <div class="col-sm-4">
+            <p class="h2 text-center">
+                <i class="far fa-envelope"></i>
+            </p>
+            <p class="text-center lead">Escríbenos a</p>
+            <p class="h4 text-center">
+                <a href="mailto:{{ '01 General.email' | get_setting }}" target="_blank">{{ '01 General.email' | get_setting }}</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="height_50"></div>
+
+<div class="splash_block splah_block_6"></div>
+
+<div class="splash_block splah_block_7 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8 offset-sm-2">
+                <h2 class="text-center">Encuéntranos en</h2>
+                <p class="text-center">
+                    <ul class="social text-center">
+                        <li class="text-center">
+                            <a href="https://twitter.com/{{ '01 General.usr_twitter' | get_setting }}?lang=es" class="bg-info" target="_blank">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            @{{ '01 General.usr_twitter' | get_setting }}
+                        </li>
+                        <li class="text-center">
+                            <a href="https://www.facebook.com/{{ '01 General.usr_facebook' | get_setting }}" class="bg-info" target="_blank">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            /{{ '01 General.usr_facebook' | get_setting }}
+                        </li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+        <p class="text-center">
+            {{ '01 General.footer_text' | get_setting | safe }}
+        </p>
+    </div>
+</div>
+
+{% endblock %}

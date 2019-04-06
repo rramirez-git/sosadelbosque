@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#project files
+sosadelbosque/main_settings.py
+files/media/
+managed/managed.imgx
+*.imgx
