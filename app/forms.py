@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import TaxonomiaExpediente, Cliente
+from .models import TaxonomiaExpediente, Cliente, DoctoGral
 
 class frmTaxonomia(forms.ModelForm):
 
@@ -33,9 +33,13 @@ class frmCliente(forms.ModelForm):
             'RFC',
             'NSS',
             'estado_civil',
+            'conyuge',
             'empresa',
             'afore_actual',
             'fecha_afore_actual',
+            'clinica',
+            'subdelegacion',
+            'observaciones',
         ]
         labels = {
             'first_name': 'Nombre',
@@ -70,9 +74,12 @@ class frmClienteUsuario(forms.ModelForm):
             'RFC',
             'NSS',
             'estado_civil',
+            'conyuge',
             'empresa',
             'afore_actual',
             'fecha_afore_actual',
+            'clinica',
+            'subdelegacion',
         ]
         widgets = {
             'fecha_nacimiento': forms.TextInput(attrs={'type': 'date'}),
@@ -104,4 +111,25 @@ class frmClienteContacto(forms.ModelForm):
             'celular': forms.TextInput(attrs={'type': 'tel'}),
             'telefono_oficina': forms.TextInput(attrs={'type': 'tel'}),
             'otro_telefono': forms.TextInput(attrs={'type': 'tel'}),
+        }
+
+
+class frmClienteObservaciones(forms.ModelForm):
+
+    class Meta:
+        model = Cliente
+        fields = [ 'observaciones' ]
+
+
+class frmDocument(forms.ModelForm):
+
+    class Meta:
+        model = DoctoGral
+        fields = [
+            'tipo',
+            'anverso',
+            'observaciones'
+        ]
+        labels = {
+            'anverso': 'Archivo',
         }

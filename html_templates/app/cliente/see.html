@@ -7,7 +7,26 @@
 <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
     {% csrf_token %}
     <div class="row">
-        <div class="col-sm-4 offset-md-2">
+        <div class="col-sm-2">
+            {% if cte.documentos.all %}
+            <h5>Documentos</h5>
+            <div class="list-group">
+                {% for docto in cte.documentos.all %}
+                    <a href="{{ docto.anverso.url}}" 
+                        class="list-group-item list-group-item-action" 
+                        target="blank" 
+                        {% if docto.observaciones %}
+                        data-toggle="tooltip" data-placement="right" data-html="true"
+                        title="{{ docto.observaciones | as_paragraph }}"
+                        {% endif %}
+                        >
+                        {{ docto }}
+                    </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-sm-4">
             {% if titulo_frm_1 %}<h5>{{ titulo_frm_1 }}</h5>{% endif %}
             {{ frm | crispy }}
             {% if titulo_frm_2 %}<h5>{{ titulo_frm_2 }}</h5>{% endif %}
@@ -22,6 +41,11 @@
             {{ frm5 | crispy }}
             {% if titulo_frm_6 %}<h5>{{ titulo_frm_6 }}</h5>{% endif %}
             {{ frm6 | crispy }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 offset-md-2">
+                {{ frmObs | crispy }}
         </div>
     </div>
     <div class="row">
@@ -82,6 +106,15 @@
             </div>
         </div>
         <button type="submit" class="btn btn-outline-primary">Agregar Alerta</button>
+    </form>
+</script>
+
+<script type="text/x-handlebars-template" id="frmdoctogral-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add-document" />
+        {{ frmDocto | crispy }}
+        <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
     </form>
 </script>
 

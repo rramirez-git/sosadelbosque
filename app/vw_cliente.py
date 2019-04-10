@@ -7,7 +7,7 @@ from django.db.models import ProtectedError
 from routines.mkitsafe import valida_acceso
 
 from .models import Cliente
-from .forms import frmCliente, frmClienteContacto, frmClienteUsuario
+from .forms import frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument, frmClienteObservaciones
 from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
 from routines.utils import requires_jquery_ui, move_uploaded_file
@@ -67,6 +67,7 @@ def new(request):
     frmCteCont = frmClienteContacto(request.POST or None)
     frmCteUsr = frmClienteUsuario(request.POST or None)
     frmCteDir = FrmDireccion(request.POST or None)
+    frmCteObs = frmClienteObservaciones(request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -95,6 +96,7 @@ def new(request):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'frm7': frmCteObs,
     })
 
 
@@ -107,6 +109,7 @@ def see(request, pk):
     frmCteCont = frmClienteContacto(instance=obj)
     frmCteUsr = frmClienteUsuario(instance=obj)
     frmCteDir = FrmDireccion(instance=obj.domicilicio)
+    frmCteObs = frmClienteObservaciones(instance=obj)
     if 'POST' == request.method:
         if "add-note" == request.POST.get('action'):
             add_nota(
@@ -121,6 +124,13 @@ def see(request, pk):
                 obj,
                 usuario
             )
+        elif "add-document":
+            frmDocto = frmDocument(request.POST or None, request.FILES)
+            docto = frmDocto.save(commit=False)
+            docto.cliente = obj
+            docto.created_by = usuario
+            docto.updated_by = usuario
+            docto.save()
     toolbar = []
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
         toolbar.append({
@@ -136,6 +146,11 @@ def see(request, pk):
         'type': 'button',
         'label': '<i class="far fa-bell"></i> Alerta',
         'onclick': 'Cte.showAlertsSglCte()',
+    })
+    toolbar.append({
+        'type': 'button',
+        'label': '<i class="fas fa-file-upload"></i> Adjuntar',
+        'onclick': 'Cte.showFrmDoctoGral()'
     })
     if usuario.has_perm_or_has_perm_child(
             'cliente.actualizar_clientes_cliente'):
@@ -165,6 +180,8 @@ def see(request, pk):
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
         'cte': obj,
+        'frmDocto': frmDocument(),
+        'frmObs': frmCteObs,
     })
 
 
@@ -178,6 +195,7 @@ def update(request, pk):
     frmCteCont = frmClienteContacto(instance=obj, data=request.POST or None)
     frmCteUsr = frmClienteUsuario(instance=obj, data=request.POST or None)
     frmCteDir = FrmDireccion(instance=obj.domicilicio, data=request.POST or None)
+    frmCteObs = frmClienteObservaciones(instance=obj, data=request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -203,6 +221,7 @@ def update(request, pk):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'frm7': frmCteObs,
     })
 
 

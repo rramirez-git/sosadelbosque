@@ -407,20 +407,22 @@ class Setting(models.Model):
 
 class Direccion(models.Model):
     iddireccion = models.AutoField(primary_key=True)
-    calle = models.CharField(max_length=100)
+    calle = models.CharField(max_length=100, blank=True)
     numero_exterior = models.CharField(
         max_length=10,
-        verbose_name="No. Exterior")
+        verbose_name="No. Exterior",
+        blank=True)
     numero_interior = models.CharField(
         max_length=10,
         blank=True,
         verbose_name="No. Interior")
-    codigo_postal = models.CharField(max_length=5)
-    colonia = models.CharField(max_length=100)
+    codigo_postal = models.CharField(max_length=5, blank=True)
+    colonia = models.CharField(max_length=100, blank=True)
     municipio = models.CharField(
         max_length=100,
-        verbose_name="Alcaldía o Municipio")
-    estado = models.CharField(max_length=100)
+        verbose_name="Alcaldía o Municipio",
+        blank=True)
+    estado = models.CharField(max_length=100, blank=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")

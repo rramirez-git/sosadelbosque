@@ -88,6 +88,10 @@ class clsCliente {
         App.openPanel( $( "#alerta-template" ).html(), "Alertas del Cliente" );
         App.setUIControls();
     }
+    showFrmDoctoGral() {
+        App.openPanel( $( "#frmdoctogral-template").html(), "Adjuntar Documento" );
+        App.setUIControls();
+    }
 }
 
 let Cte = new clsCliente();
