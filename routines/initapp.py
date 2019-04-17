@@ -60,4 +60,23 @@ def init_app_db():
     usr_cte.groups.set([gpo_cte])
     usr_cte.save()
 
+def upd190406():
+    gpos = ["Super-Administrador", "Administrador"]
+    p_admon = Permiso.objects.get(nombre='Administración')
+
+    p_tipodocto = Permiso.create("Tipos de Documento", "app", "tipodocumento", 4, None, "tipodocumento_index", False, p_admon, gpos)
+    Permiso.create("Agregar Tipo de Documento", "app", "tipodocumento", 1, es_operacion=True, permiso_padre=p_tipodocto, groups=gpos)
+    Permiso.create("Actualizar Tipo de Documento", "app", "tipodocumento", 2, es_operacion=True, permiso_padre=p_tipodocto, groups=gpos)
+    Permiso.create("Eliminar Tipo de Documento", "app", "tipodocumento", 3, es_operacion=True, permiso_padre=p_tipodocto, groups=gpos)
+
+    p_estatusactividad = Permiso.create("Estatus de Actividad", "app", "estatusactividad", 5, None, "estatusactividad_index", False, p_admon, gpos)
+    Permiso.create("Agregar Estatus de Actividad", "app", "estatusactividad", 1, es_operacion=True, permiso_padre=p_estatusactividad, groups=gpos)
+    Permiso.create("Actualizar Estatus de Actividad", "app", "estatusactividad", 2, es_operacion=True, permiso_padre=p_estatusactividad, groups=gpos)
+    Permiso.create("Eliminar Estatus de Actividad", "app", "estatusactividad", 3, es_operacion=True, permiso_padre=p_estatusactividad, groups=gpos)
+
+    p_tipoactividad = Permiso.create("Tipos de Actividad", "app", "tipoactividad", 6, None, "tipoactividad_index", False, p_admon, gpos)
+    Permiso.create("Agregar Tipo de Actividad", "app", "tipoactividad", 1, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
+    Permiso.create("Actualizar Tipo de Actividad", "app", "tipoactividad", 2, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
+    Permiso.create("Eliminar Tipo de Actividad", "app", "tipoactividad", 3, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
+
 

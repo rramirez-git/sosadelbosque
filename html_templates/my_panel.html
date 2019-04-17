@@ -22,17 +22,19 @@
 
 <h3>{{usuario}}</h3>
 
+<div class="card-columns">
 {% for taxonomia in taxonomias %}
-<div class="card" style="margin-bottom: 10px;">
+<div class="card {% if taxonomia.color %}border-{{taxonomia.color}}{% endif %}" style="margin-bottom: 10px;">
     <div class="card-header">
-        {{ taxonomia }}
+        <i class="far fa-folder-open"></i> {{ taxonomia }}
     </div>
-    <ul class="list-group list-group-flush">
+    <ul class="list-group list-group-flush {% if taxonomia.color %}text-{{taxonomia.color}}{% endif %}">
         {% for cte in taxonomia.clientes.all %}
         <li class="list-group-item"><a href="{% url 'cliente_see' pk=cte.pk %}">{{ cte }}</a></li>
         {% endfor %}
     </ul>
 </div>
 {% endfor %}
+</div>
 
 {% endblock %}

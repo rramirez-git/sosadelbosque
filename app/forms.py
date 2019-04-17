@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import TaxonomiaExpediente, Cliente, DoctoGral
+from .models import TaxonomiaExpediente, Cliente, DoctoGral, TipoActividad, TipoDocumento, EstatusActividad
 
 class frmTaxonomia(forms.ModelForm):
 
@@ -8,6 +8,7 @@ class frmTaxonomia(forms.ModelForm):
         model = TaxonomiaExpediente
         fields = [
             'nombre',
+            'color',
             'descripcion',
         ]
 
@@ -126,10 +127,36 @@ class frmDocument(forms.ModelForm):
     class Meta:
         model = DoctoGral
         fields = [
-            'tipo',
+            'tipo_de_documento',
             'anverso',
             'observaciones'
         ]
         labels = {
             'anverso': 'Archivo',
         }
+
+class frmTipoActividad(forms.ModelForm):
+
+    class Meta:
+        model = TipoActividad
+        fields = [
+            'nombre',
+        ]
+
+class frmEstatusActividad(forms.ModelForm):
+
+    class Meta:
+        model = EstatusActividad
+        fields = [
+            'nombre',
+            'color',
+        ]
+
+class frmTipoDocumento(forms.ModelForm):
+
+    class Meta:
+        model = TipoDocumento
+        fields = [
+            'nombre',
+            'visible_para_usuario'
+        ]

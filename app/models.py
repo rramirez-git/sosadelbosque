@@ -2,6 +2,7 @@ from django.db import models
 from datetime import date
 
 from initsys.models import Usr, Direccion
+from routines.utils import BootstrapColors
 
 # Create your models here.
 
@@ -58,6 +59,7 @@ TIPOS_DOCUMENTO_GRAL = (
 class TaxonomiaExpediente(models.Model):
     idtaxonomia = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
+    color = models.CharField(max_length=50, blank=True, choices=BootstrapColors, default=BootstrapColors[0][0])
     descripcion = models.TextField(
         blank=True, verbose_name="Descripción")
     padre = models.ForeignKey(
@@ -139,6 +141,10 @@ class DoctoGral(models.Model):
     mimetype_reverso = models.CharField(max_length=50, blank=True)
     reverso = models.FileField(upload_to=docto_upload_to, blank=True)
     observaciones = models.TextField(blank=True)
+    tipo_de_documento = models.ForeignKey(
+        to='TipoDocumento',
+        on_delete=models.PROTECT,
+        related_name='documentos')
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
@@ -149,10 +155,81 @@ class DoctoGral(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["tipo", "iddoctogral"]
+        ordering = ["tipo_de_documento", "iddoctogral"]
 
     def __str__(self):
-        res = "{}".format(self.tipo)
+        res = "{}".format(self.tipo_de_documento)
+        return res
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class TipoDocumento(models.Model):
+    idtipodocumento = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=50)
+    visible_para_usuario = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nombre"]
+
+    def __str__(self):
+        res = "{}".format(self.nombre)
+        return res
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class EstatusActividad(models.Model):
+    idestatusactividad = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=50)
+    color = models.CharField(max_length=50, blank=True, choices=BootstrapColors, default=BootstrapColors[0][0])
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nombre"]
+
+    def __str__(self):
+        res = "{}".format(self.nombre)
+        return res
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class TipoActividad(models.Model):
+    idtipoactividad = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=50)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nombre"]
+
+    def __str__(self):
+        res = "{}".format(self.nombre)
         return res
 
     def __unicode__(self):
