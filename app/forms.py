@@ -1,6 +1,9 @@
 from django import forms
 
-from .models import TaxonomiaExpediente, Cliente, DoctoGral, TipoActividad, TipoDocumento, EstatusActividad
+from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
+                     TipoActividad, TipoDocumento, EstatusActividad,
+                     Actividad, ActividadHistoria)
+
 
 class frmTaxonomia(forms.ModelForm):
 
@@ -11,6 +14,7 @@ class frmTaxonomia(forms.ModelForm):
             'color',
             'descripcion',
         ]
+
 
 class frmCliente(forms.ModelForm):
 
@@ -119,7 +123,7 @@ class frmClienteObservaciones(forms.ModelForm):
 
     class Meta:
         model = Cliente
-        fields = [ 'observaciones' ]
+        fields = ['observaciones']
 
 
 class frmDocument(forms.ModelForm):
@@ -135,6 +139,7 @@ class frmDocument(forms.ModelForm):
             'anverso': 'Archivo',
         }
 
+
 class frmTipoActividad(forms.ModelForm):
 
     class Meta:
@@ -142,6 +147,7 @@ class frmTipoActividad(forms.ModelForm):
         fields = [
             'nombre',
         ]
+
 
 class frmEstatusActividad(forms.ModelForm):
 
@@ -152,6 +158,7 @@ class frmEstatusActividad(forms.ModelForm):
             'color',
         ]
 
+
 class frmTipoDocumento(forms.ModelForm):
 
     class Meta:
@@ -159,4 +166,38 @@ class frmTipoDocumento(forms.ModelForm):
         fields = [
             'nombre',
             'visible_para_usuario'
+        ]
+
+class frmActividad(forms.ModelForm):
+
+    class Meta:
+        model = Actividad
+        fields = [
+            'tipo_de_actividad',
+            'titulo',
+            'estado',
+            'responsable',
+            'comentarios',
+        ]
+
+
+class frmActividadUpd(forms.ModelForm):
+
+    class Meta:
+        model = Actividad
+        fields = [
+            'tipo_de_actividad',
+            'titulo',
+            'responsable',
+            'comentarios',
+        ]
+
+
+class frmActividadHistoria(forms.ModelForm):
+
+    class Meta:
+        model = ActividadHistoria
+        fields = [
+            'estado_nuevo',
+            'observaciones'
         ]

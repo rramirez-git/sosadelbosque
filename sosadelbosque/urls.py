@@ -154,6 +154,7 @@ urlpatterns = [
     path('tiposdocumento/', include('app.url_tipodocumento')),
     path('estatusactividad/', include('app.url_estatusactividad')),
     path('tiposactividad/', include('app.url_tipoactividad')),
+    path('actividad/', include('app.url_actividad')),
 ]
 
 urlpatterns += static(

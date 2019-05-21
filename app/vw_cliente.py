@@ -152,6 +152,12 @@ def see(request, pk):
         'label': '<i class="fas fa-file-upload"></i> Adjuntar',
         'onclick': 'Cte.showFrmDoctoGral()'
     })
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'actividad_new',
+        'label': '<i class="fas fa-paperclip"></i> Actividad',
+        'pk': obj.pk
+    })
     if usuario.has_perm_or_has_perm_child(
             'cliente.actualizar_clientes_cliente'):
         toolbar.append({

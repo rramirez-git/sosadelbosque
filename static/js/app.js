@@ -94,8 +94,16 @@ class clsCliente {
     }
 }
 
+class clsActividadHistoria {
+    showFrmNew() {
+        App.openPanel( $( "#frmactividadhistoria-template").html(), "Cambiar Estado de la Actividad" );
+        App.setUIControls();
+    }
+}
+
 let Cte = new clsCliente();
 let App = new clsApp();
+let ActividadHistoria = new clsActividadHistoria();
 
 $( document ).ready( () => { 
     $('[data-toggle="tooltip"]').tooltip(); 

@@ -1,0 +1,65 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-8 offset-md-2">
+        <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+            {% csrf_token %}
+            {% if titulo_frm_1 %}<h5>{{ titulo_frm_1 }}</h5>{% endif %}
+            {{ frm | crispy }}
+            {% if titulo_frm_2 %}<h5>{{ titulo_frm_2 }}</h5>{% endif %}
+            {{ frm2 | crispy }}
+            {% if titulo_frm_3 %}<h5>{{ titulo_frm_3 }}</h5>{% endif %}
+            {{ frm3 | crispy }}
+            {% if titulo_frm_4 %}<h5>{{ titulo_frm_4 }}</h5>{% endif %}
+            {{ frm4 | crispy }}
+            {% if titulo_frm_5 %}<h5>{{ titulo_frm_5 }}</h5>{% endif %}
+            {{ frm5 | crispy }}
+            {% if titulo_frm_6 %}<h5>{{ titulo_frm_6 }}</h5>{% endif %}
+            {{ frm6 | crispy }}
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+        </form>
+        {% if read_only and act.detalle.all %}
+        <h3>Historia de la Actividad</h3>
+        <div class="list-group">
+            {% for item in act.detalle.all %}
+                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ item.estado_nuevo }}</h5>
+                        <small class="text-muted">{{ item.created_at }}</small>
+                    </div>
+                    <p class="mb-1">{{ item.observaciones }}</p>
+                    <small class="text-muted">{{ item.created_by }}</small>
+                </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script type="text/javascript">
+    $( "#id_tipo_de_actividad" ).change(function(){
+        if( "" == $( "#id_titulo" ).val() ) {
+            let str = "";
+            $( "#id_tipo_de_actividad option:selected" ).each(function() {
+                str = $( this ).text();
+            });
+            $( "#id_titulo" ).attr( 'value', str );
+        }
+    });
+</script>
+
+{% if frmActHist %}
+<script type="text/x-handlebars-template" id="frmactividadhistoria-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="frmactividadhistoria-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add-history" />
+        {{ frmActHist | crispy }}
+        <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+    </form>
+</script>
+{% endif %}
+
+{% endblock %}

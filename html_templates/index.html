@@ -117,16 +117,7 @@
 
 <div class="height_50"></div>
 
-<div class="splash_block splah_block_3">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-10 offset-sm-1">
-                <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_3.b3_titulo' | get_setting }}</h3>
-                {{ '02_PaginaPrincipal_Bloque_3.b3_texto' | get_setting | as_paragraph | safe }}
-            </div>
-        </div>
-    </div>
-</div>
+<hr />
 
 <div class="height_50"></div>
 
@@ -164,7 +155,16 @@
 
 <div class="height_50"></div>
 
-<hr />
+<div class="splash_block splah_block_3">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10 offset-sm-1">
+                <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_3.b3_titulo' | get_setting }}</h3>
+                {{ '02_PaginaPrincipal_Bloque_3.b3_texto' | get_setting | as_paragraph | safe }}
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="height_50"></div>
 
@@ -176,7 +176,7 @@
                 <i class="fas fa-phone"></i>
             </p>
             <p class="text-center lead">Llámanos al</p>
-            <p class="h4 text-center">
+            <p class="h6 text-center">
                 <a href="tel:{{ '01 General.telefono' | get_setting }}" target="_blank">{{ '01 General.telefono' | get_setting }}</a>
             </p>
         </div>
@@ -185,7 +185,7 @@
                 <i class="fab fa-whatsapp"></i>
             </p>
             <p class="text-center lead">Envíanos un mensaje al</p>
-            <p class="h4 text-center">
+            <p class="h6 text-center">
                 <a href="https://api.whatsapp.com/send?phone=52{{ '01 General.whats_app' | get_setting }}" target="_blank">{{ '01 General.whats_app' | get_setting }}</a>
             </p>
         </div>
@@ -194,7 +194,7 @@
                 <i class="far fa-envelope"></i>
             </p>
             <p class="text-center lead">Escríbenos a</p>
-            <p class="h4 text-center">
+            <p class="h6 text-center">
                 <a href="mailto:{{ '01 General.email' | get_setting }}" target="_blank">{{ '01 General.email' | get_setting }}</a>
             </p>
         </div>
@@ -208,7 +208,7 @@
 <div class="splash_block splah_block_7 bg-primary text-white">
     <div class="container">
         <div class="row">
-            <div class="col-sm-8 offset-sm-2">
+            <div class="col-sm-8 offset-sm-2 d-none">
                 <h2 class="text-center">Encuéntranos en</h2>
                 <p class="text-center">
                     <ul class="social text-center">

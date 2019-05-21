@@ -1,13 +1,13 @@
 from django.urls import path
 
-import app.vw_taxonomia as views
+import app.vw_actividad as views
 
-object_name = 'taxonomia'
+object_name = 'actividad'
 
 urlpatterns = [
     path('', views.index,
          name="{}_index".format(object_name)),
-    path('nuevo/', views.new,
+    path('nueva/<pk>/', views.new,
          name="{}_new".format(object_name)),
     path('<pk>/', views.see,
          name="{}_see".format(object_name)),

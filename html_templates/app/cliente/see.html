@@ -42,6 +42,18 @@
             {% if titulo_frm_6 %}<h5>{{ titulo_frm_6 }}</h5>{% endif %}
             {{ frm6 | crispy }}
         </div>
+        <div class="col-sm-2">
+            {% if cte.actividades_asociadas.all %}
+            <h5>Actividades</h5>
+            <div class="list-group">
+                {% for act in cte.actividades_asociadas.all %}
+                    <a href="{% url 'actividad_see' pk=act.pk %}" class="list-group-item list-group-item-action">
+                        {{ act }}
+                    </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
     </div>
     <div class="row">
         <div class="col-sm-8 offset-md-2">
