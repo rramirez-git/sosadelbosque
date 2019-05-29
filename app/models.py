@@ -108,6 +108,7 @@ class TaxonomiaExpediente(models.Model):
         default=BootstrapColors[0][0])
     descripcion = models.TextField(
         blank=True, verbose_name="Descripción")
+    mostrar_en_panel = models.BooleanField(default=False, blank=True)
     padre = models.ForeignKey(
         to="self",
         on_delete=models.SET_NULL,
@@ -244,6 +245,7 @@ class EstatusActividad(models.Model):
     color = models.CharField(
         max_length=50, blank=True, choices=BootstrapColors,
         default=BootstrapColors[0][0])
+    mostrar_en_panel = models.BooleanField(default=False, blank=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
@@ -286,6 +288,30 @@ class TipoActividad(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+class Externo(models.Model):
+    idexterno = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100)
+    apellido_paterno = models.CharField(max_length=100)
+    apellido_materno = models.CharField(max_length=100)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nombre", 'apellido_paterno', 'apellido_materno']
+
+    def __str__(self):
+        res = "{} {} {}".format(self.nombre, self.apellido_paterno, self.apellido_materno)
+        return res.strip()
+
+    def __unicode__(self):
+        return self.__str__()
+
 class Actividad(models.Model):
     idactividad = models.AutoField(primary_key=True)
     titulo = models.CharField(max_length=150)
@@ -299,7 +325,9 @@ class Actividad(models.Model):
         EstatusActividad, on_delete=models.PROTECT,
         related_name='actividades')
     comentarios = models.TextField(blank=True)
-    responsable = models.CharField(blank=True, max_length=250)
+    responsable = models.ForeignKey(
+        Externo, on_delete=models.PROTECT,
+        related_name='resp_actividades')
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")

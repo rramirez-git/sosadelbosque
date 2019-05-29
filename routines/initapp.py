@@ -79,4 +79,13 @@ def upd190406():
     Permiso.create("Actualizar Tipo de Actividad", "app", "tipoactividad", 2, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
     Permiso.create("Eliminar Tipo de Actividad", "app", "tipoactividad", 3, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
 
+def upd190528():
+    gpos = ["Super-Administrador", "Administrador"]
+    p_admon = Permiso.objects.get(nombre='Administración')
 
+    p_externo = Permiso.create("Externos", "app", "externo", 7, "Personas Externas", "externo_index", False, p_admon, gpos)
+    Permiso.create("Agregar Externo", "app", "externo", 1, "Agregar Persona Externa", '', True, p_externo, gpos)
+    Permiso.create("Actualizar Externo", "app", "externo", 2, "Actualizar Persona Externa", '', True, p_externo, gpos)
+    Permiso.create("Eliminar Externo", "app", "externo", 3, "Eliminar Persona Externa", '', True, p_externo, gpos)
+
+upd190528()

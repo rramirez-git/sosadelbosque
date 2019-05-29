@@ -7,7 +7,6 @@
 
 <nav class="navbar navbar-dark bg-primary justify-content-between">
     <a class="navbar-brand" href="{% url 'index' %}">
-        <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="30" class="d-inline-block align-top" alt="">
         Sosa del Bosque
     </a>
     <form class="form-inline d-none" method="POST" id="frm_access">
@@ -81,6 +80,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-5">
+                <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="120" class="float-left" alt="" />
                 <h2>{{ '02_PaginaPrincipal_Bloque_1.b1_line1' | get_setting }}</h2>
                 <h1>{{ '02_PaginaPrincipal_Bloque_1.b1_line2' | get_setting }}</h1>
                 <p class="blockquote">{{ '02_PaginaPrincipal_Bloque_1.b1_Texto' | get_setting }}</p>
@@ -117,7 +117,23 @@
 
 <div class="height_50"></div>
 
-<hr />
+<style type="text/css">
+    .nav_spacer {
+        min-height: 50px;
+        padding: 20px;
+        text-align: center;
+    }
+    .nav_spacer img {
+        margin: 0px 15px;
+    }
+</style>
+
+<div class="nav_spacer bg-primary">
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_01' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_02' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_03' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_04' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+</div>
 
 <div class="height_50"></div>
 

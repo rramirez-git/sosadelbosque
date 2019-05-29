@@ -2,7 +2,7 @@ from django import forms
 
 from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
                      TipoActividad, TipoDocumento, EstatusActividad,
-                     Actividad, ActividadHistoria)
+                     Actividad, ActividadHistoria, Externo)
 
 
 class frmTaxonomia(forms.ModelForm):
@@ -12,6 +12,7 @@ class frmTaxonomia(forms.ModelForm):
         fields = [
             'nombre',
             'color',
+            'mostrar_en_panel',
             'descripcion',
         ]
 
@@ -156,6 +157,7 @@ class frmEstatusActividad(forms.ModelForm):
         fields = [
             'nombre',
             'color',
+            'mostrar_en_panel',
         ]
 
 
@@ -200,4 +202,14 @@ class frmActividadHistoria(forms.ModelForm):
         fields = [
             'estado_nuevo',
             'observaciones'
+        ]
+
+class frmExterno(forms.ModelForm):
+
+    class Meta:
+        model = Externo
+        fields = [
+            'nombre',
+            'apellido_paterno',
+            'apellido_materno'
         ]
