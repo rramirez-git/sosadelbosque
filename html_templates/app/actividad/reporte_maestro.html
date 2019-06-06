@@ -1,0 +1,101 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% block content %}
+
+<button class="btn btn-outline-secondary d-none" type="button" data-toggle="collapse" data-target="#div_filter_form" aria-expanded="false" aria-controls="div_filter_form">
+    <i class="fas fa-filter"></i> Mostrar/Ocultar Filtros
+</button>
+
+<!--<div class="collapse" id="div_filter_form">-->
+    <div class="card card-body">
+        <form method="post" autocomplete="off" enctype="multipart/form-data" id="filter-form" action="">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="ftr_tipo_actividad">Tipo de Actividad</label>
+                        <select class="form-control" id="ftr_tipo_actividad" name="ftr_tipo_actividad">
+                            <option value=""></option>
+                            {% for opt in combo_options.tipo_actividad %}
+                                <option value="{{ opt.pk }}" {% if opt.pk == filters.ftr_tipo_actividad %}selected="select"{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="ftr_estatus_actividad">Estado de la Actividad</label>
+                        <select class="form-control" id="ftr_estatus_actividad" name="ftr_estatus_actividad">
+                            <option value=""></option>
+                            {% for opt in combo_options.estatus_actividad %}
+                                <option value="{{ opt.pk }}" {% if opt.pk == filters.ftr_estatus_actividad %}selected="select"{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="ftr_responsable">Responsable</label>
+                        <select class="form-control" id="ftr_responsable" name="ftr_responsable">
+                            <option value=""></option>
+                            {% for opt in combo_options.responsable %}
+                                <option value="{{ opt.pk }}" {% if opt.pk == filters.ftr_responsable %}selected="select"{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Procesar</button>
+        </form>
+    </div>
+<!--</div>-->
+
+{% if regs %}
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Actividad</th>
+            <th>Tipo de Actividad</th>
+            <th>Estado</th>
+            <th>Responsable</th>
+            <th>Fecha de Creación</th>
+            <th>Fecha de Actualización</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Cliente</th>
+            <th>Actividad</th>
+            <th>Tipo de Actividad</th>
+            <th>Estado</th>
+            <th>Responsable</th>
+            <th>Fecha de Creación</th>
+            <th>Fecha de Actualización</th>
+        </tr>
+    </tfoot>
+    <tbody id="data-tbl">
+        {% for reg in regs %}
+        <tr>
+            <td>
+                <a href="{% url 'cliente_see' pk=reg.cliente.pk %}">
+                    {{ reg.cliente }}
+                </a>
+            </td>
+            <td>
+                <a href="{% url 'actividad_see' pk=reg.pk %}">
+                    {{ reg.titulo }}
+                </a>
+            </td>
+            <td>{{ reg.tipo_de_actividad }}</td>
+            <td>{{ reg.estado }}</td>
+            <td>{{ reg.responsable }}</td>
+            <td>{{ reg.created_at|date:"d/M/Y" }}</td>
+            <td>{{ reg.updated_at|date:"d/M/Y" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

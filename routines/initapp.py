@@ -60,4 +60,42 @@ def init_app_db():
     usr_cte.groups.set([gpo_cte])
     usr_cte.save()
 
+def upd190406():
+    gpos = ["Super-Administrador", "Administrador"]
+    p_admon = Permiso.objects.get(nombre='Administración')
 
+    p_tipodocto = Permiso.create("Tipos de Documento", "app", "tipodocumento", 4, None, "tipodocumento_index", False, p_admon, gpos)
+    Permiso.create("Agregar Tipo de Documento", "app", "tipodocumento", 1, es_operacion=True, permiso_padre=p_tipodocto, groups=gpos)
+    Permiso.create("Actualizar Tipo de Documento", "app", "tipodocumento", 2, es_operacion=True, permiso_padre=p_tipodocto, groups=gpos)
+    Permiso.create("Eliminar Tipo de Documento", "app", "tipodocumento", 3, es_operacion=True, permiso_padre=p_tipodocto, groups=gpos)
+
+    p_estatusactividad = Permiso.create("Estatus de Actividad", "app", "estatusactividad", 5, None, "estatusactividad_index", False, p_admon, gpos)
+    Permiso.create("Agregar Estatus de Actividad", "app", "estatusactividad", 1, es_operacion=True, permiso_padre=p_estatusactividad, groups=gpos)
+    Permiso.create("Actualizar Estatus de Actividad", "app", "estatusactividad", 2, es_operacion=True, permiso_padre=p_estatusactividad, groups=gpos)
+    Permiso.create("Eliminar Estatus de Actividad", "app", "estatusactividad", 3, es_operacion=True, permiso_padre=p_estatusactividad, groups=gpos)
+
+    p_tipoactividad = Permiso.create("Tipos de Actividad", "app", "tipoactividad", 6, None, "tipoactividad_index", False, p_admon, gpos)
+    Permiso.create("Agregar Tipo de Actividad", "app", "tipoactividad", 1, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
+    Permiso.create("Actualizar Tipo de Actividad", "app", "tipoactividad", 2, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
+    Permiso.create("Eliminar Tipo de Actividad", "app", "tipoactividad", 3, es_operacion=True, permiso_padre=p_tipoactividad, groups=gpos)
+
+def upd190528():
+    gpos = ["Super-Administrador", "Administrador"]
+    p_admon = Permiso.objects.get(nombre='Administración')
+
+    p_externo = Permiso.create("Externos", "app", "externo", 7, "Personas Externas", "externo_index", False, p_admon, gpos)
+    Permiso.create("Agregar Externo", "app", "externo", 1, "Agregar Persona Externa", '', True, p_externo, gpos)
+    Permiso.create("Actualizar Externo", "app", "externo", 2, "Actualizar Persona Externa", '', True, p_externo, gpos)
+    Permiso.create("Eliminar Externo", "app", "externo", 3, "Eliminar Persona Externa", '', True, p_externo, gpos)
+
+    print("Permisos creados upd190528")
+
+def upd190604():
+    gpos = ["Super-Administrador", "Administrador"]
+    p_report = Permiso.create("Reportes", "auth", "permission", 2, groups=gpos)
+    Permiso.create("Maestro de Clientes", "auth", "permission", 1, vista='cliente_reporte_maestro', permiso_padre=p_report, groups=gpos)
+    Permiso.create("Maestro de Actividades", "auth", "permission", 2, vista='actividad_reporte_maestro', permiso_padre=p_report, groups=gpos)
+
+    print("Permisos creados upd190604")
+
+upd190604()

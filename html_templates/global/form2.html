@@ -25,6 +25,12 @@
     </div>
     <div class="row">
         <div class="col-sm-8 offset-md-2">
+            {% if titulo_frm_7 %}<h5>{{ titulo_frm_7 }}</h5>{% endif %}
+            {{ frm7 | crispy }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 offset-md-2">
             <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
         </div>
     </div>

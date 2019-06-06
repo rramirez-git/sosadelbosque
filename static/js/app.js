@@ -88,10 +88,22 @@ class clsCliente {
         App.openPanel( $( "#alerta-template" ).html(), "Alertas del Cliente" );
         App.setUIControls();
     }
+    showFrmDoctoGral() {
+        App.openPanel( $( "#frmdoctogral-template").html(), "Adjuntar Documento" );
+        App.setUIControls();
+    }
+}
+
+class clsActividadHistoria {
+    showFrmNew() {
+        App.openPanel( $( "#frmactividadhistoria-template").html(), "Cambiar Estado de la Actividad" );
+        App.setUIControls();
+    }
 }
 
 let Cte = new clsCliente();
 let App = new clsApp();
+let ActividadHistoria = new clsActividadHistoria();
 
 $( document ).ready( () => { 
     $('[data-toggle="tooltip"]').tooltip(); 

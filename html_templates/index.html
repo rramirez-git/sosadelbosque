@@ -7,8 +7,7 @@
 
 <nav class="navbar navbar-dark bg-primary justify-content-between">
     <a class="navbar-brand" href="{% url 'index' %}">
-        <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="30" class="d-inline-block align-top" alt="">
-        Sosa del Bosque
+        Sosa Del Bosque Asociados S. C.
     </a>
     <form class="form-inline d-none" method="POST" id="frm_access">
         {% csrf_token %}
@@ -81,6 +80,7 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-5">
+                <img src="{{ MEDIA_URL }}{{ '01 General.splash_icon' | get_setting }}" height="120" class="float-left" alt="" />
                 <h2>{{ '02_PaginaPrincipal_Bloque_1.b1_line1' | get_setting }}</h2>
                 <h1>{{ '02_PaginaPrincipal_Bloque_1.b1_line2' | get_setting }}</h1>
                 <p class="blockquote">{{ '02_PaginaPrincipal_Bloque_1.b1_Texto' | get_setting }}</p>
@@ -117,15 +117,22 @@
 
 <div class="height_50"></div>
 
-<div class="splash_block splah_block_3">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-10 offset-sm-1">
-                <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_3.b3_titulo' | get_setting }}</h3>
-                {{ '02_PaginaPrincipal_Bloque_3.b3_texto' | get_setting | as_paragraph | safe }}
-            </div>
-        </div>
-    </div>
+<style type="text/css">
+    .nav_spacer {
+        min-height: 50px;
+        padding: 20px;
+        text-align: center;
+    }
+    .nav_spacer img {
+        margin: 0px 15px;
+    }
+</style>
+
+<div class="nav_spacer bg-primary">
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_01' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_02' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_03' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_04' | get_setting }}" height="50" class="d-inline-block align-middle rounded" alt="" />
 </div>
 
 <div class="height_50"></div>
@@ -164,7 +171,16 @@
 
 <div class="height_50"></div>
 
-<hr />
+<div class="splash_block splah_block_3">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10 offset-sm-1">
+                <h3 class="text-center">{{ '02_PaginaPrincipal_Bloque_3.b3_titulo' | get_setting }}</h3>
+                {{ '02_PaginaPrincipal_Bloque_3.b3_texto' | get_setting | as_paragraph | safe }}
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="height_50"></div>
 
@@ -176,7 +192,7 @@
                 <i class="fas fa-phone"></i>
             </p>
             <p class="text-center lead">Llámanos al</p>
-            <p class="h4 text-center">
+            <p class="h6 text-center">
                 <a href="tel:{{ '01 General.telefono' | get_setting }}" target="_blank">{{ '01 General.telefono' | get_setting }}</a>
             </p>
         </div>
@@ -185,7 +201,7 @@
                 <i class="fab fa-whatsapp"></i>
             </p>
             <p class="text-center lead">Envíanos un mensaje al</p>
-            <p class="h4 text-center">
+            <p class="h6 text-center">
                 <a href="https://api.whatsapp.com/send?phone=52{{ '01 General.whats_app' | get_setting }}" target="_blank">{{ '01 General.whats_app' | get_setting }}</a>
             </p>
         </div>
@@ -194,7 +210,7 @@
                 <i class="far fa-envelope"></i>
             </p>
             <p class="text-center lead">Escríbenos a</p>
-            <p class="h4 text-center">
+            <p class="h6 text-center">
                 <a href="mailto:{{ '01 General.email' | get_setting }}" target="_blank">{{ '01 General.email' | get_setting }}</a>
             </p>
         </div>
@@ -208,7 +224,7 @@
 <div class="splash_block splah_block_7 bg-primary text-white">
     <div class="container">
         <div class="row">
-            <div class="col-sm-8 offset-sm-2">
+            <div class="col-sm-8 offset-sm-2 d-none">
                 <h2 class="text-center">Encuéntranos en</h2>
                 <p class="text-center">
                     <ul class="social text-center">

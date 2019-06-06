@@ -1,8 +1,8 @@
 from django.urls import path
 
-import app.vw_taxonomia as views
+import app.vw_tipodocumento as views
 
-object_name = 'taxonomia'
+object_name = 'tipodocumento'
 
 urlpatterns = [
     path('', views.index,

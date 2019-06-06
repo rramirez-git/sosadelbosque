@@ -234,3 +234,15 @@ def send_mail(asunto, texto_plano, email_from, email_to, texto_html, imagenes=()
         data_image.add_header('Content-ID', '<' + img[1] + '>')
         email.attach(data_image)
     print( email.send() )
+
+BootstrapColors = (
+    ('', 'Ninguno'),
+    ('primary', 'Primary'),
+    ('secondary', 'Secondary'),
+    ('success', 'Success'),
+    ('danger', 'Danger'),
+    ('warning', 'Warning'),
+    ('info', 'Info'),
+    ('light', 'Light'),
+    ('dark', 'Dark'),
+)

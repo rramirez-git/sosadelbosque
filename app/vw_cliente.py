@@ -6,8 +6,10 @@ from django.db.models import ProtectedError
 
 from routines.mkitsafe import valida_acceso
 
-from .models import Cliente
-from .forms import frmCliente, frmClienteContacto, frmClienteUsuario
+from .models import Cliente, TaxonomiaExpediente
+from .forms import (
+    frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
+    frmClienteObservaciones)
 from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
 from routines.utils import requires_jquery_ui, move_uploaded_file
@@ -67,6 +69,7 @@ def new(request):
     frmCteCont = frmClienteContacto(request.POST or None)
     frmCteUsr = frmClienteUsuario(request.POST or None)
     frmCteDir = FrmDireccion(request.POST or None)
+    frmCteObs = frmClienteObservaciones(request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -95,6 +98,7 @@ def new(request):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'frm7': frmCteObs,
     })
 
 
@@ -107,6 +111,7 @@ def see(request, pk):
     frmCteCont = frmClienteContacto(instance=obj)
     frmCteUsr = frmClienteUsuario(instance=obj)
     frmCteDir = FrmDireccion(instance=obj.domicilicio)
+    frmCteObs = frmClienteObservaciones(instance=obj)
     if 'POST' == request.method:
         if "add-note" == request.POST.get('action'):
             add_nota(
@@ -121,6 +126,13 @@ def see(request, pk):
                 obj,
                 usuario
             )
+        elif "add-document":
+            frmDocto = frmDocument(request.POST or None, request.FILES)
+            docto = frmDocto.save(commit=False)
+            docto.cliente = obj
+            docto.created_by = usuario
+            docto.updated_by = usuario
+            docto.save()
     toolbar = []
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
         toolbar.append({
@@ -136,6 +148,17 @@ def see(request, pk):
         'type': 'button',
         'label': '<i class="far fa-bell"></i> Alerta',
         'onclick': 'Cte.showAlertsSglCte()',
+    })
+    toolbar.append({
+        'type': 'button',
+        'label': '<i class="fas fa-file-upload"></i> Adjuntar',
+        'onclick': 'Cte.showFrmDoctoGral()'
+    })
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'actividad_new',
+        'label': '<i class="fas fa-paperclip"></i> Actividad',
+        'pk': obj.pk
     })
     if usuario.has_perm_or_has_perm_child(
             'cliente.actualizar_clientes_cliente'):
@@ -165,6 +188,8 @@ def see(request, pk):
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
         'cte': obj,
+        'frmDocto': frmDocument(),
+        'frmObs': frmCteObs,
     })
 
 
@@ -178,6 +203,7 @@ def update(request, pk):
     frmCteCont = frmClienteContacto(instance=obj, data=request.POST or None)
     frmCteUsr = frmClienteUsuario(instance=obj, data=request.POST or None)
     frmCteDir = FrmDireccion(instance=obj.domicilicio, data=request.POST or None)
+    frmCteObs = frmClienteObservaciones(instance=obj, data=request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -203,6 +229,7 @@ def update(request, pk):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'frm7': frmCteObs,
     })
 
 
@@ -217,3 +244,37 @@ def delete(request, pk):
         return HttpResponseRedirect(reverse('cliente_index'))
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+
+@valida_acceso(['permission.maestro_de_clientes_permiso','permission.maestro_de_clientes_permission'])
+def reporte_maestro(request):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    data = []
+    ftr_tipo_expediente = int("0" + request.POST.get('ftr_tipo_expediente', ''))
+    ftr_edad_inicio = int("0" + request.POST.get('ftr_edad_inicio', ''))
+    ftr_edad_fin = int("0" + request.POST.get('ftr_edad_fin', ''))
+    if "POST" == request.method:
+        data = Cliente.objects.all()
+        if ftr_tipo_expediente:
+            data = data.filter(tipo__pk=ftr_tipo_expediente)
+        data = list(data)
+        if ftr_edad_inicio:
+            data = [ elem for elem in data if ftr_edad_inicio <= elem.edad ]
+        if ftr_edad_fin:
+            data = [ elem for elem in data if elem.edad <= ftr_edad_fin ]
+    return render(request, 'app/cliente/reporte_maestro.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Clientes',
+        'titulo_descripcion': "Reporte Maestro",
+        'req_ui': requires_jquery_ui(request),
+        'combo_options': {
+            'tipo_expediente': list(TaxonomiaExpediente.objects.all()),
+        },
+        'filters': {
+            'ftr_tipo_expediente': ftr_tipo_expediente,
+            'ftr_edad_inicio': ftr_edad_inicio,
+            'ftr_edad_fin': ftr_edad_fin,
+        },
+        'regs': data,
+    })
+

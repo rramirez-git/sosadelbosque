@@ -22,17 +22,65 @@
 
 <h3>{{usuario}}</h3>
 
+{% if taxonomias %}
+<h4>Clientes</h4>
+<div class="card-columns">
 {% for taxonomia in taxonomias %}
-<div class="card" style="margin-bottom: 10px;">
-    <div class="card-header">
-        {{ taxonomia }}
+<div class="card {% if taxonomia.color %}border-{{taxonomia.color}}{% endif %}" style="margin-bottom: 10px;">
+    <div class="card-header {% if taxonomia.color %}text-{{taxonomia.color}}{% endif %}">
+        <i class="far fa-folder-open"></i> {{ taxonomia }}
     </div>
-    <ul class="list-group list-group-flush">
+    <ul class="list-group list-group-flush {% if taxonomia.color %}text-{{taxonomia.color}}{% endif %}">
         {% for cte in taxonomia.clientes.all %}
         <li class="list-group-item"><a href="{% url 'cliente_see' pk=cte.pk %}">{{ cte }}</a></li>
         {% endfor %}
     </ul>
 </div>
 {% endfor %}
+</div>
+{% endif %}
+
+{% if estatus_actividad %}
+<h4>Actividades</h4>
+{% for status in estatus_actividad %}
+<div class="card {% if status.color %}border-{{status.color}}{% endif %}" style="margin-bottom: 10px;">
+    <div class="card-header {% if status.color %}text-{{status.color}}{% endif %}">
+        <i class="fab fa-creative-commons-sampling"></i> {{ status }}
+    </div>
+    <div class="card-body {% if status.color %}text-{{status.color}}{% endif %}">
+        <table class="table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Actividad</th>
+                    <th>Actualizado en</th>
+                    <th>Responsable</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for actividad in status.actividades.all %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'cliente_see' pk=actividad.cliente.pk %}">{{ actividad.cliente }}</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'actividad_see' pk=actividad.pk %}">
+                                {{ actividad.titulo }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ actividad.updated_at|date:"d/M/Y" }}
+                        </td>
+                        <td>
+                            {{ actividad.responsable }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
 
 {% endblock %}

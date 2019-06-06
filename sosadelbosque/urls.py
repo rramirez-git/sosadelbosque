@@ -150,7 +150,12 @@ urlpatterns = [
         name="setting_value"),
 
     path('cliente/', include('app.url_cliente')),
-    path('taxonomia/', include('app.url_taxonomia'))
+    path('taxonomia/', include('app.url_taxonomia')),
+    path('tiposdocumento/', include('app.url_tipodocumento')),
+    path('estatusactividad/', include('app.url_estatusactividad')),
+    path('tiposactividad/', include('app.url_tipoactividad')),
+    path('actividad/', include('app.url_actividad')),
+    path('personas_externas/', include('app.url_externo')),
 ]
 
 urlpatterns += static(

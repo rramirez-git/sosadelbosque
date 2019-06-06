@@ -1,6 +1,9 @@
 from django import forms
 
-from .models import TaxonomiaExpediente, Cliente
+from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
+                     TipoActividad, TipoDocumento, EstatusActividad,
+                     Actividad, ActividadHistoria, Externo)
+
 
 class frmTaxonomia(forms.ModelForm):
 
@@ -8,8 +11,11 @@ class frmTaxonomia(forms.ModelForm):
         model = TaxonomiaExpediente
         fields = [
             'nombre',
+            'color',
+            'mostrar_en_panel',
             'descripcion',
         ]
+
 
 class frmCliente(forms.ModelForm):
 
@@ -33,9 +39,13 @@ class frmCliente(forms.ModelForm):
             'RFC',
             'NSS',
             'estado_civil',
+            'conyuge',
             'empresa',
             'afore_actual',
             'fecha_afore_actual',
+            'clinica',
+            'subdelegacion',
+            'observaciones',
         ]
         labels = {
             'first_name': 'Nombre',
@@ -70,9 +80,12 @@ class frmClienteUsuario(forms.ModelForm):
             'RFC',
             'NSS',
             'estado_civil',
+            'conyuge',
             'empresa',
             'afore_actual',
             'fecha_afore_actual',
+            'clinica',
+            'subdelegacion',
         ]
         widgets = {
             'fecha_nacimiento': forms.TextInput(attrs={'type': 'date'}),
@@ -105,3 +118,98 @@ class frmClienteContacto(forms.ModelForm):
             'telefono_oficina': forms.TextInput(attrs={'type': 'tel'}),
             'otro_telefono': forms.TextInput(attrs={'type': 'tel'}),
         }
+
+
+class frmClienteObservaciones(forms.ModelForm):
+
+    class Meta:
+        model = Cliente
+        fields = ['observaciones']
+
+
+class frmDocument(forms.ModelForm):
+
+    class Meta:
+        model = DoctoGral
+        fields = [
+            'tipo_de_documento',
+            'anverso',
+            'observaciones'
+        ]
+        labels = {
+            'anverso': 'Archivo',
+        }
+
+
+class frmTipoActividad(forms.ModelForm):
+
+    class Meta:
+        model = TipoActividad
+        fields = [
+            'nombre',
+        ]
+
+
+class frmEstatusActividad(forms.ModelForm):
+
+    class Meta:
+        model = EstatusActividad
+        fields = [
+            'nombre',
+            'color',
+            'mostrar_en_panel',
+        ]
+
+
+class frmTipoDocumento(forms.ModelForm):
+
+    class Meta:
+        model = TipoDocumento
+        fields = [
+            'nombre',
+            'visible_para_usuario'
+        ]
+
+class frmActividad(forms.ModelForm):
+
+    class Meta:
+        model = Actividad
+        fields = [
+            'tipo_de_actividad',
+            'titulo',
+            'estado',
+            'responsable',
+            'comentarios',
+        ]
+
+
+class frmActividadUpd(forms.ModelForm):
+
+    class Meta:
+        model = Actividad
+        fields = [
+            'tipo_de_actividad',
+            'titulo',
+            'responsable',
+            'comentarios',
+        ]
+
+
+class frmActividadHistoria(forms.ModelForm):
+
+    class Meta:
+        model = ActividadHistoria
+        fields = [
+            'estado_nuevo',
+            'observaciones'
+        ]
+
+class frmExterno(forms.ModelForm):
+
+    class Meta:
+        model = Externo
+        fields = [
+            'nombre',
+            'apellido_paterno',
+            'apellido_materno'
+        ]
