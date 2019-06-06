@@ -143,7 +143,7 @@ def delete(request, pk):
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
-@valida_acceso(['permission.maestro_de_actividades_permiso'])
+@valida_acceso(['permission.maestro_de_actividades_permiso','permission.maestro_de_actividades_permission'])
 def reporte_maestro(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = []

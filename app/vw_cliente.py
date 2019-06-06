@@ -246,7 +246,7 @@ def delete(request, pk):
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
 
-@valida_acceso(['permission.maestro_de_clientes_permiso'])
+@valida_acceso(['permission.maestro_de_clientes_permiso','permission.maestro_de_clientes_permission'])
 def reporte_maestro(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = []
