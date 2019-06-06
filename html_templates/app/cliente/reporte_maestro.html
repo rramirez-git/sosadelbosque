@@ -1,0 +1,92 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% block content %}
+
+<button class="btn btn-outline-secondary d-none" type="button" data-toggle="collapse" data-target="#div_filter_form" aria-expanded="false" aria-controls="div_filter_form">
+    <i class="fas fa-filter"></i> Mostrar/Ocultar Filtros
+</button>
+
+<!--<div class="collapse" id="div_filter_form">-->
+    <div class="card card-body">
+        <form method="post" autocomplete="off" enctype="multipart/form-data" id="filter-form" action="">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="ftr_tipo_expediente">Tipo de Expediente</label>
+                        <select class="form-control" id="ftr_tipo_expediente" name="ftr_tipo_expediente">
+                            <option value=""></option>
+                            {% for opt in combo_options.tipo_expediente %}
+                                <option value="{{ opt.pk }}" {% if opt.pk == filters.ftr_tipo_expediente %}selected="select"{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="ftr_edad_inicio">Edad (Inicio)</label>
+                        <input value="{{ filters.ftr_edad_inicio }}" type="number" class="form-control" id="ftr_edad_inicio" name="ftr_edad_inicio" min="0" max="99" maxlength="2" />
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="ftr_edad_fin">Edad (Fin)</label>
+                        <input value="{{ filters.ftr_edad_fin }}" type="number" class="form-control" id="ftr_edad_fin" name="ftr_edad_fin" min="0" max="99" maxlength="2" />
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Procesar</button>
+        </form>
+    </div>
+<!--</div>-->
+
+{% if regs %}
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Edad</th>
+            <th>Tipo de Expediente</th>
+            <th>Datos de Identificación</th>
+            <th>Teléfono</th>
+            <th>Ubicación</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Cliente</th>
+            <th>Edad</th>
+            <th>Tipo de Expediente</th>
+            <th>Datos de Identificación</th>
+            <th>Teléfono</th>
+            <th>Ubicación</th>
+        </tr>
+    </tfoot>
+    <tbody id="data-tbl">
+        {% for reg in regs %}
+        <tr>
+            <td>
+                <a href="{% url 'cliente_see' pk=reg.pk %}">
+                    {{ reg }}
+                </a>
+            </td>
+            <td>{{ reg.edad }}</td>
+            <td>{{ reg.tipo }}</td>
+            <td>
+                CURP: {{ reg.CURP }}<br />
+                NSS: {{ reg.NSS }}<br />
+                RFC: {{ reg.RFC }}
+            </td>
+            <td>
+                Fijo: {{ reg.telefono }}<br />
+                Móvil: {{ reg.celular }}<br />
+                Oficina: {{ reg.telefono_oficina }}
+            </td>
+            <td>{{ reg.domicilicio.municipio }}, {{ reg.domicilicio.estado }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

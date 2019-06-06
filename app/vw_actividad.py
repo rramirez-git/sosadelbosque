@@ -7,7 +7,8 @@ from routines.mkitsafe import valida_acceso
 from routines.utils import requires_jquery_ui
 from initsys.models import Usr
 
-from .models import Actividad, Cliente
+from .models import (
+    Actividad, Cliente, TipoActividad, EstatusActividad, Externo)
 from .forms import frmActividad, frmActividadUpd, frmActividadHistoria
 
 @valida_acceso()
@@ -141,3 +142,38 @@ def delete(request, pk):
         return HttpResponseRedirect(reverse('cliente_see', kwargs={'pk': cte_pk}))
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+@valida_acceso(['permission.maestro_de_actividades_permiso'])
+def reporte_maestro(request):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    data = []
+    ftr_tipo_actividad = int("0" + request.POST.get('ftr_tipo_actividad', ''))
+    ftr_estatus_actividad = int("0" + request.POST.get('ftr_estatus_actividad', ''))
+    ftr_responsable = int("0" + request.POST.get('ftr_responsable', ''))
+    if "POST" == request.method:
+        data = Actividad.objects.all()
+        if ftr_tipo_actividad:
+            data = data.filter(tipo_de_actividad__pk=ftr_tipo_actividad)
+        if ftr_estatus_actividad:
+            data = data.filter(estado__pk=ftr_estatus_actividad)
+        if ftr_responsable:
+            data = data.filter(responsable__pk=ftr_responsable)
+        data = list(data)
+    return render(request, 'app/actividad/reporte_maestro.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Actividad',
+        'titulo_descripcion': "Reporte Maestro",
+        'req_ui': requires_jquery_ui(request),
+        'combo_options': {
+            'tipo_actividad': list(TipoActividad.objects.all()),
+            'estatus_actividad': list(EstatusActividad.objects.all()),
+            'responsable': list(Externo.objects.all()),
+        },
+        'filters': {
+            'ftr_tipo_actividad': ftr_tipo_actividad,
+            'ftr_estatus_actividad': ftr_estatus_actividad,
+            'ftr_responsable': ftr_responsable,
+        },
+        'regs': data,
+    })
+

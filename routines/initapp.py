@@ -88,4 +88,14 @@ def upd190528():
     Permiso.create("Actualizar Externo", "app", "externo", 2, "Actualizar Persona Externa", '', True, p_externo, gpos)
     Permiso.create("Eliminar Externo", "app", "externo", 3, "Eliminar Persona Externa", '', True, p_externo, gpos)
 
-upd190528()
+    print("Permisos creados upd190528")
+
+def upd190604():
+    gpos = ["Super-Administrador", "Administrador"]
+    p_report = Permiso.create("Reportes", "auth", "permission", 2, groups=gpos)
+    Permiso.create("Maestro de Clientes", "auth", "permission", 1, vista='cliente_reporte_maestro', permiso_padre=p_report, groups=gpos)
+    Permiso.create("Maestro de Actividades", "auth", "permission", 2, vista='actividad_reporte_maestro', permiso_padre=p_report, groups=gpos)
+
+    print("Permisos creados upd190604")
+
+upd190604()

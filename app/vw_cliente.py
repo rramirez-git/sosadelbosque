@@ -6,8 +6,10 @@ from django.db.models import ProtectedError
 
 from routines.mkitsafe import valida_acceso
 
-from .models import Cliente
-from .forms import frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument, frmClienteObservaciones
+from .models import Cliente, TaxonomiaExpediente
+from .forms import (
+    frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
+    frmClienteObservaciones)
 from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
 from routines.utils import requires_jquery_ui, move_uploaded_file
@@ -242,3 +244,37 @@ def delete(request, pk):
         return HttpResponseRedirect(reverse('cliente_index'))
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+
+@valida_acceso(['permission.maestro_de_clientes_permiso'])
+def reporte_maestro(request):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    data = []
+    ftr_tipo_expediente = int("0" + request.POST.get('ftr_tipo_expediente', ''))
+    ftr_edad_inicio = int("0" + request.POST.get('ftr_edad_inicio', ''))
+    ftr_edad_fin = int("0" + request.POST.get('ftr_edad_fin', ''))
+    if "POST" == request.method:
+        data = Cliente.objects.all()
+        if ftr_tipo_expediente:
+            data = data.filter(tipo__pk=ftr_tipo_expediente)
+        data = list(data)
+        if ftr_edad_inicio:
+            data = [ elem for elem in data if ftr_edad_inicio <= elem.edad ]
+        if ftr_edad_fin:
+            data = [ elem for elem in data if elem.edad <= ftr_edad_fin ]
+    return render(request, 'app/cliente/reporte_maestro.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Clientes',
+        'titulo_descripcion': "Reporte Maestro",
+        'req_ui': requires_jquery_ui(request),
+        'combo_options': {
+            'tipo_expediente': list(TaxonomiaExpediente.objects.all()),
+        },
+        'filters': {
+            'ftr_tipo_expediente': ftr_tipo_expediente,
+            'ftr_edad_inicio': ftr_edad_inicio,
+            'ftr_edad_fin': ftr_edad_fin,
+        },
+        'regs': data,
+    })
+

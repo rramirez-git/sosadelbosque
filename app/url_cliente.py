@@ -15,4 +15,6 @@ urlpatterns = [
          name="{}_update".format(object_name)),
     path('eliminar/<pk>/', views.delete,
          name="{}_delete".format(object_name)),
+     path('reporte/maestro', views.reporte_maestro,
+          name="{}_reporte_maestro".format(object_name)),
 ]

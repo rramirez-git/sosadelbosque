@@ -165,6 +165,16 @@ class Cliente(Usr):
         related_name='clientes')
     observaciones = models.TextField(blank=True)
 
+    @property
+    def edad(self):
+        anios = date.today().year - self.fecha_nacimiento.year
+        if date.today().month < self.fecha_nacimiento.month:
+            anios -= 1
+        elif (date.today().month == self.fecha_nacimiento.month 
+            and date.today().day < self.fecha_nacimiento.day):
+            anios -= 1
+        return anios
+
     class Meta:
         ordering = ["first_name", "last_name", "apellido_materno"]
 
