@@ -23,7 +23,9 @@ def index(request):
                         reg.name)
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('group.agregar_perfiles_grupo') or usuario.has_perm_or_has_perm_child('group.agregar_perfiles_group'):
+    if (usuario.has_perm_or_has_perm_child('group.agregar_perfiles_grupo')
+            or usuario.has_perm_or_has_perm_child(
+                'group.agregar_perfiles_group')):
         toolbar.append({
             'type': 'link',
             'view': 'perfil_new',
@@ -40,7 +42,8 @@ def index(request):
         })
 
 
-@valida_acceso(['group.agregar_perfiles_grupo', 'group.agregar_perfiles_group'])
+@valida_acceso([
+    'group.agregar_perfiles_grupo', 'group.agregar_perfiles_group'])
 def new(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if 'POST' == request.method:
@@ -87,18 +90,24 @@ def see(request, pk):
                 permisos_en_perfil.append(p)
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('group.perfiles_grupo') or usuario.has_perm_or_has_perm_child('group.perfiles_group'):
+    if (usuario.has_perm_or_has_perm_child('group.perfiles_grupo')
+            or usuario.has_perm_or_has_perm_child(
+                'group.perfiles_group')):
         toolbar.append({
             'type': 'link',
             'view': 'perfil_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('group.actualizar_perfiles_grupo') or usuario.has_perm_or_has_perm_child('group.actualizar_perfiles_group'):
+    if (usuario.has_perm_or_has_perm_child('group.actualizar_perfiles_grupo')
+            or usuario.has_perm_or_has_perm_child(
+                'group.actualizar_perfiles_group')):
         toolbar.append({
             'type': 'link_pk',
             'view': 'perfil_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('group.eliminar_perfiles_grupo') or usuario.has_perm_or_has_perm_child('group.eliminar_perfiles_group'):
+    if (usuario.has_perm_or_has_perm_child('group.eliminar_perfiles_grupo')
+            or usuario.has_perm_or_has_perm_child(
+                'group.eliminar_perfiles_group')):
         toolbar.append({
             'type': 'link_pk',
             'view': 'perfil_delete',
@@ -119,7 +128,8 @@ def see(request, pk):
     )
 
 
-@valida_acceso(['group.actualizar_perfiles_grupo', 'group.actualizar_perfiles_group'])
+@valida_acceso([
+    'group.actualizar_perfiles_grupo', 'group.actualizar_perfiles_group'])
 def update(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Group.objects.filter(pk=pk).exists():
@@ -159,7 +169,8 @@ def update(request, pk):
     )
 
 
-@valida_acceso(['group.eliminar_perfiles_grupo', 'group.eliminar_perfiles_group'])
+@valida_acceso([
+    'group.eliminar_perfiles_grupo', 'group.eliminar_perfiles_group'])
 def delete(request, pk):
     try:
         if not Group.objects.filter(pk=pk).exists():

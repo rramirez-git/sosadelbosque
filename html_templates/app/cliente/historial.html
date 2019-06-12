@@ -1,0 +1,361 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+{% load util_filters %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-5">
+        <p>
+            <strong>{{ cte }}</strong><br />
+            {% if cte.CURP %}CURP: {{ cte.CURP }}<br />{% endif %}
+            {% if cte.NSS %}NSS: {{ cte.NSS }}<br />{% endif %}
+            {% if cte.RFC %}RFC: {{ cte.RFC }}<br />{% endif %}
+        </p>
+        
+        <p>Semanas Cotizadas: {{ historia.semanas_cotizadas }}</p>
+    </div>
+    <div class="col-sm-7 card">
+        <div class="card-body">
+            <button type="button" class="btn btn-outline-secondary float-right" onclick="openCommentsFrm()">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+            <strong>Comentarios:</strong><br />
+            {{ historia.comentarios|as_paragraph|safe }}
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    let openCommentsFrm = () => {
+        App.openPanel( $( "#comentarios-template" ).html(), "Actualizar comentarios" );
+    }
+    
+    let openCaptManual = () => {
+        App.openPanel( $( "#frm-captura-manual-template" ).html(), "Captura Manual" );
+    }
+    let openCaptExcel = () => {
+        App.openPanel( $( "#frm-captura-excel-template" ).html(), "Captura Excel" );
+    }
+    let openCaptWord = () => {
+        App.openPanel( $( "#frm-captura-word-template" ).html(), "Captura Word" );
+    }
+    let openCaptPDF = () => {
+        App.openPanel( $( "#frm-captura-pdf-template" ).html(), "Captura PDF" );
+    }
+
+    let addRowCaptManual = () => {
+        let template = Handlebars.compile( $( "#frm-captura-manual-add-template" ).html() );
+        rowc = $( "#tbl-captura-manual" )[0].rows.length + 1;
+        $( "#rows" )[0].value = rowc;
+        let html = template( { fila: rowc} );
+        $( "#tbl-captura-manual" ).append( $( html ) );
+    }
+    let convertCaptExcel = () => {
+        let lines = $( "#contenido-excel" ).val().trim().split( '\n' );
+        $( "#captura-form table" ).removeClass( 'd-none' );
+        $( "#div-contenido-excel" ).addClass( 'd-none' );
+        let tbl = $( "#tbl-captura-excel" );
+        let rows = lines.length
+        let template = Handlebars.compile( $( "#frm-captura-excel-add-template" ).html() );
+        for( let x = 1; x <= rows; x++ ){
+            fila = lines[ x - 1 ].split( '\t' );
+            let html = template( { 
+                fila: x, 
+                registro: fila[ 0 ], 
+                empresa: fila[ 1 ],
+                inicio: fila[ 2 ].substr( 6, 4 ) + '-' + fila[ 2 ].substr( 3, 2 ) + '-' + fila[ 2 ].substr( 0, 2 ),
+                fin: fila[ 3 ].substr( 6, 4 ) + '-' + fila[ 3 ].substr( 3, 2 ) + '-' + fila[ 3 ].substr( 0, 2 )
+            } );
+            tbl.append( $( html ) );
+        }
+        $( "#rows" )[ 0 ].value = rows;
+        $( "#captura-form button[type=button]" ).addClass( 'd-none' );
+        $( "#captura-form button[type=submit]" ).removeClass( 'd-none' );
+    }
+    let convertCaptWord = () => {
+        let patron = /\d{2}\s+\d+\s+\d{2}\/\d{2}\/\d{4}\s+\d\s+\d\s+\d{2}\/\d{2}\/\d{4}\s+\d+\.\d{2}\s+[A-Z]\s+\d\s+[A-Z]+\s+[A-Z]+\s+\d\s+\d\s+\d{2}\/\d{2}\/\d{4}/g;
+        let contenido = $("#contenido-word").val().trim();
+        let lines = contenido.match(patron);
+        $( "#captura-form table" ).removeClass( 'd-none' );
+        $( "#div-contenido-word" ).addClass( 'd-none' );
+        let tbl = $( "#tbl-captura-word" );
+        let rows = lines.length
+        let template = Handlebars.compile( $( "#frm-captura-word-add-template" ).html() );
+        for( let x = 1; x <= rows; x++ ){
+            fila = lines[ x - 1 ];
+            let html = template( { 
+                fila: x, 
+                registro: fila.substr( 3, 11),
+                inicio: fila.substr( 36, 4 ) + '-' + fila.substr( 33, 2 ) + '-' + fila.substr( 30, 2 ),
+                fin: fila.substr( 71, 4 ) + '-' + fila.substr( 68, 2 ) + '-' + fila.substr( 65, 2 ),
+                salario: parseFloat( fila.substr( 40, 8 ).trim() )
+            } );
+            tbl.append( $( html ) );
+        }
+        $( "#rows" )[ 0 ].value = rows;
+        $( "#captura-form button[type=button]" ).addClass( 'd-none' );
+        $( "#captura-form button[type=submit]" ).removeClass( 'd-none' );
+    }
+    let convertCaptPDF = () => {
+        let patron_mov = /[A-Z\s]+/g;
+        let patron_fec = /\d{2}\/\d{2}\/\d{4}/g;
+        let patron_sueldo = /\d+\.\d+/g;
+        let lines = $( "#contenido-pdf" ).val().trim().split( '\n' );
+        let rows = lines.length;
+        let template = Handlebars.compile( $( "#frm-captura-pdf-add-template" ).html() );
+        $( "#captura-form table" ).removeClass( 'd-none' );
+        $( "#div-contenido-pdf" ).addClass( 'd-none' );
+        let tbl = $( "#tbl-captura-pdf" );
+        for( let x = 1; x <= rows; x++ ){
+            let fila = lines[ x - 1 ];
+            let mov = fila.match( patron_mov )[ 0 ].trim();
+            let fecha = fila.match( patron_fec )[ 0 ];
+            let sueldo = fila.match( patron_sueldo )[ 0 ];
+            let html = template( {
+                fila: x,
+                salario: sueldo,
+                inicio: fecha.substr( 6, 4 ) + "-" + fecha.substr( 3, 2 ) + "-" + fecha.substr( 0, 2 )
+            });
+            tbl.append( $( html ) );
+        }
+        $( "#rows" )[ 0 ].value = rows;
+        $( "#captura-form button[type=button]" ).addClass( 'd-none' );
+        $( "#captura-form button[type=submit]" ).removeClass( 'd-none' );
+    }
+</script>
+
+<script type="text/x-handlebars-template" id="comentarios-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="comentarios-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action" value="update-comments" />
+        <div class="form-group">
+            <label for="comentarios">Comentarios</label>
+            <textarea class="form-control" id="comentarios" name="comentarios" rows="3">{{ historia.comentarios }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+    </form>
+</script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="frm-captura-manual-add-template">
+    <tr>
+        <td>
+            <input name="inicio_{{fila}}" id="inicio_{{fila}}" type="date" required="required" class="form-control" />
+        </td>
+        <td>
+            <input name="fin_{{fila}}" id="fin_{{fila}}" type="date" required="required" class="form-control" />
+        </td>
+        <td>
+            <input name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" />
+        </td>
+        <td></td>
+    </tr>
+</script>
+{% endverbatim %}
+
+<script type="text/x-handlebars-template" id="frm-captura-manual-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="captura-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action" value="captura-manual" />
+        <input type="hidden" name="rows" id="rows" value="1" />
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="empresa">Empresa:</label>
+                    <input id="empresa" name="empresa" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="registro_patronal">Registro Patronal:</label>
+                    <input id="registro_patronal" name="registro_patronal" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th colspan="2">Periodo</th>
+                    <th class="align-bottom">
+                        Salario
+                    </th>
+                    <th>
+                        <button onclick="addRowCaptManual()" type="button" class="btn btn-outline-secondary float-right btn-sm" title="Agregar Período">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tbl-captura-manual">
+                <tr>
+                    <td>
+                        <input name="inicio_1" id="inicio_1" type="date" required="required" class="form-control" />
+                    </td>
+                    <td>
+                        <input name="fin_1" id="fin_1" type="date" required="required" class="form-control" />
+                    </td>
+                    <td>
+                        <input name="salario_1" id="salario_1" type="text" required="required" class="form-control" />
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+    </form>
+</script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="frm-captura-excel-add-template">
+    <tr>
+        <td>
+            <input value="{{registro}}" name="registro_patronal_{{fila}}" id="registro_patronal_{{fila}}" type="text" class="form-control" />
+        </td>
+        <td>
+            <input value="{{empresa}}" name="empresa_{{fila}}" id="empresa_{{fila}}" type="text" class="form-control" />
+        </td>
+        <td>
+            <input value="{{inicio}}" name="inicio_{{fila}}" id="inicio_{{fila}}" type="date" required="required" class="form-control" style="width: 170px;" />
+        </td>
+        <td>
+            <input value="{{fin}}" name="fin_{{fila}}" id="fin_{{fila}}" type="date" required="required" class="form-control" style="width: 170px;" />
+        </td>
+        <td>
+            <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
+        </td>
+    </tr>
+</script>
+{% endverbatim %}
+
+<script type="text/x-handlebars-template" id="frm-captura-excel-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="captura-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action" value="captura-excel" />
+        <input type="hidden" name="rows" id="rows" value="1" />
+        <div id="div-contenido-excel" class="form-group">
+            <label for="contenido-excel">Texto</label>
+            <textarea class="form-control" id="contenido-excel" name="contenido-excel" rows="3"></textarea>
+        </div>
+        <table class="d-none table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th>Registro Patronal</th>
+                    <th>Empresa</th>
+                    <th colspan="2">Periodo</th>
+                    <th>Salario</th>
+                </tr>
+            </thead>
+            <tbody id="tbl-captura-excel">
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-primary" id="btn-continue" onclick="convertCaptExcel()">Continuar</button>
+        <button type="submit" class="btn btn-outline-primary d-none" id="btn-save" >Guardar</button>
+    </form>
+</script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="frm-captura-word-add-template">
+    <tr>
+        <td>
+            <input value="{{registro}}" name="registro_patronal_{{fila}}" id="registro_patronal_{{fila}}" type="text" class="form-control" />
+        </td>
+        <td>
+            <input value="{{empresa}}" name="empresa_{{fila}}" id="empresa_{{fila}}" type="text" class="form-control" />
+        </td>
+        <td>
+            <input value="{{inicio}}" name="inicio_{{fila}}" id="inicio_{{fila}}" type="date" required="required" class="form-control" style="width: 170px;" />
+        </td>
+        <td>
+            <input value="{{fin}}" name="fin_{{fila}}" id="fin_{{fila}}" type="date" required="required" class="form-control" style="width: 170px;" />
+        </td>
+        <td>
+            <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
+        </td>
+    </tr>
+</script>
+{% endverbatim %}
+
+<script type="text/x-handlebars-template" id="frm-captura-word-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="captura-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action" value="captura-word" />
+        <input type="hidden" name="rows" id="rows" value="1" />
+        <div id="div-contenido-word" class="form-group">
+            <label for="contenido-word">Texto</label>
+            <textarea class="form-control" id="contenido-word" name="contenido-word" rows="3"></textarea>
+        </div>
+        <table class="d-none table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th>Registro Patronal</th>
+                    <th>Empresa</th>
+                    <th colspan="2">Periodo</th>
+                    <th>Salario</th>
+                </tr>
+            </thead>
+            <tbody id="tbl-captura-word">
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-primary" id="btn-continue" onclick="convertCaptWord()">Continuar</button>
+        <button type="submit" class="btn btn-outline-primary d-none" id="btn-save" >Guardar</button>
+    </form>
+</script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="frm-captura-pdf-add-template">
+    <tr>
+        <td>
+            <input value="{{inicio}}" name="inicio_{{fila}}" id="inicio_{{fila}}" type="date" required="required" class="form-control" />
+        </td>
+        <td>
+            <input value="{{fin}}" name="fin_{{fila}}" id="fin_{{fila}}" type="date" required="required" class="form-control" />
+        </td>
+        <td>
+            <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" />
+        </td>
+    </tr>
+</script>
+{% endverbatim %}
+
+<script type="text/x-handlebars-template" id="frm-captura-pdf-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="captura-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action" value="captura-pdf" />
+        <input type="hidden" name="rows" id="rows" value="1" />
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="empresa">Empresa:</label>
+                    <input id="empresa" name="empresa" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="registro_patronal">Registro Patronal:</label>
+                    <input id="registro_patronal" name="registro_patronal" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div id="div-contenido-pdf" class="form-group">
+            <label for="contenido-pdf">Texto</label>
+            <textarea class="form-control" id="contenido-pdf" name="contenido-pdf" rows="3"></textarea>
+        </div>
+        <table class="d-none table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th colspan="2">Periodo</th>
+                    <th class="align-bottom">
+                        Salario
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tbl-captura-pdf">
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-primary" id="btn-continue" onclick="convertCaptPDF()">Continuar</button>
+        <button type="submit" class="d-none btn btn-outline-primary" id="btn-save" >Guardar</button>
+    </form>
+</script>
+
+{% endblock %}

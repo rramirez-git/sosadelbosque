@@ -10,20 +10,25 @@ from initsys.models import Usr
 from .models import TipoActividad
 from .forms import frmTipoActividad
 
+
 @valida_acceso(['tipoactividad.tipos_de_actividad_tipo actividad'])
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = list(TipoActividad.objects.all())
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('tipoactividad.agregar_tipo_de_actividad_tipo actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipoactividad.agregar_tipo_de_actividad_tipo actividad'):
         toolbar.append({
             'type': 'link',
             'view': 'tipoactividad_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
     perms = {
-        'see': usuario.has_perm_or_has_perm_child('tipoactividad.tipos_de_actividad_tipo actividad'),
-        'update': usuario.has_perm_or_has_perm_child('tipoactividad.actualizar_tipo_de_actividad_tipo actividad'),
-        'delete': usuario.has_perm_or_has_perm_child('tipoactividad.eliminar_tipo_de_actividad_tipo actividad'),
+        'see': usuario.has_perm_or_has_perm_child(
+            'tipoactividad.tipos_de_actividad_tipo actividad'),
+        'update': usuario.has_perm_or_has_perm_child(
+            'tipoactividad.actualizar_tipo_de_actividad_tipo actividad'),
+        'delete': usuario.has_perm_or_has_perm_child(
+            'tipoactividad.eliminar_tipo_de_actividad_tipo actividad'),
     }
     return render(request, 'app/tipoactividad/index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -62,19 +67,22 @@ def see(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = TipoActividad.objects.get(pk=pk)
     frm = frmTipoActividad(instance=obj)
-    toolbar=[]
-    if usuario.has_perm_or_has_perm_child('tipoactividad.tipos_de_actividad_tipo actividad'):
+    toolbar = []
+    if usuario.has_perm_or_has_perm_child(
+            'tipoactividad.tipos_de_actividad_tipo actividad'):
         toolbar.append({
             'type': 'link',
             'view': 'tipoactividad_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('tipoactividad.actualizar_tipo_de_actividad_tipo actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipoactividad.actualizar_tipo_de_actividad_tipo actividad'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'tipoactividad_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('tipoactividad.eliminar_tipo_de_actividad_tipo actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipoactividad.eliminar_tipo_de_actividad_tipo actividad'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'tipoactividad_delete',
@@ -103,12 +111,13 @@ def update(request, pk):
         obj.save()
         return HttpResponseRedirect(reverse(
             'tipoactividad_see', kwargs={'pk': obj.pk}))
-    return render(request,'global/form.html', {
+    return render(request, 'global/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Tipo de Actividad',
         'titulo_descripcion': obj,
         'frm': frm,
     })
+
 
 @valida_acceso(['tipoactividad.eliminar_tipo_de_actividad_tipo actividad'])
 def delete(request, pk):

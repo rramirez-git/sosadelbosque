@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sosadelbosque.settings import BASE_DIR
 
+
 class CLogger():
 
     logfile = os.path.join(BASE_DIR, 'logs/log_{}.log'.format(

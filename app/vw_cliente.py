@@ -6,7 +6,7 @@ from django.db.models import ProtectedError
 
 from routines.mkitsafe import valida_acceso
 
-from .models import Cliente, TaxonomiaExpediente
+from .models import Cliente, TaxonomiaExpediente, HistoriaLaboral
 from .forms import (
     frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
     frmClienteObservaciones)
@@ -40,6 +40,7 @@ def add_alert(nota, fecha_notificacion, usr_to, usr_creator):
             created_by=usr_creator,
             updated_by=usr_creator
         )
+
 
 @valida_acceso(['cliente.clientes_cliente'])
 def index(request):
@@ -87,7 +88,7 @@ def new(request):
         return HttpResponseRedirect(reverse(
             'cliente_see', kwargs={'pk': obj.pk}
         ))
-    return render(request,'global/form2.html', {
+    return render(request, 'global/form2.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
         'titulo_descripcion': 'Nuevo',
@@ -174,7 +175,7 @@ def see(request, pk):
             'view': 'cliente_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
-    return render(request,'app/cliente/see.html', {
+    return render(request, 'app/cliente/see.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
         'titulo_descripcion': obj,
@@ -200,10 +201,14 @@ def update(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = Cliente.objects.get(pk=pk)
     frm = frmCliente(instance=obj, data=request.POST or None)
-    frmCteCont = frmClienteContacto(instance=obj, data=request.POST or None)
-    frmCteUsr = frmClienteUsuario(instance=obj, data=request.POST or None)
-    frmCteDir = FrmDireccion(instance=obj.domicilicio, data=request.POST or None)
-    frmCteObs = frmClienteObservaciones(instance=obj, data=request.POST or None)
+    frmCteCont = frmClienteContacto(
+        instance=obj, data=request.POST or None)
+    frmCteUsr = frmClienteUsuario(
+        instance=obj, data=request.POST or None)
+    frmCteDir = FrmDireccion(
+        instance=obj.domicilicio, data=request.POST or None)
+    frmCteObs = frmClienteObservaciones(
+        instance=obj, data=request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -218,7 +223,7 @@ def update(request, pk):
         return HttpResponseRedirect(reverse(
             'cliente_see', kwargs={'pk': obj.pk}
         ))
-    return render(request,'global/form2.html', {
+    return render(request, 'global/form2.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
         'titulo_descripcion': obj,
@@ -246,11 +251,14 @@ def delete(request, pk):
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
 
-@valida_acceso(['permission.maestro_de_clientes_permiso','permission.maestro_de_clientes_permission'])
+@valida_acceso([
+    'permission.maestro_de_clientes_permiso',
+    'permission.maestro_de_clientes_permission'])
 def reporte_maestro(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = []
-    ftr_tipo_expediente = int("0" + request.POST.get('ftr_tipo_expediente', ''))
+    ftr_tipo_expediente = int(
+        "0" + request.POST.get('ftr_tipo_expediente', ''))
     ftr_edad_inicio = int("0" + request.POST.get('ftr_edad_inicio', ''))
     ftr_edad_fin = int("0" + request.POST.get('ftr_edad_fin', ''))
     if "POST" == request.method:
@@ -259,9 +267,9 @@ def reporte_maestro(request):
             data = data.filter(tipo__pk=ftr_tipo_expediente)
         data = list(data)
         if ftr_edad_inicio:
-            data = [ elem for elem in data if ftr_edad_inicio <= elem.edad ]
+            data = [elem for elem in data if ftr_edad_inicio <= elem.edad]
         if ftr_edad_fin:
-            data = [ elem for elem in data if elem.edad <= ftr_edad_fin ]
+            data = [elem for elem in data if elem.edad <= ftr_edad_fin]
     return render(request, 'app/cliente/reporte_maestro.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
@@ -278,3 +286,60 @@ def reporte_maestro(request):
         'regs': data,
     })
 
+
+@valida_acceso(['cliente.clientes_cliente'])
+def historia_laboral(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    cte = Cliente.objects.get(pk=pk)
+    if HistoriaLaboral.objects.filter(cliente=cte).exists():
+        historia = HistoriaLaboral.objects.get(cliente=cte)
+    else:
+        historia = HistoriaLaboral.objects.create(
+            cliente=cte, created_by=usuario, updated_by=usuario)
+        historia.save()
+    toolbar = []
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'cliente_see',
+        'label': '<i class="far fa-eye"></i> Ver Cliente',
+        'pk': cte.pk})
+    toolbar.append({
+        'type': 'button',
+        'label': '<i class="far fa-hand-paper"></i> Captura Manual',
+        'onclick': 'openCaptManual()',
+    })
+    toolbar.append({
+        'type': 'button',
+        'label': '<i class="far fa-file-excel"></i> Captura Excel',
+        'onclick': 'openCaptExcel()',
+    })
+    toolbar.append({
+        'type': 'button',
+        'label': '<i class="far fa-file-word"></i> Captura Word',
+        'onclick': 'openCaptWord()',
+    })
+    toolbar.append({
+        'type': 'button',
+        'label': '<i class="far fa-file-pdf"></i> Captura PDF',
+        'onclick': 'openCaptPDF()',
+    })
+    if "POST" == request.method:
+        if "update-comments" == request.POST.get('action'):
+            historia.comentarios = request.POST.get('comentarios')
+            historia.updated_by = usuario
+            historia.save()
+        elif "captura-manual" == request.POST.get('action'):
+            pass
+        elif "captura-excel" == request.POST.get('action'):
+            pass
+        elif "captura-word" == request.POST.get('action'):
+            pass
+        elif "captura-excel" == request.POST.get('action'):
+            pass
+    return render(request, 'app/cliente/historial.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Historial Laboral',
+        'toolbar': toolbar,
+        'cte': cte,
+        'historia': historia,
+    })

@@ -10,20 +10,25 @@ from initsys.models import Usr
 from .models import TaxonomiaExpediente
 from .forms import frmTaxonomia
 
+
 @valida_acceso(['taxonomiaexpediente.taxonomia_taxonomia expediente'])
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = list(TaxonomiaExpediente.objects.all())
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('taxonomiaexpediente.agregar_taxonomia_taxonomia expediente'):
+    if usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.agregar_taxonomia_taxonomia expediente'):
         toolbar.append({
             'type': 'link',
             'view': 'taxonomia_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
     perms = {
-        'see': usuario.has_perm_or_has_perm_child('taxonomiaexpediente.taxonomia_taxonomia expediente'),
-        'update': usuario.has_perm_or_has_perm_child('taxonomiaexpediente.actualizar_taxonomia_taxonomia expediente'),
-        'delete': usuario.has_perm_or_has_perm_child('taxonomiaexpediente.eliminar_taxonomia_taxonomia expediente'),
+        'see': usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.taxonomia_taxonomia expediente'),
+        'update': usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.actualizar_taxonomia_taxonomia expediente'),
+        'delete': usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.eliminar_taxonomia_taxonomia expediente'),
     }
     return render(request, 'app/taxonomiaexpediente/index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -62,19 +67,23 @@ def see(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = TaxonomiaExpediente.objects.get(pk=pk)
     frm = frmTaxonomia(instance=obj)
-    toolbar=[]
-    if usuario.has_perm_or_has_perm_child('taxonomiaexpediente.taxonomia_taxonomia expediente'):
+    toolbar = []
+    if usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.taxonomia_taxonomia expediente'):
         toolbar.append({
             'type': 'link',
             'view': 'taxonomia_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('taxonomiaexpediente.actualizar_taxonomia_taxonomia expediente'):
+    if usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.actualizar_taxonomia_taxonomia expediente'
+            ):
         toolbar.append({
             'type': 'link_pk',
             'view': 'taxonomia_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('taxonomiaexpediente.eliminar_taxonomia_taxonomia expediente'):
+    if usuario.has_perm_or_has_perm_child(
+            'taxonomiaexpediente.eliminar_taxonomia_taxonomia expediente'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'taxonomia_delete',
@@ -103,12 +112,13 @@ def update(request, pk):
         obj.save()
         return HttpResponseRedirect(reverse(
             'taxonomia_see', kwargs={'pk': obj.pk}))
-    return render(request,'global/form.html', {
+    return render(request, 'global/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Tipo de Expediente',
         'titulo_descripcion': obj,
         'frm': frm,
     })
+
 
 @valida_acceso(['taxonomiaexpediente.eliminar_taxonomia_taxonomia expediente'])
 def delete(request, pk):

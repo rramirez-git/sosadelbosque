@@ -13,6 +13,7 @@ from routines.logger import Logger
 usr_upload_to = 'usuarios'
 setting_upload_to = "settings"
 
+
 class Permiso(Permission):
     """
     Permiso para estructura de perfiles.
@@ -513,8 +514,3 @@ class Alerta(models.Model):
 
     def __unicode__(self):
         return self.__str__()
-
-
-
-
-

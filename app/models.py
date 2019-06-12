@@ -170,8 +170,8 @@ class Cliente(Usr):
         anios = date.today().year - self.fecha_nacimiento.year
         if date.today().month < self.fecha_nacimiento.month:
             anios -= 1
-        elif (date.today().month == self.fecha_nacimiento.month 
-            and date.today().day < self.fecha_nacimiento.day):
+        elif (date.today().month == self.fecha_nacimiento.month
+                and date.today().day < self.fecha_nacimiento.day):
             anios -= 1
         return anios
 
@@ -298,6 +298,7 @@ class TipoActividad(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+
 class Externo(models.Model):
     idexterno = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
@@ -316,11 +317,14 @@ class Externo(models.Model):
         ordering = ["nombre", 'apellido_paterno', 'apellido_materno']
 
     def __str__(self):
-        res = "{} {} {}".format(self.nombre, self.apellido_paterno, self.apellido_materno)
+        res = "{} {} {}".format(
+            self.nombre, self.apellido_paterno,
+            self.apellido_materno)
         return res.strip()
 
     def __unicode__(self):
         return self.__str__()
+
 
 class Actividad(models.Model):
     idactividad = models.AutoField(primary_key=True)
@@ -383,17 +387,18 @@ class ActividadHistoria(models.Model):
 
     def __str__(self):
         return "{} de {} a {}".format(
-            self.actividad, self.estado_anterior,self.estado_nuevo)
+            self.actividad, self.estado_anterior, self.estado_nuevo)
 
     def __unicode__(self):
         return self.__str__()
+
 
 class HistoriaLaboral(models.Model):
     idhistorialaboral = models.AutoField(primary_key=True)
     cliente = models.ForeignKey(
         Cliente, on_delete=models.CASCADE,
-        related_name='actividades')
-    comenatrios = models.TextField(blank=True)
+        related_name='historia')
+    comentarios = models.TextField(blank=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
@@ -415,6 +420,7 @@ class HistoriaLaboral(models.Model):
 
     def __unicode__(self):
         return self.__str__()
+
 
 class HistoriaLaboralRegistro(models.Model):
     idhistorialaboralregistro = models.AutoField(primary_key=True)
@@ -453,7 +459,7 @@ class HistoriaLaboralRegistro(models.Model):
     @property
     def anios_inactivos(self):
         pass
-        
+
     class Meta:
         ordering = ["historia_laboral", "-fecha_de_alta", "-fecha_de_baja"]
 
@@ -469,13 +475,16 @@ class HistoriaLaboralRegistro(models.Model):
 # Modificacion de Salario
 # Baja
 
+
 class HistoriaLaboralRegistroDetalle(models.Model):
     idhistorialaboralregistrodetalle = models.AutoField(primary_key=True)
     historia_laboral_registro = models.ForeignKey(
         HistoriaLaboralRegistro, on_delete=models.CASCADE,
         related_name='detalle')
     fecha_inicial = models.DateField(default=date.today)
-    fecha_final = models.DateField(default=date.today)
+    fecha_final = models.DateField(default=date.today, blank=True)
+    vigente = models.BooleanField(default=False, blank=True)
+    # Salario base es semanal
     salario_base = models.DecimalField(
         max_digits=7, decimal_places=2, default=0.0)
 

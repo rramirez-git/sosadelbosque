@@ -170,6 +170,7 @@ class frmTipoDocumento(forms.ModelForm):
             'visible_para_usuario'
         ]
 
+
 class frmActividad(forms.ModelForm):
 
     class Meta:
@@ -203,6 +204,7 @@ class frmActividadHistoria(forms.ModelForm):
             'estado_nuevo',
             'observaciones'
         ]
+
 
 class frmExterno(forms.ModelForm):
 

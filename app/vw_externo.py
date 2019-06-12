@@ -10,6 +10,7 @@ from initsys.models import Usr
 from .models import Externo
 from .forms import frmExterno
 
+
 @valida_acceso(['externo.externos_externo'])
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
@@ -21,9 +22,12 @@ def index(request):
             'view': 'externo_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
     perms = {
-        'see': usuario.has_perm_or_has_perm_child('externo.externos_externo'),
-        'update': usuario.has_perm_or_has_perm_child('externo.actualizar_externo_externo'),
-        'delete': usuario.has_perm_or_has_perm_child('externo.eliminar_externo_externo'),
+        'see': usuario.has_perm_or_has_perm_child(
+            'externo.externos_externo'),
+        'update': usuario.has_perm_or_has_perm_child(
+            'externo.actualizar_externo_externo'),
+        'delete': usuario.has_perm_or_has_perm_child(
+            'externo.eliminar_externo_externo'),
     }
     return render(request, 'app/externo/index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -62,19 +66,21 @@ def see(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = Externo.objects.get(pk=pk)
     frm = frmExterno(instance=obj)
-    toolbar=[]
+    toolbar = []
     if usuario.has_perm_or_has_perm_child('externo.externos_externo'):
         toolbar.append({
             'type': 'link',
             'view': 'externo_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('externo.actualizar_externo_externo'):
+    if usuario.has_perm_or_has_perm_child(
+            'externo.actualizar_externo_externo'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'externo_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('externo.eliminar_externo_externo'):
+    if usuario.has_perm_or_has_perm_child(
+            'externo.eliminar_externo_externo'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'externo_delete',
@@ -103,12 +109,13 @@ def update(request, pk):
         obj.save()
         return HttpResponseRedirect(reverse(
             'externo_see', kwargs={'pk': obj.pk}))
-    return render(request,'global/form.html', {
+    return render(request, 'global/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Persona Externa',
         'titulo_descripcion': obj,
         'frm': frm,
     })
+
 
 @valida_acceso(['externo.eliminar_externo_externo'])
 def delete(request, pk):
