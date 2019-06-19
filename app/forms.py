@@ -2,7 +2,7 @@ from django import forms
 
 from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
                      TipoActividad, TipoDocumento, EstatusActividad,
-                     Actividad, ActividadHistoria, Externo)
+                     Actividad, ActividadHistoria, Externo, UMA)
 
 
 class frmTaxonomia(forms.ModelForm):
@@ -170,6 +170,7 @@ class frmTipoDocumento(forms.ModelForm):
             'visible_para_usuario'
         ]
 
+
 class frmActividad(forms.ModelForm):
 
     class Meta:
@@ -204,6 +205,7 @@ class frmActividadHistoria(forms.ModelForm):
             'observaciones'
         ]
 
+
 class frmExterno(forms.ModelForm):
 
     class Meta:
@@ -212,4 +214,14 @@ class frmExterno(forms.ModelForm):
             'nombre',
             'apellido_paterno',
             'apellido_materno'
+        ]
+
+
+class frmUMA(forms.ModelForm):
+
+    class Meta:
+        model = UMA
+        fields = [
+            'año',
+            'valor'
         ]

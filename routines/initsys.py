@@ -418,7 +418,7 @@ Los datos personales requeridos y recolectados son:
         es_multiple=False,
         created_by=usr_sadmin
     )
-    
+
     Setting.objects.create(
         seccion="02_PaginaPrincipal_Bloque_2",
         nombre="b2_Title",
@@ -441,6 +441,7 @@ En Sosa del Bosque nos esmeramos en cumplir con todos y cada uno de nuestros cli
         es_multiple=False,
         created_by=usr_sadmin
     )
+
 
 init_db()
 print("Done...")

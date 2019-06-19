@@ -11,21 +11,26 @@ from .models import (
     Actividad, Cliente, TipoActividad, EstatusActividad, Externo)
 from .forms import frmActividad, frmActividadUpd, frmActividadHistoria
 
+
 @valida_acceso()
 def index(request):
     return ""
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = list(TipoActividad.objects.all())
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('tipoactividad.agregar_tipo_de_actividad_tipo actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipoactividad.agregar_tipo_de_actividad_tipo actividad'):
         toolbar.append({
             'type': 'link',
             'view': 'tipoactividad_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
     perms = {
-        'see': usuario.has_perm_or_has_perm_child('tipoactividad.tipos_de_actividad_tipo actividad'),
-        'update': usuario.has_perm_or_has_perm_child('tipoactividad.actualizar_tipo_de_actividad_tipo actividad'),
-        'delete': usuario.has_perm_or_has_perm_child('tipoactividad.eliminar_tipo_de_actividad_tipo actividad'),
+        'see': usuario.has_perm_or_has_perm_child(
+            'tipoactividad.tipos_de_actividad_tipo actividad'),
+        'update': usuario.has_perm_or_has_perm_child(
+            'tipoactividad.actualizar_tipo_de_actividad_tipo actividad'),
+        'delete': usuario.has_perm_or_has_perm_child(
+            'tipoactividad.eliminar_tipo_de_actividad_tipo actividad'),
     }
     return render(request, 'app/tipoactividad/index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -78,7 +83,7 @@ def see(request, pk):
                 obj.estado = actHist.estado_nuevo
                 obj.save()
     frm = frmActividad(instance=obj)
-    toolbar=[]
+    toolbar = []
     toolbar.append({
         'type': 'link_pk',
         'view': 'cliente_see',
@@ -101,7 +106,7 @@ def see(request, pk):
     return render(request, 'app/actividad/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Actividad',
-        'titulo_descripcion': "{} - {}".format( obj, obj.cliente),
+        'titulo_descripcion': "{} - {}".format(obj, obj.cliente),
         'frm': frm,
         'read_only': True,
         'toolbar': toolbar,
@@ -123,12 +128,13 @@ def update(request, pk):
         obj.save()
         return HttpResponseRedirect(reverse(
             'actividad_see', kwargs={'pk': obj.pk}))
-    return render(request,'app/actividad/form.html', {
+    return render(request, 'app/actividad/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Actividad',
-        'titulo_descripcion': "{} - {}".format( obj, obj.cliente),
+        'titulo_descripcion': "{} - {}".format(obj, obj.cliente),
         'frm': frm,
     })
+
 
 @valida_acceso()
 def delete(request, pk):
@@ -139,16 +145,22 @@ def delete(request, pk):
     cte_pk = obj.cliente.pk
     try:
         obj.delete()
-        return HttpResponseRedirect(reverse('cliente_see', kwargs={'pk': cte_pk}))
+        return HttpResponseRedirect(
+            reverse('cliente_see', kwargs={'pk': cte_pk}))
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
-@valida_acceso(['permission.maestro_de_actividades_permiso','permission.maestro_de_actividades_permission'])
+
+@valida_acceso([
+    'permission.maestro_de_actividades_permiso',
+    'permission.maestro_de_actividades_permission'])
 def reporte_maestro(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = []
-    ftr_tipo_actividad = int("0" + request.POST.get('ftr_tipo_actividad', ''))
-    ftr_estatus_actividad = int("0" + request.POST.get('ftr_estatus_actividad', ''))
+    ftr_tipo_actividad = int(
+        "0" + request.POST.get('ftr_tipo_actividad', ''))
+    ftr_estatus_actividad = int(
+        "0" + request.POST.get('ftr_estatus_actividad', ''))
     ftr_responsable = int("0" + request.POST.get('ftr_responsable', ''))
     if "POST" == request.method:
         data = Actividad.objects.all()
@@ -176,4 +188,3 @@ def reporte_maestro(request):
         },
         'regs': data,
     })
-

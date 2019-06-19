@@ -10,20 +10,25 @@ from initsys.models import Usr
 from .models import TipoDocumento
 from .forms import frmTipoDocumento
 
+
 @valida_acceso(['tipodocumento.tipos_de_documento_tipo documento'])
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = list(TipoDocumento.objects.all())
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('tipodocumento.agregar_tipo_de_documento_tipo documento'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipodocumento.agregar_tipo_de_documento_tipo documento'):
         toolbar.append({
             'type': 'link',
             'view': 'tipodocumento_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
     perms = {
-        'see': usuario.has_perm_or_has_perm_child('tipodocumento.tipos_de_documento_tipo documento'),
-        'update': usuario.has_perm_or_has_perm_child('tipodocumento.actualizar_tipo_de_documento_tipo documento'),
-        'delete': usuario.has_perm_or_has_perm_child('tipodocumento.eliminar_tipo_de_documento_tipo documento'),
+        'see': usuario.has_perm_or_has_perm_child(
+            'tipodocumento.tipos_de_documento_tipo documento'),
+        'update': usuario.has_perm_or_has_perm_child(
+            'tipodocumento.actualizar_tipo_de_documento_tipo documento'),
+        'delete': usuario.has_perm_or_has_perm_child(
+            'tipodocumento.eliminar_tipo_de_documento_tipo documento'),
     }
     return render(request, 'app/tipodocumento/index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -62,19 +67,22 @@ def see(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = TipoDocumento.objects.get(pk=pk)
     frm = frmTipoDocumento(instance=obj)
-    toolbar=[]
-    if usuario.has_perm_or_has_perm_child('tipodocumento.tipos_de_documento_tipo documento'):
+    toolbar = []
+    if usuario.has_perm_or_has_perm_child(
+            'tipodocumento.tipos_de_documento_tipo documento'):
         toolbar.append({
             'type': 'link',
             'view': 'tipodocumento_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('tipodocumento.actualizar_tipo_de_documento_tipo documento'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipodocumento.actualizar_tipo_de_documento_tipo documento'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'tipodocumento_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('tipodocumento.eliminar_tipo_de_documento_tipo documento'):
+    if usuario.has_perm_or_has_perm_child(
+            'tipodocumento.eliminar_tipo_de_documento_tipo documento'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'tipodocumento_delete',
@@ -103,12 +111,13 @@ def update(request, pk):
         obj.save()
         return HttpResponseRedirect(reverse(
             'tipodocumento_see', kwargs={'pk': obj.pk}))
-    return render(request,'global/form.html', {
+    return render(request, 'global/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Tipo de Documento',
         'titulo_descripcion': obj,
         'frm': frm,
     })
+
 
 @valida_acceso(['tipodocumento.eliminar_tipo_de_documento_tipo documento'])
 def delete(request, pk):

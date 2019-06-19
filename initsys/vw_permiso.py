@@ -35,12 +35,16 @@ def index(request):
                         or search_value in hipernormalize(reg.codename))
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('permiso.agregar_permisos_permiso') or usuario.has_perm_or_has_perm_child('permission.agregar_permisos_permiso'):
+    if (usuario.has_perm_or_has_perm_child('permiso.agregar_permisos_permiso')
+            or usuario.has_perm_or_has_perm_child(
+                'permission.agregar_permisos_permiso')):
         toolbar.append({
             'type': 'link',
             'view': 'permiso_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
-    if usuario.has_perm_or_has_perm_child('permission.perms_permiso') or usuario.has_perm_or_has_perm_child('permission.perms_permission'):
+    if (usuario.has_perm_or_has_perm_child('permission.perms_permiso')
+            or usuario.has_perm_or_has_perm_child(
+                'permission.perms_permission')):
         toolbar.append({
             'type': 'link',
             'view': 'permission_index',
@@ -57,7 +61,9 @@ def index(request):
             })
 
 
-@valida_acceso(['permiso.agregar_permisos_permiso', 'permission.agregar_permisos_permiso'])
+@valida_acceso([
+    'permiso.agregar_permisos_permiso',
+    'permission.agregar_permisos_permiso'])
 def new(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     frm = FrmPermiso(request.POST or None)
@@ -89,18 +95,26 @@ def see(request, pk):
     obj = Permiso.objects.get(pk=pk)
     frm = FrmPermiso(instance=obj)
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('permiso.permisos_permiso') or usuario.has_perm_or_has_perm_child('permission.permisos_permiso'):
+    if (usuario.has_perm_or_has_perm_child('permiso.permisos_permiso')
+            or usuario.has_perm_or_has_perm_child(
+                'permission.permisos_permiso')):
         toolbar.append({
             'type': 'link',
             'view': 'permiso_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('permiso.actualizar_permisos_permiso') or usuario.has_perm_or_has_perm_child('permission.actualizar_permisos_permiso'):
+    if (usuario.has_perm_or_has_perm_child(
+            'permiso.actualizar_permisos_permiso') or
+            usuario.has_perm_or_has_perm_child(
+                'permission.actualizar_permisos_permiso')):
         toolbar.append({
             'type': 'link_pk',
             'view': 'permiso_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('permiso.eliminar_permisos_permiso') or usuario.has_perm_or_has_perm_child('permission.eliminar_permisos_permiso'):
+    if (usuario.has_perm_or_has_perm_child(
+            'permiso.eliminar_permisos_permiso') or
+            usuario.has_perm_or_has_perm_child(
+                'permission.eliminar_permisos_permiso')):
         toolbar.append({
             'type': 'link_pk',
             'view': 'permiso_delete',
@@ -119,7 +133,9 @@ def see(request, pk):
             })
 
 
-@valida_acceso(['permiso.actualizar_permisos_permiso', 'permission.actualizar_permisos_permiso'])
+@valida_acceso([
+    'permiso.actualizar_permisos_permiso',
+    'permission.actualizar_permisos_permiso'])
 def update(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Permiso.objects.filter(pk=pk).exists():
@@ -158,7 +174,9 @@ def update(request, pk):
                 })
 
 
-@valida_acceso(['permiso.eliminar_permisos_permiso', 'permission.eliminar_permisos_permiso'])
+@valida_acceso([
+    'permiso.eliminar_permisos_permiso',
+    'permission.eliminar_permisos_permiso'])
 def delete(request, pk):
     try:
         if not Permiso.objects.filter(pk=pk).exists():
@@ -187,7 +205,9 @@ def permission_index(request):
                         or search_value in hipernormalize(reg.codename))
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('permiso.permisos_permiso') or usuario.has_perm_or_has_perm_child('permission.permisos_permiso'):
+    if (usuario.has_perm_or_has_perm_child('permiso.permisos_permiso')
+            or usuario.has_perm_or_has_perm_child(
+                'permission.permisos_permiso')):
         toolbar.append({
             'type': 'link',
             'view': 'permiso_index',

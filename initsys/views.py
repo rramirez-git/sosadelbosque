@@ -83,10 +83,12 @@ def panel(request):
         alerta.save()
     taxonomias = []
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
-        taxonomias = list(TaxonomiaExpediente.objects.filter(mostrar_en_panel=True))
+        taxonomias = list(TaxonomiaExpediente.objects.filter(
+            mostrar_en_panel=True))
     estatus_actividad = []
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
-        estatus_actividad = list(EstatusActividad.objects.filter(mostrar_en_panel=True))
+        estatus_actividad = list(EstatusActividad.objects.filter(
+            mostrar_en_panel=True))
     return render(
         request,
         'my_panel.html', {

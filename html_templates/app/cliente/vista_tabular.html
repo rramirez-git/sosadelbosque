@@ -1,0 +1,120 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+{% load util_filters %}
+
+{% block content %}
+
+<style type="text/css">
+    #data-tbl p {
+        margin: 0;
+    }
+</style>
+
+<h5>Resumen</h5>
+
+<div class="row">
+    <div class="col-sm-6">
+        <p>
+            <strong>{{ historia.cliente }}</strong><br />
+            {% if historia.cliente.CURP %}CURP: {{ historia.cliente.CURP }}<br />{% endif %}
+            {% if historia.cliente.NSS %}NSS: {{ historia.cliente.NSS }}<br />{% endif %}
+            {% if historia.cliente.RFC %}RFC: {{ historia.cliente.RFC }}<br />{% endif %}
+        </p>
+    </div>
+    <div class="col-sm-6 card">
+        <div class="card-body">
+            <table class="table table-striped table-sm table-responsive-md">
+                <tbody>
+                    <tr>
+                        <th>Fecha Inicial</th>
+                        <td class="text-right">{{ data.subtotal.inicio|date:'d/M/Y' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fecha Final</th>
+                        <td class="text-right">{{ data.subtotal.fin|date:'d/M/Y' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Días Cotizados</th>
+                        <td class="text-right">{{ data.subtotal.dias_cotizados|money2display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Semanas Cotizadas</th>
+                        <td class="text-right">{{ data.subtotal.semanas_cotizadas|money2display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Suma de Salario</th>
+                        <td class="text-right">$ {{ data.subtotal.suma_salario|money2display }}</td>
+                    </tr>
+                    <tr>
+                        <th> Salario Promedio</th>
+                        <td class="text-right">$ {{ data.subtotal.salario_promedio|money2display }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<h5>Detalle</h5>
+
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Empresa</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Salario Base</th>
+            <th>Días Cotizados</th>
+            <th>Semanas Cotizadas</th>
+            <th>Suma a Promedio</th>
+        </tr>
+    </thead>
+    <tbody id="data-tbl">
+        {% for reg in data.data.itertuples %}
+        {% if forloop.counter|divisibleby:15 %}
+        <tr class="d-print-none">
+            <th>Empresa</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Salario Base</th>
+            <th>Días Cotizados</th>
+            <th>Semanas Cotizadas</th>
+            <th>Suma a Promedio</th>
+        </tr>
+        {% endif %}
+        <tr>
+            <td>{{ reg.empresa|as_paragraph|safe }}</td>
+            <td>{{ reg.inicio|date:'d/M/Y' }}</td>
+            <td>{{ reg.fin|date:'d/M/Y' }}</td>
+            <td class="text-right {% if reg.salario_comentario %}table-info{% endif %}" title="{{ reg.salario_comentario }}" {% if reg.salario_comentario %}data-toggle="tooltip"{% endif %}>
+                $ {{ reg.salario_base|money2display }}
+            </td>
+            <td class="text-right">{{ reg.dias_cotizados }}</td>
+            <td class="text-right">{{ reg.semanas_cotizadas|money2display }}</td>
+            <td class="text-right">$ {{ reg.suma_salario|money2display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>Empresa</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Salario Base</th>
+            <th>Días Cotizados</th>
+            <th>Semanas Cotizadas</th>
+            <th>Suma a Promedio</th>
+        </tr>
+        <tr>
+            <th>Totales</th>
+            <th>{{ data.subtotal.inicio|date:'d/M/Y' }}</th>
+            <th>{{ data.subtotal.fin|date:'d/M/Y' }}</th>
+            <th class="text-right"></th>
+            <th class="text-right">{{ data.subtotal.dias_cotizados|money2display }}</th>
+            <th class="text-right">{{ data.subtotal.semanas_cotizadas|money2display }}</th>
+            <th class="text-right">$ {{ data.subtotal.suma_salario|money2display }}</th>
+        </tr>
+    </tfoot>
+</table>
+
+{% endblock %}

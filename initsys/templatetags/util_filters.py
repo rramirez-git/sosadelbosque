@@ -31,7 +31,10 @@ def random_num(num_ini, num_fin):
 
 @register.filter
 def money2display(num):
-    return "{:0,.2f}".format(num)
+    try:
+        return "{:0,.2f}".format(num)
+    except ValueError:
+        return num
 
 
 @register.filter
@@ -52,8 +55,8 @@ def keyvalue(dict, key):
     data = ''
     try:
         data = dict[key]
-    except:
-        Logger.write("No se encontro la llave {} en {}".format(key,dict))
+    except KeyError:
+        Logger.write("No se encontro la llave {} en {}".format(key, dict))
     return data
 
 

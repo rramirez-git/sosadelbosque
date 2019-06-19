@@ -37,12 +37,15 @@ def index(request):
                         or search_value in hipernormalize(reg.last_name))
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('usr.agregar_usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.agregar_usuarios_user'):
+    if (usuario.has_perm_or_has_perm_child('usr.agregar_usuarios_usuario')
+            or usuario.has_perm_or_has_perm_child(
+                'usr.agregar_usuarios_user')):
         toolbar.append({
             'type': 'link',
             'view': 'usuario_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
-    if usuario.has_perm_or_has_perm_child('user.users_usuario') or usuario.has_perm_or_has_perm_child('user.users_user'):
+    if (usuario.has_perm_or_has_perm_child('user.users_usuario')
+            or usuario.has_perm_or_has_perm_child('user.users_user')):
         toolbar.append({
             'type': 'link',
             'view': 'user_index',
@@ -98,18 +101,23 @@ def see(request, pk):
     for u in obj.descendencia():
         arbol.append(u)
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('usr.usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.usuarios_user'):
+    if (usuario.has_perm_or_has_perm_child('usr.usuarios_usuario')
+            or usuario.has_perm_or_has_perm_child('usr.usuarios_user')):
         toolbar.append({
             'type': 'link',
             'view': 'usuario_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    if usuario.has_perm_or_has_perm_child('usr.actualizar_usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.actualizar_usuarios_user'):
+    if (usuario.has_perm_or_has_perm_child('usr.actualizar_usuarios_usuario')
+            or usuario.has_perm_or_has_perm_child(
+                'usr.actualizar_usuarios_user')):
         toolbar.append({
             'type': 'link_pk',
             'view': 'usuario_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('usr.eliminar_usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.eliminar_usuarios_user'):
+    if (usuario.has_perm_or_has_perm_child('usr.eliminar_usuarios_usuario')
+            or usuario.has_perm_or_has_perm_child(
+                'usr.eliminar_usuarios_user')):
         toolbar.append({
             'type': 'link_pk',
             'view': 'usuario_delete',
@@ -127,7 +135,8 @@ def see(request, pk):
         })
 
 
-@valida_acceso(['usr.actualizar_usuarios_usuario', 'usr.actualizar_usuarios_user'])
+@valida_acceso([
+    'usr.actualizar_usuarios_usuario', 'usr.actualizar_usuarios_user'])
 def update(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Usr.objects.filter(pk=pk).exists():
@@ -167,7 +176,8 @@ def update(request, pk):
             })
 
 
-@valida_acceso(['usr.eliminar_usuarios_usuario', 'usr.eliminar_usuarios_user'])
+@valida_acceso([
+    'usr.eliminar_usuarios_usuario', 'usr.eliminar_usuarios_user'])
 def delete(request, pk):
     try:
         if not Usr.objects.filter(pk=pk).exists():
@@ -196,7 +206,8 @@ def user_index(request):
                         or search_value in hipernormalize(reg.last_name))
                     ]
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('usr.usuarios_usuario') or usuario.has_perm_or_has_perm_child('usr.usuarios_user'):
+    if (usuario.has_perm_or_has_perm_child('usr.usuarios_usuario')
+            or usuario.has_perm_or_has_perm_child('usr.usuarios_user')):
         toolbar.append({
             'type': 'link',
             'view': 'usuario_index',

@@ -156,6 +156,7 @@ urlpatterns = [
     path('tiposactividad/', include('app.url_tipoactividad')),
     path('actividad/', include('app.url_actividad')),
     path('personas_externas/', include('app.url_externo')),
+    path('uma/', include('app.url_uma')),
 ]
 
 urlpatterns += static(
