@@ -18,7 +18,10 @@ def getyear():
     return date.today().year
 
 def getmaxUMA():
-    return UMA.objects.all()[0].pk
+    try:
+        return UMA.objects.all()[0].pk
+    except IndexError:
+        return 0
 
 ESTADO_CIVIL_SOLTERO = "Soltero"
 ESTADO_CIVIL_CASADO = "Casado"

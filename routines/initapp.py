@@ -163,6 +163,4 @@ def upd190617():
     UMA.objects.create(año=2018, valor=80.60)
     UMA.objects.create(año=2019, valor=84.49)
 
-    print("Unidades de medida y actualización creadas")
-
-upd190617()
+    print("Unidades de medida y actualizacion creadas")
