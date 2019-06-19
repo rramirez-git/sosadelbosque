@@ -389,7 +389,8 @@ def historia_laboral(request, pk):
             reg.setDates()
         elif "captura-excel" == request.POST.get('action'):
             for x in range(int(request.POST.get('rows'))):
-                registro_patronal = request.POST.get('registro_patronal_{}'.format(x + 1))
+                registro_patronal = request.POST.get(
+                    'registro_patronal_{}'.format(x + 1))
                 empresa = request.POST.get('empresa_{}'.format(x + 1))
                 inicio = request.POST.get('inicio_{}'.format(x + 1))
                 fin = request.POST.get('fin_{}'.format(x + 1))
@@ -408,7 +409,8 @@ def historia_laboral(request, pk):
                 else:
                     vigente = False
                 if historia.registros.filter(
-                        registro_patronal=registro_patronal, empresa=empresa
+                        registro_patronal=registro_patronal,
+                        empresa=empresa
                         ).exists():
                     reg = historia.registros.filter(
                         registro_patronal=registro_patronal,
@@ -444,7 +446,8 @@ def historia_laboral(request, pk):
                 reg.setDates()
         elif "captura-word" == request.POST.get('action'):
             for x in range(int(request.POST.get('rows'))):
-                registro_patronal = request.POST.get('registro_patronal_{}'.format(x + 1))
+                registro_patronal = request.POST.get(
+                    'registro_patronal_{}'.format(x + 1))
                 empresa = request.POST.get('empresa_{}'.format(x + 1))
                 inicio = request.POST.get('inicio_{}'.format(x + 1))
                 fin = request.POST.get('fin_{}'.format(x + 1))
@@ -577,7 +580,8 @@ def historia_laboral(request, pk):
             reg.vigente = vigente
             reg.save()
             reg.historia_laboral_registro.setDates()
-        return HttpResponseRedirect(reverse('cliente_historia_laboral', kwargs={'pk': pk}))
+        return HttpResponseRedirect(reverse(
+            'cliente_historia_laboral', kwargs={'pk': pk}))
     return render(request, 'app/cliente/historial.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Historial Laboral',
@@ -633,7 +637,8 @@ def historia_laboral_vista_tabular(request, pk):
     toolbar.append({
         'type': 'link_pk',
         'view': 'cliente_historia_laboral',
-        'label': '<i class="fas fa-file-medical-alt"></i> Ver Historia Laboral',
+        'label': '<i class="fas fa-file-medical-alt"></i>'
+        ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
     data = historia_laboral.data_table_period()
     return render(request, 'app/cliente/vista_tabular.html', {
@@ -661,7 +666,8 @@ def historia_laboral_vista_grafica(request, pk):
     toolbar.append({
         'type': 'link_pk',
         'view': 'cliente_historia_laboral',
-        'label': '<i class="fas fa-file-medical-alt"></i> Ver Historia Laboral',
+        'label': '<i class="fas fa-file-medical-alt"></i>'
+        ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
     data = historia_laboral.data_table_graph()
     return render(request, 'app/cliente/vista_grafica.html', {

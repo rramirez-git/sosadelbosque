@@ -17,11 +17,13 @@ def docto_upload_to(instance, filename):
 def getyear():
     return date.today().year
 
+
 def getmaxUMA():
     try:
         return UMA.objects.all()[0].pk
     except IndexError:
         return 0
+
 
 ESTADO_CIVIL_SOLTERO = "Soltero"
 ESTADO_CIVIL_CASADO = "Casado"
@@ -437,11 +439,11 @@ class HistoriaLaboral(models.Model):
     def data_table_days(self):
         if self.DataFrameDays:
             return self.DataFrameDays
-        df_day = pd.DataFrame(columns=['fecha','empresa','salario_base'])
+        df_day = pd.DataFrame(columns=['fecha', 'empresa', 'salario_base'])
         for reg in self.registros.all():
             for det in reg.detalle.all():
                 df_day = df_day.append(pd.DataFrame({
-                    'fecha': pd.date_range(det.inicio,det.fin),
+                    'fecha': pd.date_range(det.inicio, det.fin),
                     'empresa': "{}\n".format(reg),
                     'salario_base': det.salario_base,
                 }), ignore_index=True)
@@ -480,10 +482,12 @@ class HistoriaLaboral(models.Model):
                 sb = salario_base_ant
                 sb_commentario = ''
                 if sb > tope_uma:
-                    sb_commentario = "El salario base es de ${} pero el tope UMA es de ${}".format(sb, tope_uma)
+                    sb_commentario = (
+                        "El salario base es de ${} pero "
+                        "el tope UMA es de ${}").format(sb, tope_uma)
                     sb = tope_uma
                 df = df.append({
-                    'empresa':empresa_ant,
+                    'empresa': empresa_ant,
                     'inicio': fecha_inicio_ant,
                     'fin': fecha_fin_ant,
                     'salario_base': sb,
@@ -505,10 +509,12 @@ class HistoriaLaboral(models.Model):
             sb = salario_base_ant
             sb_commentario = ''
             if sb > tope_uma:
-                sb_commentario = "El salario base es de ${} pero el tope UMA es de ${}".format(sb, tope_uma)
+                sb_commentario = (
+                    "El salario base es de ${} pero el "
+                    "tope UMA es de ${}").format(sb, tope_uma)
                 sb = tope_uma
             df = df.append({
-                'empresa':empresa_ant,
+                'empresa': empresa_ant,
                 'inicio': fecha_inicio_ant,
                 'fin': fecha_fin_ant,
                 'salario_base': sb,
@@ -518,7 +524,7 @@ class HistoriaLaboral(models.Model):
                 'suma_salario': sb * dc,
                 }, ignore_index=True)
         df = df.sort_values(by=['inicio', 'fin', 'empresa'])
-        subt = df.agg(['sum','min','max'])
+        subt = df.agg(['sum', 'min', 'max'])
         subtotal = {
             'inicio': subt['inicio'][1],
             'fin': subt['fin'][2],
@@ -538,8 +544,14 @@ class HistoriaLaboral(models.Model):
         if self.DataFrameGraph:
             return self.DataFrameGraph
         dtp = self.data_table_period()
-        inicio = date(dtp['subtotal']['inicio'].year, dtp['subtotal']['inicio'].month, dtp['subtotal']['inicio'].day)
-        fin = date(dtp['subtotal']['fin'].year, dtp['subtotal']['fin'].month, dtp['subtotal']['fin'].day)
+        inicio = date(
+            dtp['subtotal']['inicio'].year,
+            dtp['subtotal']['inicio'].month,
+            dtp['subtotal']['inicio'].day)
+        fin = date(
+            dtp['subtotal']['fin'].year,
+            dtp['subtotal']['fin'].month,
+            dtp['subtotal']['fin'].day)
         dias = (fin - inicio).days + 1
         data = []
         for reg in self.registros.all():
@@ -663,7 +675,8 @@ class HistoriaLaboralRegistro(models.Model):
     def __str__(self):
         res = ""
         if self.empresa and self.registro_patronal:
-            res = "{} ({})".format(self.empresa.strip(), self.registro_patronal.strip())
+            res = "{} ({})".format(
+                self.empresa.strip(), self.registro_patronal.strip())
         elif self.empresa:
             res = "{}".format(self.empresa.strip())
         elif self.registro_patronal:
@@ -757,7 +770,7 @@ class UMA(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = [ '-año' ]
+        ordering = ['-año']
 
     def __str__(self):
         return "{}".format(self.año)

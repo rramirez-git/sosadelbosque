@@ -221,7 +221,7 @@ def truncate(f, n=0):
 
 
 def send_mail(
-    asunto, texto_plano, email_from, email_to, texto_html, imagenes=()):
+        asunto, texto_plano, email_from, email_to, texto_html, imagenes=()):
     email = EmailMultiAlternatives(
         asunto,
         texto_plano,

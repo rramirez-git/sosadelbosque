@@ -127,16 +127,20 @@ def upd190528():
 
 def upd190604():
     gpos = ["Super-Administrador", "Administrador"]
-    p_report = Permiso.create("Reportes", "auth", "permission", 2,
+    p_report = Permiso.create(
+        "Reportes", "auth", "permission", 2,
         groups=gpos)
-    Permiso.create("Maestro de Clientes", "auth", "permission", 1,
+    Permiso.create(
+        "Maestro de Clientes", "auth", "permission", 1,
         vista='cliente_reporte_maestro', permiso_padre=p_report,
         groups=gpos)
-    Permiso.create("Maestro de Actividades", "auth", "permission", 2,
+    Permiso.create(
+        "Maestro de Actividades", "auth", "permission", 2,
         vista='actividad_reporte_maestro', permiso_padre=p_report,
         groups=gpos)
 
     print("Permisos creados upd190604")
+
 
 def upd190617():
     from app.models import UMA

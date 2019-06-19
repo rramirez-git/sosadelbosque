@@ -9,6 +9,7 @@ from initsys.models import Usr
 from .models import UMA
 from .forms import frmUMA
 
+
 @valida_acceso(['uma.uma_uma'])
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
@@ -77,7 +78,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child('uma.eliminar_uma_uma'):
         toolbar.append({
             'type': 'link_pk',
-            'view':'uma_delete',
+            'view': 'uma_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
     return render(request, 'global/form.html', {
