@@ -162,7 +162,7 @@
         $( "#captura-form button[type=submit]" ).removeClass( 'd-none' );
     }
     let convertCaptWord = () => {
-        let patron = /\d{2}\s+\d+\s+\d{2}\/\d{2}\/\d{4}\s+\d\s+\d\s+\d{2}\/\d{2}\/\d{4}\s+\d+\.\d{2}\s+[A-Z]\s+\d\s+[A-Z]+\s+[A-Z]+\s+\d\s+\d\s+\d{2}\/\d{2}\/\d{4}/g;
+        let patron = /\d{2}\s+[A-Z]?\d+\s+\d{2}\/\d{2}\/\d{4}\s+\d\s+\d\s+\d{2}\/\d{2}\/\d{4}\s+\d+\.\d{2}\s+[A-Z]\s+\d\s+[A-Z]+\s+[A-Z]+\s+\d?\s+\d?\s+\d{2}\/\d{2}\/\d{4}/g;
         let contenido = $("#contenido-word").val().trim();
         let lines = contenido.match(patron);
         $( "#captura-form table" ).removeClass( 'd-none' );
@@ -172,11 +172,16 @@
         let template = Handlebars.compile( $( "#frm-captura-word-add-template" ).html() );
         for( let x = 1; x <= rows; x++ ){
             fila = lines[ x - 1 ];
+            fini = fila.substr( 36, 4 ) + '-' + fila.substr( 33, 2 ) + '-' + fila.substr( 30, 2 );
+            ffin = fila.substr( 71, 4 ) + '-' + fila.substr( 68, 2 ) + '-' + fila.substr( 65, 2 );
+            if( ffin == "0000-00-00" ) {
+                ffin = null;
+            }
             let html = template( { 
                 fila: x, 
                 registro: fila.substr( 3, 11),
-                inicio: fila.substr( 36, 4 ) + '-' + fila.substr( 33, 2 ) + '-' + fila.substr( 30, 2 ),
-                fin: fila.substr( 71, 4 ) + '-' + fila.substr( 68, 2 ) + '-' + fila.substr( 65, 2 ),
+                inicio: fini,
+                fin: ffin,
                 salario: parseFloat( fila.substr( 40, 8 ).trim() )
             } );
             tbl.append( $( html ) );
@@ -417,7 +422,7 @@
             <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
         </td>
         <td>
-            <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="checkbox" title="vigente" />
+            <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="checkbox" title="vigente" {{#if fin}}{{else}}checked="checked"{{/if}} />
         </td>
     </tr>
 </script>

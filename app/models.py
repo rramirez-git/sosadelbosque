@@ -188,13 +188,13 @@ class Cliente(Usr):
         return anios
 
     class Meta:
-        ordering = ["first_name", "last_name", "apellido_materno"]
+        ordering = ["last_name", "apellido_materno", "first_name"]
 
     def __str__(self):
         return "{} {} {}".format(
-            self.first_name,
             self.last_name,
-            self.apellido_materno
+            self.apellido_materno,
+            self.first_name,
             ).strip()
 
     def __unicode__(self):
@@ -314,8 +314,8 @@ class TipoActividad(models.Model):
 class Externo(models.Model):
     idexterno = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-    apellido_paterno = models.CharField(max_length=100)
-    apellido_materno = models.CharField(max_length=100)
+    apellido_paterno = models.CharField(max_length=100, blank=True)
+    apellido_materno = models.CharField(max_length=100, blank=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
