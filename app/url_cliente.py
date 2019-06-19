@@ -19,4 +19,12 @@ urlpatterns = [
           name="{}_historia_laboral".format(object_name)),
      path('reporte/maestro/', views.reporte_maestro,
           name="{}_reporte_maestro".format(object_name)),
+     path('eliminar_registro/<pk>/', views.delete_registro,
+          name="{}_delete_registro".format(object_name)),
+     path('eliminar_detalle/<pk>/', views.delete_detalle,
+          name="{}_delete_detalle".format(object_name)),
+     path('vista_tabular/<pk>/', views.historia_laboral_vista_tabular,
+          name="{}_vista_tabular".format(object_name)),
+     path('vista_grafica/<pk>/', views.historia_laboral_vista_grafica,
+          name="{}_vista_grafica".format(object_name)),
 ]

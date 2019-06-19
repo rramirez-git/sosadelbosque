@@ -31,7 +31,10 @@ def random_num(num_ini, num_fin):
 
 @register.filter
 def money2display(num):
-    return "{:0,.2f}".format(num)
+    try:
+        return "{:0,.2f}".format(num)
+    except ValueError:
+        return num
 
 
 @register.filter

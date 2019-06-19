@@ -137,3 +137,32 @@ def upd190604():
         groups=gpos)
 
     print("Permisos creados upd190604")
+
+def upd190617():
+    from app.models import UMA
+    gpos = ["Super-Administrador", "Administrador"]
+    p_admon = Permiso.objects.get(nombre='Administración')
+    p_uma = Permiso.create(
+        "UMA", "app", "uma", 8, "Unidad de Medida y Actualización (UMA)",
+        'uma_index', False, p_admon, gpos)
+    Permiso.create(
+        "Agregar UMA", "app", "uma", 1, es_operacion=True,
+        permiso_padre=p_uma, groups=gpos)
+    Permiso.create(
+        "Actualizar UMA", "app", "uma", 2, es_operacion=True,
+        permiso_padre=p_uma, groups=gpos)
+    Permiso.create(
+        "Eliminar UMA", "app", "uma", 3, es_operacion=True,
+        permiso_padre=p_uma, groups=gpos)
+
+    print("Permisos creados upd190617")
+
+    UMA.objects.all().delete()
+    UMA.objects.create(año=2016, valor=73.04)
+    UMA.objects.create(año=2017, valor=75.49)
+    UMA.objects.create(año=2018, valor=80.60)
+    UMA.objects.create(año=2019, valor=84.49)
+
+    print("Unidades de medida y actualización creadas")
+
+upd190617()

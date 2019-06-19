@@ -22,6 +22,18 @@ Date.prototype.theTime = function() {
     res += this.getMinutes();
     return res;
 }
+Date.prototype.fromMX = function( date ) {
+    return new Date(
+        parseInt( date.substr( 6, 4 ) ),
+        parseInt( date.substr( 3, 4 ) ) - 1,
+        parseInt( date.substr( 0, 2 ) )
+        );
+}
+Date.prototype.addDays = function( days ) {
+    let date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
 Number.prototype.asMoney = function() {
     let asString = `${this}`;
     if( asString.indexOf( "." ) == -1 ){

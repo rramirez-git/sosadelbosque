@@ -189,11 +189,13 @@ def get_setting_fn(sectionvalue, Setting):
 
 def as_paragraph_fn(text):
     text = text.replace('\r', '')
+    text = text.strip()
     res = ""
     for p in text.split('\n'):
         res += p.strip() + "<br />"
     res = "<p>{}</p>".format(res)
     res = res.replace("<br /><br />", '</p><p>')
+    res = res.replace("<br /></p>", '</p>')
     return res
 
 

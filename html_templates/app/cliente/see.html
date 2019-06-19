@@ -43,11 +43,11 @@
             {{ frm6 | crispy }}
         </div>
         <div class="col-sm-2">
-            <!--<a href="{% url 'cliente_historia_laboral' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
+            <a href="{% url 'cliente_historia_laboral' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
                 <i class="fas fa-file-medical-alt"></i>
                 Historia Laboral
             </a>
-            <p></p>-->
+            <p></p>
             {% if cte.actividades_asociadas.all %}
             <h5>Actividades</h5>
             <div class="list-group">
