@@ -777,3 +777,53 @@ class UMA(models.Model):
 
     def __unicode__(self):
         return self.__str__()
+
+
+class Cuantiabasica(models.Model):
+    idcuantia = models.AutoField(primary_key=True)
+    salario_inicio = models.DecimalField(max_digits=6, decimal_places=4)
+    salario_fin = models.DecimalField(max_digits=6, decimal_places=4)
+    porcentaje_de_cuantia_basica = models.DecimalField(
+        max_digits=5, decimal_places=3)
+    porcentaje_de_incremento_anual = models.DecimalField(
+        max_digits=5, decimal_places=3)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['salario_inicio', 'salario_fin']
+
+    def __str__(self):
+        return "de {} a {}".format(self.salario_inicio, self.salario_fin)
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class Factoredad(models.Model):
+    idfactoredad = models.AutoField(primary_key=True)
+    edad = models.PositiveSmallIntegerField()
+    factor_de_edad = models.DecimalField(max_digits=6, decimal_places=3)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['edad']
+
+    def __str__(self):
+        return "{} ({}%%)".format(self.edad, self.factor_de_edad)
+
+    def __unicode__(self):
+        return self.__str__()
