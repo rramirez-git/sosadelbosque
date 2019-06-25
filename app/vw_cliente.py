@@ -11,7 +11,8 @@ from routines.mkitsafe import valida_acceso
 
 from .models import (
     Cliente, TaxonomiaExpediente, HistoriaLaboral,
-    HistoriaLaboralRegistro, HistoriaLaboralRegistroDetalle, UMA)
+    HistoriaLaboralRegistro, HistoriaLaboralRegistroDetalle, UMA,
+    DoctoGral)
 from .forms import (
     frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
     frmClienteObservaciones)
@@ -139,6 +140,7 @@ def see(request, pk):
             docto.created_by = usuario
             docto.updated_by = usuario
             docto.save()
+        return HttpResponseRedirect(reverse('cliente_see', kwargs={'pk': pk}))
     toolbar = []
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
         toolbar.append({
@@ -176,7 +178,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'cliente.eliminar_clientes_cliente'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'cliente_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
@@ -614,8 +616,10 @@ def delete_detalle(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = HistoriaLaboralRegistroDetalle.objects.get(pk=pk)
     pk_cliente = obj.historia_laboral_registro.historia_laboral.cliente.pk
+    reg = obj.historia_laboral_registro
     try:
         obj.delete()
+        reg.setDates()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
     except ProtectedError:
@@ -680,3 +684,17 @@ def historia_laboral_vista_grafica(request, pk):
         'dias': data['dias'],
         'periods': json.dumps(data['data_table_graph']),
     })
+
+@valida_acceso(['cliente.clientes_cliente'])
+def delete_documento(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not DoctoGral.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = DoctoGral.objects.get(pk=pk)
+    pk_cliente = obj.cliente.pk
+    try:
+        obj.delete()
+        return HttpResponseRedirect(reverse(
+            'cliente_see', kwargs={'pk': pk_cliente}))
+    except ProtectedError:
+        return HttpResponseRedirect(reverse('item_con_relaciones'))

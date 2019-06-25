@@ -91,7 +91,7 @@ def see(request, pk):
             'estatusactividad.eliminar_estatus_de_actividad_estatus actividad'
             ):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'estatusactividad_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

@@ -84,7 +84,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'tipodocumento.eliminar_tipo_de_documento_tipo documento'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'tipodocumento_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

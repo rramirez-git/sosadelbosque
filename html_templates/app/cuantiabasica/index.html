@@ -30,7 +30,9 @@
                 </td>
                 <td class="text-center">
                     {% if cperms.delete %}
-                    <a href="{% url 'cuantiabasica_delete' pk=reg.pk %}" class="btn btn-outline-secondary" title="Eliminar"><i class="far fa-trash-alt"></i></a>
+                    <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cuantiabasica_delete' pk=reg.pk %}`)" title="Eliminar" class="btn btn-outline-secondary">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
                     {% endif %}
                 </td>
             </tr>

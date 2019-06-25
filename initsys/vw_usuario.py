@@ -119,7 +119,7 @@ def see(request, pk):
             or usuario.has_perm_or_has_perm_child(
                 'usr.eliminar_usuarios_user')):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'usuario_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

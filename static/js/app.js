@@ -89,6 +89,12 @@ class clsApp {
     showPrivacyPolicy(){
         App.openPanel( $( "#privacy-policy-template" ).html(), "Política de Privacidad" );
     }
+    showDeletingConfirmation(url, elemento="elemento", pre_elemento="el") {
+        let template = Handlebars.compile( $( "#deleting-confirmation-template" ).html() );
+        let html = template( { url, elemento, pre_elemento } );
+        App.openPanel( html, "Confirmación de Eliminación");
+        return false;
+    }
 }
 
 class clsCliente {

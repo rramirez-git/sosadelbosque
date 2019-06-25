@@ -132,6 +132,18 @@
                     </div>
                 </div>
             </script>
+            <script type="text/x-handlebars-template" id="deleting-confirmation-template">
+                <span class="float-left"><i class="fas fa-exclamation-triangle fa-2x"></i></span>
+                ¿Confirma que realmente desea eliminar {{pre_elemento}} {{elemento}}?
+                <div class="row">
+                    <div class="col-sm-6 text-center" style="color: white">
+                        <a href="{{url}}" class="btn btn-primary">Aceptar</a>
+                    </div>
+                    <div class="col-sm-6 text-center">
+                        <button data-dismiss="modal" type="button" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </div>
+            </script>
         {% endverbatim %}
         
         <script type="text/x-handlebars-template" id="privacy-policy-template">{{ '01 General.privacy_policy' | get_setting | as_paragraph | safe }}</script>

@@ -82,7 +82,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'cuantiabasica.eliminar_cuantiabasica_cuantiabasica'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'cuantiabasica_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

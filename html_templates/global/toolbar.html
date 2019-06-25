@@ -10,6 +10,10 @@
             <a href="{% url item.view pk=item.pk %}" class="btn btn-outline-secondary">
                 {{ item.label | safe }}
             </a>
+        {% elif 'link_pk_del' == item.type %}
+            <a href="#" onclick="App.showDeletingConfirmation(`{% url item.view pk=item.pk %}`)" class="btn btn-outline-secondary">
+                {{ item.label | safe }}
+            </a>
         {% elif 'button' == item.type %}
             <button type="button" class="btn btn-outline-secondary" onclick="{{ item.onclick }}">
                 {{ item.label | safe }}

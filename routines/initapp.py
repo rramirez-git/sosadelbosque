@@ -4,7 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group
 
 from initsys.models import Permiso, Usr
-from app.models import Cliente, TaxonomiaExpediente
+from app.models import (
+    Cliente, TaxonomiaExpediente, HistoriaLaboralRegistro)
 from .utils import clean_name
 
 
@@ -298,3 +299,10 @@ def upd190619():
     Factoredad.objects.create(edad=63, factor_de_edad=90)
     Factoredad.objects.create(edad=64, factor_de_edad=95)
     Factoredad.objects.create(edad=65, factor_de_edad=100)
+
+
+def upd190624():
+    for r in HistoriaLaboralRegistro.objects.all():
+        print("Procesando para {}".format(reg))
+        r.setDates()
+

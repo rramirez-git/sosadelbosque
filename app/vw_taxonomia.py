@@ -85,7 +85,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'taxonomiaexpediente.eliminar_taxonomia_taxonomia expediente'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'taxonomia_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

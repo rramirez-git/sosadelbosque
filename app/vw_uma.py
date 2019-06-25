@@ -77,7 +77,7 @@ def see(request, pk):
             'pk': pk})
     if usuario.has_perm_or_has_perm_child('uma.eliminar_uma_uma'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'uma_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

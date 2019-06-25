@@ -82,7 +82,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'factoredad.eliminar_factoredad_factoredad'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'factoredad_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

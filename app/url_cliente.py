@@ -15,6 +15,8 @@ urlpatterns = [
           name="{}_update".format(object_name)),
      path('eliminar/<pk>/', views.delete,
           name="{}_delete".format(object_name)),
+     path('eliminar_documento/<pk>/', views.delete_documento,
+          name="{}_eliminar_documento".format(object_name)),
      path('historial_laboral/<pk>/', views.historia_laboral,
           name="{}_historia_laboral".format(object_name)),
      path('reporte/maestro/', views.reporte_maestro,

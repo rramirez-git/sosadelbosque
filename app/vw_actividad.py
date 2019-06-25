@@ -99,7 +99,7 @@ def see(request, pk):
         'label': '<i class="far fa-edit"></i> Actualizar',
         'pk': pk})
     toolbar.append({
-        'type': 'link_pk',
+        'type': 'link_pk_del',
         'view': 'actividad_delete',
         'label': '<i class="far fa-trash-alt"></i> Eliminar',
         'pk': pk})

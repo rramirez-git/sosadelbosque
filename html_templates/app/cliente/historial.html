@@ -54,7 +54,7 @@
                 <button type="button" class="btn btn-outline-secondary" onclick="openUpdRegistro({{ reg.pk }}, '{{ reg.empresa }}', '{{ reg.registro_patronal }}')" title="Actualizar Empresa / Registro Patronal">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
-                <a href="{% url 'cliente_delete_registro' pk=reg.pk %}" class="btn btn-outline-secondary" title="Eliminar">
+                <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_registro' pk=reg.pk %}`, 'registro del patron seleccionado y su detalle de periodos')" title="Eliminar" class="btn btn-outline-secondary">
                     <i class="far fa-trash-alt"></i>
                 </a>
             </div>
@@ -90,7 +90,7 @@
                             </button>
                         </td>
                         <td class="text-center">
-                            <a href="{% url 'cliente_delete_detalle' pk=det.pk %}" class="btn btn-outline-secondary" title="Eliminar">
+                            <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_detalle' pk=det.pk %}`, 'periodo seleccionado')" title="Eliminar" class="btn btn-outline-secondary">
                                 <i class="far fa-trash-alt"></i>
                             </a>
                         </td>

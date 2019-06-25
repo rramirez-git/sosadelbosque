@@ -109,7 +109,7 @@ def see(request, pk):
             or usuario.has_perm_or_has_perm_child(
                 'group.eliminar_perfiles_group')):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'perfil_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
