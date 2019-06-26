@@ -334,6 +334,7 @@ def historia_laboral(request, pk):
         if "update-comments" == request.POST.get('action'):
             historia.comentarios = request.POST.get('comentarios')
             historia.uma = UMA.objects.get(pk=request.POST.get('uma'))
+            historia.dias_salario_promedio = request.POST.get('dias')
             historia.updated_by = usuario
             historia.save()
         elif "captura-manual" == request.POST.get('action'):
@@ -600,9 +601,12 @@ def delete_registro(request, pk):
     if not HistoriaLaboralRegistro.objects.filter(pk=pk).exists():
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = HistoriaLaboralRegistro.objects.get(pk=pk)
-    pk_cliente = obj.historia_laboral.cliente.pk
+    hl = obj.historia_laboral
+    pk_cliente = hl.cliente.pk
     try:
         obj.delete()
+        for reg in hl.registros.all():
+            reg.setDates()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
     except ProtectedError:
@@ -644,14 +648,12 @@ def historia_laboral_vista_tabular(request, pk):
         'label': '<i class="fas fa-file-medical-alt"></i>'
         ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
-    data = historia_laboral.data_table_period()
     return render(request, 'app/cliente/vista_tabular.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Detalle Laboral',
         'titulo_descripcion': historia_laboral.cliente,
         'toolbar': toolbar,
         'historia': historia_laboral,
-        'data': data,
     })
 
 
@@ -673,17 +675,30 @@ def historia_laboral_vista_grafica(request, pk):
         'label': '<i class="fas fa-file-medical-alt"></i>'
         ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
-    data = historia_laboral.data_table_graph()
+    periodos = []
+    dtotal = (historia_laboral.fin - historia_laboral.inicio).days
+    for reg in historia_laboral.registros.all():
+        r = {'empresa': '{}'.format(reg), 'periodos': []}
+        for per in reg.hlrd_periodos_continuo_reg.all().order_by(
+                '-fecha_inicio'):
+            d = (per.fecha_inicio - historia_laboral.inicio).days
+            r['periodos'].append({
+                'dias': per.dias,
+                'fin': per.fecha_fin.strftime('%d/%m/%Y'),
+                'inicio': per.fecha_inicio.strftime('%d/%m/%Y'),
+                'porc': per.dias * 100 / historia_laboral.dias_cotizados,
+                'porc_from_start': d * 100 / dtotal,
+            })
+        periodos.append(r)
     return render(request, 'app/cliente/vista_grafica.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Gráfico Laboral',
         'titulo_descripcion': historia_laboral.cliente,
         'toolbar': toolbar,
         'historia': historia_laboral,
-        'data': data['data_table_period'],
-        'dias': data['dias'],
-        'periods': json.dumps(data['data_table_graph']),
+        'periods': json.dumps(periodos),
     })
+
 
 @valida_acceso(['cliente.clientes_cliente'])
 def delete_documento(request, pk):

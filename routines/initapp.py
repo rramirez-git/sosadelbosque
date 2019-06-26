@@ -303,6 +303,5 @@ def upd190619():
 
 def upd190624():
     for r in HistoriaLaboralRegistro.objects.all():
-        print("Procesando para {}".format(reg))
+        print("Procesando para {}".format(r))
         r.setDates()
-

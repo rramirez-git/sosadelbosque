@@ -13,7 +13,7 @@
             {% if cte.RFC %}RFC: {{ cte.RFC }}<br />{% endif %}
         </p>
         
-        <p>Semanas Cotizadas: {{ historia.semanas_cotizadas|money2display }}</p>
+        <p>Semanas Cotizadas: {{ historia.semanas_cotizadas }}</p>
     </div>
     <div class="col-sm-7 card">
         <div class="card-body">
@@ -21,7 +21,8 @@
                 <i class="fas fa-pencil-alt"></i>
             </button>
             <p>
-                <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})
+                <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})<br />
+                <strong>{{ historia.dias_salario_promedio }}</strong> días para calculo de salario promedio diario.
             </p>
             <p>
                 <strong>Comentarios:</strong><br />
@@ -269,6 +270,10 @@
                     <option value="{{ uma.pk }}" {% if uma.pk == historia.uma.pk %}selected="select"{% endif %}>{{ uma }} ($ {{ uma.valor|money2display }})</option>
                 {% endfor %}
             </select>
+        </div>
+        <div class="form-group">
+            <label for="dias">Días para cálculo de salario promedio:</label>
+            <input type="number" name="dias" id="dias" value="{{ historia.dias_salario_promedio }}"class="form-control" required="required" min="1" max="15000" />
         </div>
         <div class="form-group">
             <label for="comentarios">Comentarios</label>

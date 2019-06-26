@@ -415,6 +415,9 @@ class HistoriaLaboral(models.Model):
     comentarios = models.TextField(blank=True)
     uma = models.ForeignKey(
         'UMA', on_delete=models.PROTECT, related_name='+', default=getmaxUMA)
+    dias_salario_promedio = models.PositiveSmallIntegerField(
+        default=1750,
+        verbose_name="Cantidad de Días para calculo de salario promedio")
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
@@ -423,10 +426,6 @@ class HistoriaLaboral(models.Model):
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
-
-    DataFrameDays = None
-    DataFramePeriod = None
-    DataFrameGraph = None
 
     @property
     def dias_cotizados(self):
@@ -444,144 +443,69 @@ class HistoriaLaboral(models.Model):
             return 0
         return res
 
-    def data_table_days(self):
-        if self.DataFrameDays:
-            return self.DataFrameDays
-        df_day = pd.DataFrame(list(
-            self.hlrd_days_hl.all().values(
-                'fecha',
-                'salario_base',
-                'historialaboralregistro__empresa',
-                'historialaboralregistro__registro_patronal')))
-        df_day.columns=['fecha', 'empresa', 'registro_patronal', 'salario_base']
-        self.DataFrameDays = df_day
-        return self.DataFrameDays
+    @property
+    def inicio(self):
+        res = self.hlrd_periodos_continuo_levelhl_hl.aggregate(
+            Min('fecha_inicio'))['fecha_inicio__min']
+        return res
 
-    def data_table_period(self):
-        if self.DataFramePeriod:
-            return self.DataFramePeriod
-        df = pd.DataFrame(columns=[
-            'empresa',
-            'inicio', 'fin', 'dias_cotizados', 'semanas_cotizadas',
-            'salario_base', 'suma_salario', 'salario_comentario'])
-        tope_uma = 25 * self.uma.valor
-        df_day = self.data_table_days()
-        fecha_inicio = None
-        fecha_fin = None
-        empresa = None
-        salario_base = None
-        fecha_inicio_ant = None
-        fecha_fin_ant = None
-        empresa_ant = None
-        salario_base_ant = None
-        for reg in df_day.groupby(['fecha']).agg(['sum']).iterrows():
-            r_fecha = reg[0]
-            r_empresa = reg[1][0]
-            r_registro_patronal = reg[1][1]
-            r_salario_base = reg[1][2]
-            if fecha_inicio is None:
-                fecha_inicio = r_fecha
-            fecha_fin = r_fecha
-            if empresa is None:
-                empresa = r_empresa
-            if salario_base is None:
-                salario_base = r_salario_base
-            if empresa != r_empresa or salario_base != r_salario_base:
-                dc = (fecha_fin_ant - fecha_inicio_ant).days + 1
-                sb = salario_base_ant
-                sb_commentario = ''
-                if sb > tope_uma:
-                    sb_commentario = (
-                        "El salario base es de ${} pero "
-                        "el tope UMA es de ${}").format(sb, tope_uma)
-                    sb = tope_uma
-                df = df.append({
-                    'empresa': empresa_ant,
-                    'inicio': fecha_inicio_ant,
-                    'fin': fecha_fin_ant,
-                    'salario_base': sb,
-                    'salario_comentario': sb_commentario,
-                    'dias_cotizados': dc,
-                    'semanas_cotizadas': round(dc / 7),
-                    'suma_salario': sb * dc,
-                    }, ignore_index=True)
-                fecha_inicio = r_fecha
-                empresa = r_empresa
-                salario_base = r_salario_base
-            else:
-                fecha_inicio_ant = fecha_inicio
-                fecha_fin_ant = fecha_fin
-                empresa_ant = empresa
-                salario_base_ant = salario_base
-        if fecha_fin_ant and fecha_inicio_ant:
-            dc = (fecha_fin_ant - fecha_inicio_ant).days + 1
-            sb = salario_base_ant
-            sb_commentario = ''
-            if sb > tope_uma:
-                sb_commentario = (
-                    "El salario base es de ${} pero el "
-                    "tope UMA es de ${}").format(sb, tope_uma)
-                sb = tope_uma
-            df = df.append({
-                'empresa': empresa_ant,
-                'inicio': fecha_inicio_ant,
-                'fin': fecha_fin_ant,
-                'salario_base': sb,
-                'salario_comentario': sb_commentario,
-                'dias_cotizados': dc,
-                'semanas_cotizadas': round(dc / 7),
-                'suma_salario': sb * dc,
-                }, ignore_index=True)
-        df = df.sort_values(by=['inicio', 'fin', 'empresa'])
-        subt = df.agg(['sum', 'min', 'max'])
-        subtotal = {
-            'inicio': subt['inicio'][1],
-            'fin': subt['fin'][2],
-            'dias_cotizados': subt['dias_cotizados'][0],
-            'semanas_cotizadas': subt['semanas_cotizadas'][0],
-            'suma_salario': subt['suma_salario'][0],
-            }
-        subtotal['salario_promedio'] = subtotal['suma_salario'] \
-            / subtotal['dias_cotizados']
-        self.DataFramePeriod = {
-            'data': df,
-            'subtotal': subtotal,
-            }
-        return self.DataFramePeriod
+    @property
+    def fin(self):
+        res = self.hlrd_periodos_continuo_levelhl_hl.aggregate(
+            Max('fecha_fin'))['fecha_fin__max']
+        return res
 
-    def data_table_graph(self):
-        if self.DataFrameGraph:
-            return self.DataFrameGraph
-        dtp = self.data_table_period()
-        inicio = date(
-            dtp['subtotal']['inicio'].year,
-            dtp['subtotal']['inicio'].month,
-            dtp['subtotal']['inicio'].day)
-        fin = date(
-            dtp['subtotal']['fin'].year,
-            dtp['subtotal']['fin'].month,
-            dtp['subtotal']['fin'].day)
-        dias = (fin - inicio).days + 1
-        data = []
-        for reg in self.registros.all():
-            periodos = []
-            for det in reg.detalle.all():
-                pdias = (det.fin - det.inicio).days + 1
-                dias_from_start = (det.inicio - inicio).days
-                periodos.append({
-                    'inicio': det.inicio.strftime('%d/%m/%Y'),
-                    'fin': det.fin.strftime('%d/%m/%Y'),
-                    'salario_base': float(det.salario_base),
-                    'dias': pdias,
-                    'porc': float(pdias * 100 / dias),
-                    'porc_from_start': float(dias_from_start * 100 / dias)
-                    })
-            data.append({'empresa': "{}".format(reg), 'periodos': periodos})
-        self.DataFrameGraph = {
-            'data_table_period': dtp,
-            'data_table_graph': data,
-            'dias': dias}
-        return self.DataFrameGraph
+    def agg_salario(self, dias=None):
+        """
+        Calcula los elementos relacionados con el Salario Promedio Diario
+
+        Parameters
+        ----------
+        dias : integer, optional
+            Número de últimos días para realizar el cálculo del
+            Salario Promedio Diario, si su valor es None se tomará en
+            cuenta el valor establecido en el miembro dias_salario_promedio
+
+        Returns
+        -------
+        dict
+            diccionario con la estructura de datos relacionada con el
+            cálculo del Salario Promedio Diario:
+
+            {
+                'suma_salario': Decimal,
+                'salario_promedio': Decimal,
+                'fecha_minima': Date,
+                'fecha_maxima': Date,
+                'salario_df': pandas.DataFrame(
+                    columns=[
+                        'f_ini', 'f_fin', 'n', 'salario', 'suma_salario'
+                    ]),
+            }
+
+            for reg in salario_df.itertuples():
+                print(reg[1],reg[2],reg[3],reg[4],reg[5])
+        """
+        if dias is None:
+            dias = self.dias_salario_promedio
+        df = pd.DataFrame(self.hlrd_days_hl.values('fecha').annotate(
+            suma_salario=Sum('salario_base')).order_by('-fecha')[:dias])
+        ss = df.agg(['sum', 'min', 'max'])
+        salary_df = pd.DataFrame(
+            [(r[1], r[2], r[3], r[0], r[3] * r[0]) for r in df.groupby(
+                ['suma_salario']).agg(
+                    ['min', 'max', 'count']).itertuples()],
+            columns=['f_ini', 'f_fin', 'n', 'salario', 'suma_salario']
+            ).sort_values(['f_ini', 'f_fin'])
+        # >>> for reg in salary_df.itertuples():
+        # ...     print(reg[1],reg[2],reg[3],reg[4],reg[5])
+        return {
+            'suma_salario': ss['suma_salario']['sum'],
+            'salario_promedio': ss['suma_salario']['sum'] / dias,
+            'fecha_minima': ss['fecha']['min'],
+            'fecha_maxima': ss['fecha']['max'],
+            'salario_df': salary_df,
+        }
 
     class Meta:
         ordering = ["cliente", "-updated_at"]
@@ -818,12 +742,12 @@ class HistoriaLaboralRegistroDetalle(models.Model):
 
     def fill_days(self):
         self.hlrd_days_det.all().delete()
+        reg = self.historia_laboral_registro
         for dt in pd.date_range(self.inicio, self.fin):
             HLRDDay.objects.create(
                 historialaboralregistrodetalle=self,
-                historialaboralregistro=self.historia_laboral_registro,
-                historialaboral=\
-                    self.historia_laboral_registro.historia_laboral,
+                historialaboralregistro=reg,
+                historialaboral=reg.historia_laboral,
                 fecha=dt,
                 salario_base=self.salario_base)
 
@@ -937,6 +861,7 @@ class HLRDDay(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+
 class HLRD_periodo_continuo_laborado(models.Model):
     idhlrd_periodo_continuo_laborado = models.AutoField(primary_key=True)
     historialaboralregistro = models.ForeignKey(
@@ -954,6 +879,7 @@ class HLRD_periodo_continuo_laborado(models.Model):
             "fecha_inicio",
             "fecha_fin",
         ]
+
 
 class HLRD_periodo_continuo_laborado_levelhl(models.Model):
     idhlrd_periodo_continuo_laborado_levelhl = models.AutoField(
