@@ -3,9 +3,10 @@ from django.db.models import Max, Min, Sum
 from datetime import date, timedelta
 
 import pandas as pd
+import sys
 
 from initsys.models import Usr, Direccion
-from routines.utils import BootstrapColors
+from routines.utils import BootstrapColors, inter_periods_days, free_days
 
 # Create your models here.
 
@@ -623,24 +624,60 @@ class HistoriaLaboralRegistro(models.Model):
                 fecha_ant = reg.fecha
             if reg.fecha > fecha_ant + timedelta(days=1):
                 d = (fecha_ant - fecha_ini).days + 1
+                s = round(d / 7)
+                a = s / 52
                 HLRD_periodo_continuo_laborado.objects.create(
                     historialaboralregistro=self,
                     historialaboral=self.historia_laboral,
                     fecha_inicio=fecha_ini,
                     fecha_fin=fecha_ant,
                     dias=d,
-                    semanas=round(d / 7))
+                    semanas=s,
+                    anios=a)
                 fecha_ini = reg.fecha
             fecha_ant = reg.fecha
         d = (fecha_ant - fecha_ini).days + 1
+        s = round(d / 7)
+        a = s / 52
         HLRD_periodo_continuo_laborado.objects.create(
             historialaboralregistro=self,
             historialaboral=self.historia_laboral,
             fecha_inicio=fecha_ini,
             fecha_fin=fecha_ant,
             dias=d,
-            semanas=round(d / 7))
+            semanas=s,
+            anios=a)
         hl = self.historia_laboral
+        pers = list(hl.hlrd_periodos_continuo_hl.all())
+        for x in range(len(pers)):
+            dias_cotizados = pers[x].dias
+            dias_inactivos = sys.maxsize
+            if 0 == x:
+                dias_inactivos = 0
+            else:
+                for y in range(len(pers)):
+                    if y < x:
+                        dias_c = len(free_days(
+                            pers[y].fecha_inicio,
+                            pers[y].fecha_fin,
+                            pers[x].fecha_inicio,
+                            pers[x].fecha_fin))
+                        if dias_cotizados > dias_c:
+                            dias_cotizados = dias_c
+                        dias_i = inter_periods_days(
+                            pers[y].fecha_inicio,
+                            pers[y].fecha_fin,
+                            pers[x].fecha_inicio,
+                            pers[x].fecha_fin)
+                        if dias_inactivos > dias_i:
+                            dias_inactivos = dias_i
+            pers[x].dias_cotiz = dias_cotizados
+            pers[x].semanas_cotiz = round(dias_cotizados / 7)
+            pers[x].anios_cotiz = round(dias_cotizados / 7) / 52
+            pers[x].dias_inact = dias_inactivos
+            pers[x].semanas_inact = round(dias_inactivos / 7)
+            pers[x].anios_inact = round(dias_inactivos / 7) / 52
+            pers[x].save()
         hl.hlrd_periodos_continuo_levelhl_hl.all().delete()
         fecha_ini = None
         fecha_ant = None
@@ -873,6 +910,15 @@ class HLRD_periodo_continuo_laborado(models.Model):
     fecha_fin = models.DateField()
     dias = models.PositiveSmallIntegerField()
     semanas = models.PositiveIntegerField()
+    anios = models.DecimalField(max_digits=4,decimal_places=2)
+    dias_cotiz = models.PositiveSmallIntegerField(default=0)
+    semanas_cotiz = models.PositiveIntegerField(default=0)
+    anios_cotiz = models.DecimalField(
+        max_digits=4, decimal_places=2, default=0)
+    dias_inact = models.PositiveSmallIntegerField(default=0)
+    semanas_inact = models.PositiveIntegerField(default=0)
+    anios_inact = models.DecimalField(
+        max_digits=4, decimal_places=2, default=0)
 
     class Meta:
         ordering = [

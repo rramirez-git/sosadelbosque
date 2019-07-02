@@ -68,4 +68,7 @@ def ifNone(value, default=""):
 def division(num, div):
     if div == 0:
         return 0
-    return num / div
+    try:
+        return int("0{}".format(num)) / div
+    except ValueError:
+        return 0

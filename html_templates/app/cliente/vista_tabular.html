@@ -67,7 +67,7 @@
     </div>
 </div>
 
-<h5>Detalle de Cálculo de Saldo Promedio</h5>
+<h5>Detalle de Cálculo de Salario Promedio</h5>
 
 <div class="row">
     <div class="col-sm-8">
@@ -135,63 +135,80 @@
 
 <h5>Detalle de Cálculo de Semanas Cotizadas</h5>
 
-<h5>Detalle</h5>
-
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th rowspan="2">Empresa</th>
+            <th rowspan="2">Inicio del Periodo</th>
+            <th rowspan="2">Fin del Periodo</th>
+            <th colspan="3" style="border-left: rgb(194, 195, 196) solid 1px; border-right: rgb(194, 195, 196) solid 1px">Periodos Cotizados</th>
+            <th colspan="3">Periodos Inactivos</th>
+        </tr>
+        <tr>
+            <th style="border-left: rgb(194, 195, 196) solid 1px;">Días</th>
+            <th>Semanas</th>
+            <th style="border-right: rgb(194, 195, 196) solid 1px;">Años</th>
+            <th>Días</th>
+            <th>Semanas</th>
+            <th>Años</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reg in peridodos_laborados %}
+        <tr>
+            <td>{{ reg.historialaboralregistro }}</td>
+            <td class="text-center">{{ reg.fecha_inicio|date:'d/M/Y' }}</td>
+            <td class="text-center">{{ reg.fecha_fin|date:'d/M/Y' }}</td>
+            <td class="text-right" style="border-left: rgb(194, 195, 196) solid 1px;">{{ reg.dias_cotiz }}</td>
+            <td class="text-right">{{ reg.semanas_cotiz }}</td>
+            <td class="text-right" style="border-right: rgb(194, 195, 196) solid 1px;">{{ reg.anios_cotiz }}</td>
+            <td class="text-right">{{ reg.dias_inact }}</td>
+            <td class="text-right">{{ reg.semanas_inact }}</td>
+            <td class="text-right">{{ reg.anios_inact }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>&nbsp;</p>
 <div class="row">
-    <div class="col-sm-8">
+    <div class="col-sm-8 offset-sm-2">
         <table class="table table-striped table-sm table-responsive-md">
             <thead>
                 <tr>
-                    <th rowspan="2">Empresa</th>
-                    <th rowspan="2">Inicio del Periodo</th>
-                    <th rowspan="2">Fin del Periodo</th>
-                    <th colspan="3">Periodos Cotizados</th>
-                </tr>
-                <tr>
+                    <th></th>
                     <th>Días</th>
                     <th>Semanas</th>
                     <th>Años</th>
                 </tr>
             </thead>
             <tbody>
-                {% for reg in historia.hlrd_periodos_continuo_hl.all %}
                 <tr>
-                    <td>{{ reg.historialaboralregistro }}</td>
-                    <td class="text-center">{{ reg.fecha_inicio|date:'d/M/Y' }}</td>
-                    <td class="text-center">{{ reg.fecha_fin|date:'d/M/Y' }}</td>
-                    <td class="text-right">{{ reg.dias }}</td>
-                    <td class="text-right">{{ reg.semanas }}</td>
-                    <td class="text-right">{{ reg.semanas|division:52|money2display }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="col-sm-4">
-        <p class="lead">Resumen</p>
-        <table class="table table-striped table-sm table-responsibe-md">
-            <tbody>
-                <tr>
-                    <th>Fecha Inicial</th>
-                    <td class="text-right"></td>
+                    <td class="text-right">Semanas transcurridas desde el alta de número social a la fecha</td>
+                    <td class="text-right">+{{ aggr_per_lab.dias_transc }}</td>
+                    <td class="text-right">+{{ aggr_per_lab.sem_transc }}</td>
+                    <td class="text-right">+{{ aggr_per_lab.anios_transc|money2display }}</td>
                 </tr>
                 <tr>
-                    <th>Fecha Final</th>
-                    <td class="text-right"></td>
+                    <td class="text-right">Semanas reconocidas por el IMSS</td>
+                    <td class="text-right">-{{ aggr_per_lab.dias_rec }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.sem_rec }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.anios_rec|money2display }}</td>
                 </tr>
                 <tr>
-                    <th>Días Cotizados</th>
-                    <td class="text-right" data-toggle="tooltip" title="Dato calculado tomando en consideración periodos traslapados"></td>
-                </tr>
-                <tr>
-                    <th>Semanas Cotizadas</th>
-                    <td class="text-right" data-toggle="tooltip" title="Dato calculado tomando en consideración periodos traslapados"></td>
-                </tr>
-                <tr>
-                    <th>Años Cotizados</th>
-                    <td class="text-right" data-toggle="tooltip" title="Dato calculado tomando en consideración periodos traslapados"></td>
+                    <td class="text-right">Periodos inactivos</td>
+                    <td class="text-right">-{{ aggr_per_lab.dias_inac }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.sem_inac }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.anios_inac|money2display }}</td>
                 </tr>
             </tbody>
+            <tfoot>
+                <tr>
+                    <th class="text-right">Diferencia</th>
+                    <th class="text-right">{{ aggr_per_lab.dias_dif }}</th>
+                    <th class="text-right">{{ aggr_per_lab.sem_dif }}</th>
+                    <th class="text-right">{{ aggr_per_lab.anios_dif|money2display }}</th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

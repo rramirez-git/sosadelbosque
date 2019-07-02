@@ -29,4 +29,9 @@ urlpatterns = [
           name="{}_vista_tabular".format(object_name)),
      path('vista_grafica/<pk>/', views.historia_laboral_vista_grafica,
           name="{}_vista_grafica".format(object_name)),
+     path('actualiza/detalle/salario/complete/',
+          views.update_all_salarios_complete,
+          name="{}_update_dalarios_complete"),
+     path('actualiza/detalle/salario/', views.update_all_salarios,
+          name="{}_update_dalarios"),
 ]

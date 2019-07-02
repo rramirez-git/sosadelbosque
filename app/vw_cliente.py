@@ -1,11 +1,15 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import Group
 from django.db.models import ProtectedError, Max, Min, Sum
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from decimal import Decimal
+import pandas as pd
 import json
+import os
+import sys
 
 from routines.mkitsafe import valida_acceso
 
@@ -18,7 +22,9 @@ from .forms import (
     frmClienteObservaciones)
 from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
-from routines.utils import requires_jquery_ui, move_uploaded_file
+from routines.utils import (
+    requires_jquery_ui, move_uploaded_file,
+    inter_periods_days, free_days)
 
 
 def add_nota(cte, nota, fecha_notificacion, usr):
@@ -648,12 +654,32 @@ def historia_laboral_vista_tabular(request, pk):
         'label': '<i class="fas fa-file-medical-alt"></i>'
         ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
+    peridodos_laborados = historia_laboral.hlrd_periodos_continuo_hl.all()
+    f_max = peridodos_laborados.aggregate(Max('fecha_fin'))['fecha_fin__max']
+    f_min = peridodos_laborados.aggregate(Min('fecha_inicio'))['fecha_inicio__min']
+    aggr_per_lab = {
+        'dias_transc': (f_max- f_min).days,
+        'dias_rec': peridodos_laborados.aggregate(Sum('dias_cotiz'))['dias_cotiz__sum'],
+        'sem_rec': peridodos_laborados.aggregate(Sum('semanas_cotiz'))['semanas_cotiz__sum'],
+        'anios_rec': peridodos_laborados.aggregate(Sum('anios_cotiz'))['anios_cotiz__sum'],
+        'dias_inac': peridodos_laborados.aggregate(Sum('dias_inact'))['dias_inact__sum'],
+        'sem_inac': peridodos_laborados.aggregate(Sum('semanas_inact'))['semanas_inact__sum'],
+        'anios_inac': peridodos_laborados.aggregate(Sum('anios_inact'))['anios_inact__sum'],
+    }
+    aggr_per_lab['sem_transc'] = int(round(
+        aggr_per_lab['dias_transc'] / 7))
+    aggr_per_lab['anios_transc'] = Decimal(aggr_per_lab['sem_transc'] / 52)
+    aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc'] - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
+    aggr_per_lab['sem_dif'] = aggr_per_lab['sem_transc'] - aggr_per_lab['sem_rec'] - aggr_per_lab['sem_inac']
+    aggr_per_lab['anios_dif'] = aggr_per_lab['anios_transc'] - aggr_per_lab['anios_rec'] - aggr_per_lab['anios_inac']
     return render(request, 'app/cliente/vista_tabular.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Detalle Laboral',
         'titulo_descripcion': historia_laboral.cliente,
         'toolbar': toolbar,
         'historia': historia_laboral,
+        'aggr_per_lab': aggr_per_lab,
+        'peridodos_laborados': historia_laboral.hlrd_periodos_continuo_hl.all(),
     })
 
 
@@ -713,3 +739,80 @@ def delete_documento(request, pk):
             'cliente_see', kwargs={'pk': pk_cliente}))
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+def update_all_salarios(request):
+    today = datetime.now()
+    file_dir = os.path.join(
+        settings.MEDIA_ROOT,
+        'autoupdates')
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%Y")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%m")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_path = os.path.join(
+        file_dir,
+        "updates_{}.txt".format(today.strftime("%Y_%m_%d_%H_%M")))
+    file = open(file_path, "a", encoding="utf8")
+    regs = HistoriaLaboralRegistro.objects.filter(vigente=True)
+    file.write("\n\n\nActualizacion de registros de salarios\n")
+    file.write(datetime.now().strftime("%Y-%m-%d at %H:%M"))
+    file.write("\n{} records to update found\n".format(regs.count()))
+    for reg in regs:
+        file.write("\n{}\t{:70}\t{:70}".format(
+            datetime.now().strftime("%Y-%m-%d at %H:%M"),
+            reg.__str__(),
+            reg.historia_laboral.cliente.__str__()))
+        file.flush()
+        fecha_final = reg.hlrd_days_reg.all().aggregate(
+            Max('fecha'))['fecha__max']
+        if fecha_final == reg.fin:
+            file.write("Skipped")
+        else:
+            reg.setDates()
+            file.write("Updated")
+    file.close()
+    return render(request, "global/html.html", {})
+
+
+def update_all_salarios_complete(request):
+    today = datetime.now()
+    file_dir = os.path.join(
+        settings.MEDIA_ROOT,
+        'autoupdates_complete')
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%Y")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%m")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_path = os.path.join(
+        file_dir,
+        "updates_{}.txt".format(today.strftime("%Y_%m_%d_%H_%M")))
+    file = open(file_path, "a", encoding="utf8")
+    regs = HistoriaLaboralRegistro.objects.all()
+    file.write("\n\n\nActualizacion de registros de salarios\n")
+    file.write(datetime.now().strftime("%Y-%m-%d at %H:%M"))
+    file.write("\n{} records to update found\n".format(regs.count()))
+    for reg in regs:
+        file.write("\n{}\t{:70}\t{:70}".format(
+            datetime.now().strftime("%Y-%m-%d at %H:%M"),
+            reg.__str__(),
+            reg.historia_laboral.cliente.__str__()))
+        file.flush()
+        reg.setDates()
+    file.close()
+    return render(request, "global/html.html", {})
