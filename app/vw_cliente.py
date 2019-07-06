@@ -813,6 +813,12 @@ def update_all_salarios_complete(request):
             reg.__str__(),
             reg.historia_laboral.cliente.__str__()))
         file.flush()
-        reg.setDates()
+        fecha_final = reg.hlrd_days_reg.all().aggregate(
+            Max('fecha'))['fecha__max']
+        if fecha_final == reg.fin:
+            file.write("Skipped")
+        else:
+            reg.setDates()
+            file.write("Updated")
     file.close()
     return render(request, "global/html.html", {})

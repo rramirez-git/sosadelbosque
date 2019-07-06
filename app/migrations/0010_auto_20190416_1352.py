@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctogral',
             name='tipo_de_documento',
-            field=models.ForeignKey(default=0, on_delete=django.db.models.deletion.PROTECT, related_name='documentos', to='app.TipoDocumento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='documentos', to='app.TipoDocumento'),
             preserve_default=False,
         ),
     ]
