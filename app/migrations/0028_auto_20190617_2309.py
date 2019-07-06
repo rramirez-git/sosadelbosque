@@ -19,7 +19,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historialaboral',
             name='uma',
-            # field=models.ForeignKey(default=app.models.getmaxUMA, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='app.UMA'),
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='app.UMA'),
+            field=models.ForeignKey(default=app.models.getmaxUMA, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='app.UMA'),
         ),
     ]
