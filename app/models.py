@@ -7,6 +7,15 @@ import sys
 
 from initsys.models import Usr, Direccion
 from routines.utils import BootstrapColors, inter_periods_days, free_days
+from app.data_utils import (
+    df_data_generate_HLRDDay, df_load_HLRDDay, df_load_HLRDDay_agg,
+    df_save_HLRDDay,
+    df_update,
+    df_load_HLRD_periodo_continuo_laborado,
+    df_generate_HLRD_periodo_continuo_laborado,
+    df_generate_data_cotiz_HLRD_periodo_continuo_laborado,
+    df_save_HLRD_periodo_continuo_laborado
+)
 
 # Create your models here.
 
@@ -430,30 +439,30 @@ class HistoriaLaboral(models.Model):
 
     @property
     def dias_cotizados(self):
-        res = self.hlrd_periodos_continuo_levelhl_hl.aggregate(
-            Sum('dias'))['dias__sum']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['sum'])['dias_cotiz']['sum']
         if res is None:
             return 0
         return res
 
     @property
     def semanas_cotizadas(self):
-        res = self.hlrd_periodos_continuo_levelhl_hl.aggregate(
-            Sum('semanas'))['semanas__sum']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['sum'])['semanas_cotiz']['sum']
         if res is None:
             return 0
         return res
 
     @property
     def inicio(self):
-        res = self.hlrd_periodos_continuo_levelhl_hl.aggregate(
-            Min('fecha_inicio'))['fecha_inicio__min']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['min'])['fecha_inicio']['min']
         return res
 
     @property
     def fin(self):
-        res = self.hlrd_periodos_continuo_levelhl_hl.aggregate(
-            Max('fecha_fin'))['fecha_fin__max']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['max'])['fecha_fin']['max']
         return res
 
     def agg_salario(self, dias=None):
@@ -480,7 +489,7 @@ class HistoriaLaboral(models.Model):
                 'fecha_maxima': Date,
                 'salario_df': pandas.DataFrame(
                     columns=[
-                        'f_ini', 'f_fin', 'n', 'salario', 'suma_salario'
+                        'f_ini', 'f_fin', 'n', 'salario', 'salario_topado', 'suma_salario'
                     ]),
             }
 
@@ -489,20 +498,52 @@ class HistoriaLaboral(models.Model):
         """
         if dias is None:
             dias = self.dias_salario_promedio
-        df = pd.DataFrame(self.hlrd_days_hl.values('fecha').annotate(
-            suma_salario=Sum('salario_base')).order_by('-fecha')[:dias])
+        df = df_load_HLRDDay_agg(self.cliente.pk).head(dias)
+        tope_uma = 25 * self.uma.valor
+        df['salario_topado'] = df.salario
+        df.loc[df.salario > tope_uma, 'salario_topado' ] = tope_uma
         ss = df.agg(['sum', 'min', 'max'])
-        salary_df = pd.DataFrame(
-            [(r[1], r[2], r[3], r[0], r[3] * r[0]) for r in df.groupby(
-                ['suma_salario']).agg(
-                    ['min', 'max', 'count']).itertuples()],
-            columns=['f_ini', 'f_fin', 'n', 'salario', 'suma_salario']
-            ).sort_values(['f_ini', 'f_fin'])
-        # >>> for reg in salary_df.itertuples():
-        # ...     print(reg[1],reg[2],reg[3],reg[4],reg[5])
+        periodos = []
+        inicio = None
+        fin = None
+        salario = None
+        salario_topado = None
+        for reg in df.sort_index(ascending=False).itertuples():
+            if inicio is None:
+                inicio = reg[1]
+            if fin is None:
+                fin = reg[1]
+            if salario is None:
+                salario = reg[2]
+            if salario_topado is None:
+                salario_topado = reg[3]
+            if (reg[1] - fin).days > 1 or salario != reg[2]:
+                dias = (fin - inicio).days + 1
+                periodos.append({
+                    'f_ini': inicio,
+                    'f_fin': fin,
+                    'n': dias,
+                    'salario': salario,
+                    'salario_topado': salario_topado,
+                    'suma_salario': dias * salario_topado})
+                inicio = reg[1]
+                salario = reg[2]
+                salario_topado = reg[3]
+            fin = reg[1]
+        dias = (fin - inicio).days + 1
+        periodos.append({
+            'f_ini': inicio,
+            'f_fin': fin,
+            'n': dias,
+            'salario': salario,
+            'salario_topado': salario_topado,
+            'suma_salario': dias * salario_topado})
+        salary_df = pd.DataFrame(periodos, columns=[
+            'f_ini','f_fin','n','salario','salario_topado','suma_salario'
+            ]).sort_values(['f_ini','f_fin'], ascending=[False,False])
         return {
-            'suma_salario': ss['suma_salario']['sum'],
-            'salario_promedio': ss['suma_salario']['sum'] / dias,
+            'suma_salario': ss['salario_topado']['sum'],
+            'salario_promedio': ss['salario_topado']['sum'] / dias,
             'fecha_minima': ss['fecha']['min'],
             'fecha_maxima': ss['fecha']['max'],
             'salario_df': salary_df,
@@ -546,16 +587,18 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def dias_cotizados(self):
-        res = self.hlrd_periodos_continuo_reg.aggregate(
-            Sum('dias'))['dias__sum']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers = df_pers[df_pers.historialaboralregistro_pk == self.pk]
+        res = df_pers.agg(['sum'])['dias_cotiz']['sum']
         if res is None:
             return 0
         return res
 
     @property
     def semanas_cotizadas(self):
-        res = self.hlrd_periodos_continuo_reg.aggregate(
-            Sum('semanas'))['semanas__sum']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers = df_pers[df_pers.historialaboralregistro_pk == self.pk]
+        res = df_pers.agg(['sum'])['semanas_cotiz']['sum']
         if res is None:
             return 0
         return res
@@ -582,20 +625,26 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def inicio(self):
-        return date(
-            self.fecha_de_alta.year,
-            self.fecha_de_alta.month,
-            self.fecha_de_alta.day)
+        try:
+            return date(
+                self.fecha_de_alta.year,
+                self.fecha_de_alta.month,
+                self.fecha_de_alta.day)
+        except AttributeError:
+            return date.today()
 
     @property
     def fin(self):
         if self.vigente:
             return date.today()
         else:
-            return date(
-                self.fecha_de_baja.year,
-                self.fecha_de_baja.month,
-                self.fecha_de_baja.day)
+            try:
+                return date(
+                    self.fecha_de_baja.year,
+                    self.fecha_de_baja.month,
+                    self.fecha_de_baja.day)
+            except AttributeError:
+                return date.today()
 
     def setDates(self):
         vigente = False
@@ -614,95 +663,12 @@ class HistoriaLaboralRegistro(models.Model):
         self.createPeriodos()
 
     def createPeriodos(self):
-        self.hlrd_periodos_continuo_reg.all().delete()
-        fecha_ini = None
-        fecha_ant = None
-        for reg in list(self.hlrd_days_reg.all()):
-            if fecha_ini is None:
-                fecha_ini = reg.fecha
-            if fecha_ant is None:
-                fecha_ant = reg.fecha
-            if reg.fecha > fecha_ant + timedelta(days=1):
-                d = (fecha_ant - fecha_ini).days + 1
-                s = round(d / 7)
-                a = s / 52
-                HLRD_periodo_continuo_laborado.objects.create(
-                    historialaboralregistro=self,
-                    historialaboral=self.historia_laboral,
-                    fecha_inicio=fecha_ini,
-                    fecha_fin=fecha_ant,
-                    dias=d,
-                    semanas=s,
-                    anios=a)
-                fecha_ini = reg.fecha
-            fecha_ant = reg.fecha
-        d = (fecha_ant - fecha_ini).days + 1
-        s = round(d / 7)
-        a = s / 52
-        HLRD_periodo_continuo_laborado.objects.create(
-            historialaboralregistro=self,
-            historialaboral=self.historia_laboral,
-            fecha_inicio=fecha_ini,
-            fecha_fin=fecha_ant,
-            dias=d,
-            semanas=s,
-            anios=a)
-        hl = self.historia_laboral
-        pers = list(hl.hlrd_periodos_continuo_hl.all())
-        for x in range(len(pers)):
-            dias_cotizados = pers[x].dias
-            dias_inactivos = sys.maxsize
-            if 0 == x:
-                dias_inactivos = 0
-            else:
-                for y in range(len(pers)):
-                    if y < x:
-                        dias_c = len(free_days(
-                            pers[y].fecha_inicio,
-                            pers[y].fecha_fin,
-                            pers[x].fecha_inicio,
-                            pers[x].fecha_fin))
-                        if dias_cotizados > dias_c:
-                            dias_cotizados = dias_c
-                        dias_i = inter_periods_days(
-                            pers[y].fecha_inicio,
-                            pers[y].fecha_fin,
-                            pers[x].fecha_inicio,
-                            pers[x].fecha_fin)
-                        if dias_inactivos > dias_i:
-                            dias_inactivos = dias_i
-            pers[x].dias_cotiz = dias_cotizados
-            pers[x].semanas_cotiz = round(dias_cotizados / 7)
-            pers[x].anios_cotiz = round(dias_cotizados / 7) / 52
-            pers[x].dias_inact = dias_inactivos
-            pers[x].semanas_inact = round(dias_inactivos / 7)
-            pers[x].anios_inact = round(dias_inactivos / 7) / 52
-            pers[x].save()
-        hl.hlrd_periodos_continuo_levelhl_hl.all().delete()
-        fecha_ini = None
-        fecha_ant = None
-        for reg in list(hl.hlrd_days_hl.all()):
-            if fecha_ini is None:
-                fecha_ini = reg.fecha
-            if fecha_ant is None:
-                fecha_ant = reg.fecha
-            if reg.fecha > fecha_ant + timedelta(days=1):
-                d = (fecha_ant - fecha_ini).days + 1
-                HLRD_periodo_continuo_laborado_levelhl.objects.create(
-                    historialaboral=hl,
-                    fecha_inicio=fecha_ini,
-                    fecha_fin=fecha_ant,
-                    dias=d,
-                    semanas=round(d / 7))
-                fecha_ini = reg.fecha
-            fecha_ant = reg.fecha
-        d = (fecha_ant - fecha_ini).days + 1
-        HLRD_periodo_continuo_laborado_levelhl.objects.create(
-            historialaboral=hl,
-            fecha_inicio=fecha_ini,
-            fecha_fin=fecha_ant,
-            dias=d,
-            semanas=round(d / 7))
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers_new = df_generate_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, self)
+        df_pers = df_update(df_pers, df_pers_new, reg = self.pk)
+        df_save_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, df_pers)
+        df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_save_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, df_pers)
 
     class Meta:
         ordering = ["historia_laboral", "-fecha_de_alta", "-fecha_de_baja"]
@@ -778,15 +744,10 @@ class HistoriaLaboralRegistroDetalle(models.Model):
         return round(self.semanas_cotizadas / 52, 2)
 
     def fill_days(self):
-        self.hlrd_days_det.all().delete()
         reg = self.historia_laboral_registro
-        for dt in pd.date_range(self.inicio, self.fin):
-            HLRDDay.objects.create(
-                historialaboralregistrodetalle=self,
-                historialaboralregistro=reg,
-                historialaboral=reg.historia_laboral,
-                fecha=dt,
-                salario_base=self.salario_base)
+        df_day = df_load_HLRDDay(reg.historia_laboral.cliente.pk)
+        df_day = df_update(df_day, df_data_generate_HLRDDay(self), det=self.pk)
+        df_save_HLRDDay(reg.historia_laboral.cliente.pk, df_day)
 
     class Meta:
         ordering = [
@@ -874,71 +835,3 @@ class Factoredad(models.Model):
     def __unicode__(self):
         return self.__str__()
 
-
-class HLRDDay(models.Model):
-    idhlrdday = models.AutoField(primary_key=True)
-    historialaboralregistrodetalle = models.ForeignKey(
-        HistoriaLaboralRegistroDetalle, models.CASCADE, 'hlrd_days_det')
-    historialaboralregistro = models.ForeignKey(
-        HistoriaLaboralRegistro, models.CASCADE, 'hlrd_days_reg')
-    historialaboral = models.ForeignKey(
-        HistoriaLaboral, models.CASCADE, 'hlrd_days_hl')
-    fecha = models.DateField()
-    salario_base = models.DecimalField(
-        max_digits=7, decimal_places=2, default=0.0)
-
-    class Meta:
-        ordering = [
-            "fecha",
-        ]
-
-    def __str__(self):
-        return "{}: {}".format(self.fecha, self.salario_base)
-
-    def __unicode__(self):
-        return self.__str__()
-
-
-class HLRD_periodo_continuo_laborado(models.Model):
-    idhlrd_periodo_continuo_laborado = models.AutoField(primary_key=True)
-    historialaboralregistro = models.ForeignKey(
-        HistoriaLaboralRegistro, models.CASCADE,
-        'hlrd_periodos_continuo_reg')
-    historialaboral = models.ForeignKey(
-        HistoriaLaboral, models.CASCADE, 'hlrd_periodos_continuo_hl')
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    dias = models.PositiveSmallIntegerField()
-    semanas = models.PositiveIntegerField()
-    anios = models.DecimalField(max_digits=4,decimal_places=2)
-    dias_cotiz = models.PositiveSmallIntegerField(default=0)
-    semanas_cotiz = models.PositiveIntegerField(default=0)
-    anios_cotiz = models.DecimalField(
-        max_digits=4, decimal_places=2, default=0)
-    dias_inact = models.PositiveSmallIntegerField(default=0)
-    semanas_inact = models.PositiveIntegerField(default=0)
-    anios_inact = models.DecimalField(
-        max_digits=4, decimal_places=2, default=0)
-
-    class Meta:
-        ordering = [
-            "fecha_inicio",
-            "fecha_fin",
-        ]
-
-
-class HLRD_periodo_continuo_laborado_levelhl(models.Model):
-    idhlrd_periodo_continuo_laborado_levelhl = models.AutoField(
-        primary_key=True)
-    historialaboral = models.ForeignKey(
-        HistoriaLaboral, models.CASCADE, 'hlrd_periodos_continuo_levelhl_hl')
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    dias = models.PositiveSmallIntegerField()
-    semanas = models.PositiveIntegerField()
-
-    class Meta:
-        ordering = [
-            "fecha_inicio",
-            "fecha_fin",
-        ]

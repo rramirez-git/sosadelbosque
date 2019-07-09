@@ -87,7 +87,7 @@
                     <td>{{ reg.f_ini|date:'d/M/Y' }}</td>
                     <td>{{ reg.f_fin|date:'d/M/Y' }}</td>
                     <td class="text-right">{{ reg.n }}</td>
-                    <td class="text-right">$ {{ reg.salario|money2display }}</td>
+                    <td class="text-right">$ {{ reg.salario_topado|money2display }}</td>
                     <td class="text-right">$ {{ reg.suma_salario|money2display }}</td>
                 </tr>
                 {% endfor %}
@@ -154,17 +154,17 @@
         </tr>
     </thead>
     <tbody>
-        {% for reg in peridodos_laborados %}
+        {% for reg in peridodos_laborados.itertuples %}
         <tr>
             <td>{{ reg.historialaboralregistro }}</td>
             <td class="text-center">{{ reg.fecha_inicio|date:'d/M/Y' }}</td>
             <td class="text-center">{{ reg.fecha_fin|date:'d/M/Y' }}</td>
             <td class="text-right" style="border-left: rgb(194, 195, 196) solid 1px;">{{ reg.dias_cotiz }}</td>
             <td class="text-right">{{ reg.semanas_cotiz }}</td>
-            <td class="text-right" style="border-right: rgb(194, 195, 196) solid 1px;">{{ reg.anios_cotiz }}</td>
+            <td class="text-right" style="border-right: rgb(194, 195, 196) solid 1px;">{{ reg.anios_cotiz|money2display }}</td>
             <td class="text-right">{{ reg.dias_inact }}</td>
             <td class="text-right">{{ reg.semanas_inact }}</td>
-            <td class="text-right">{{ reg.anios_inact }}</td>
+            <td class="text-right">{{ reg.anios_inact|money2display }}</td>
         </tr>
         {% endfor %}
     </tbody>

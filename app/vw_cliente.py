@@ -25,6 +25,8 @@ from initsys.models import Usr, Nota, Alerta, usr_upload_to
 from routines.utils import (
     requires_jquery_ui, move_uploaded_file,
     inter_periods_days, free_days)
+from app.data_utils import (
+    df_load_HLRD_periodo_continuo_laborado, df_load_HLRDDay)
 
 
 def add_nota(cte, nota, fecha_notificacion, usr):
@@ -654,24 +656,31 @@ def historia_laboral_vista_tabular(request, pk):
         'label': '<i class="fas fa-file-medical-alt"></i>'
         ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
-    peridodos_laborados = historia_laboral.hlrd_periodos_continuo_hl.all()
-    f_max = peridodos_laborados.aggregate(Max('fecha_fin'))['fecha_fin__max']
-    f_min = peridodos_laborados.aggregate(Min('fecha_inicio'))['fecha_inicio__min']
+    df_pers = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
+    df_pers[
+        'historialaboralregistro'
+        ] = df_pers.historialaboralregistro_pk.apply(
+            lambda x: HistoriaLaboralRegistro.objects.get(pk=x).__str__()
+            )
+    df_pers_agg = df_pers.agg(['min', 'max', 'sum'])
+    f_max = df_pers_agg.fecha_fin['max']
+    f_min = df_pers_agg.fecha_inicio['min']
+    dias_t = (f_max- f_min).days
     aggr_per_lab = {
-        'dias_transc': (f_max- f_min).days,
-        'dias_rec': peridodos_laborados.aggregate(Sum('dias_cotiz'))['dias_cotiz__sum'],
-        'sem_rec': peridodos_laborados.aggregate(Sum('semanas_cotiz'))['semanas_cotiz__sum'],
-        'anios_rec': peridodos_laborados.aggregate(Sum('anios_cotiz'))['anios_cotiz__sum'],
-        'dias_inac': peridodos_laborados.aggregate(Sum('dias_inact'))['dias_inact__sum'],
-        'sem_inac': peridodos_laborados.aggregate(Sum('semanas_inact'))['semanas_inact__sum'],
-        'anios_inac': peridodos_laborados.aggregate(Sum('anios_inact'))['anios_inact__sum'],
+        'dias_transc': dias_t,
+        'dias_rec': df_pers_agg.dias_cotiz['sum'],
+        'sem_rec': df_pers_agg.semanas_cotiz['sum'],
+        'anios_rec': df_pers_agg.anios_cotiz['sum'],
+        'dias_inac': df_pers_agg.dias_inact['sum'],
+        'sem_inac': df_pers_agg.semanas_inact['sum'],
+        'anios_inac': df_pers_agg.anios_inact['sum'],
+        'sem_transc': round(dias_t / 7),
+        'anios_transc': round(dias_t / 7) / 52,
     }
-    aggr_per_lab['sem_transc'] = int(round(
-        aggr_per_lab['dias_transc'] / 7))
-    aggr_per_lab['anios_transc'] = Decimal(aggr_per_lab['sem_transc'] / 52)
     aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc'] - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
     aggr_per_lab['sem_dif'] = aggr_per_lab['sem_transc'] - aggr_per_lab['sem_rec'] - aggr_per_lab['sem_inac']
     aggr_per_lab['anios_dif'] = aggr_per_lab['anios_transc'] - aggr_per_lab['anios_rec'] - aggr_per_lab['anios_inac']
+
     return render(request, 'app/cliente/vista_tabular.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Detalle Laboral',
@@ -679,7 +688,7 @@ def historia_laboral_vista_tabular(request, pk):
         'toolbar': toolbar,
         'historia': historia_laboral,
         'aggr_per_lab': aggr_per_lab,
-        'peridodos_laborados': historia_laboral.hlrd_periodos_continuo_hl.all(),
+        'peridodos_laborados': df_pers,
     })
 
 
@@ -703,16 +712,19 @@ def historia_laboral_vista_grafica(request, pk):
         'pk': historia_laboral.cliente.pk})
     periodos = []
     dtotal = (historia_laboral.fin - historia_laboral.inicio).days
+    df_periodos = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
+    df_periodos.sort_index(ascending=False,inplace=True)
+    print(df_periodos)
     for reg in historia_laboral.registros.all():
         r = {'empresa': '{}'.format(reg), 'periodos': []}
-        for per in reg.hlrd_periodos_continuo_reg.all().order_by(
-                '-fecha_inicio'):
-            d = (per.fecha_inicio - historia_laboral.inicio).days
+        df_pers = df_periodos[df_periodos.historialaboralregistro_pk == reg.pk]
+        for p in df_pers.itertuples():
+            d = (p[3] - historia_laboral.inicio).days
             r['periodos'].append({
-                'dias': per.dias,
-                'fin': per.fecha_fin.strftime('%d/%m/%Y'),
-                'inicio': per.fecha_inicio.strftime('%d/%m/%Y'),
-                'porc': per.dias * 100 / historia_laboral.dias_cotizados,
+                'dias': p[5],
+                'fin': p[4].strftime('%d/%m/%Y'),
+                'inicio': p[3].strftime('%d/%m/%Y'),
+                'porc': p[5] * 100 / historia_laboral.dias_cotizados,
                 'porc_from_start': d * 100 / dtotal,
             })
         periodos.append(r)
@@ -740,6 +752,7 @@ def delete_documento(request, pk):
     except ProtectedError:
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
+
 def update_all_salarios(request):
     today = datetime.now()
     file_dir = os.path.join(
@@ -766,13 +779,18 @@ def update_all_salarios(request):
     file.write(datetime.now().strftime("%Y-%m-%d at %H:%M"))
     file.write("\n{} records to update found\n".format(regs.count()))
     for reg in regs:
+        df = df_load_HLRDDay(reg.historia_laboral.cliente.pk)
+        df = df[df.historialaboralregistro_pk == reg.pk]
+        d = df.agg('max').fecha
+        try:
+            fecha_final = date(d.year, d.month, d.day)
+        except AttributeError:
+            fecha_final = None
         file.write("\n{}\t{:70}\t{:70}".format(
             datetime.now().strftime("%Y-%m-%d at %H:%M"),
             reg.__str__(),
             reg.historia_laboral.cliente.__str__()))
         file.flush()
-        fecha_final = reg.hlrd_days_reg.all().aggregate(
-            Max('fecha'))['fecha__max']
         if fecha_final == reg.fin:
             file.write("Skipped")
         else:
@@ -808,13 +826,18 @@ def update_all_salarios_complete(request):
     file.write(datetime.now().strftime("%Y-%m-%d at %H:%M"))
     file.write("\n{} records to update found\n".format(regs.count()))
     for reg in regs:
+        df = df_load_HLRDDay(reg.historia_laboral.cliente.pk)
+        df = df[df.historialaboralregistro_pk == reg.pk]
+        d = df.agg('max').fecha
+        try:
+            fecha_final = date(d.year, d.month, d.day)
+        except AttributeError:
+            fecha_final = None
         file.write("\n{}\t{:70}\t{:70}".format(
             datetime.now().strftime("%Y-%m-%d at %H:%M"),
             reg.__str__(),
             reg.historia_laboral.cliente.__str__()))
         file.flush()
-        fecha_final = reg.hlrd_days_reg.all().aggregate(
-            Max('fecha'))['fecha__max']
         if fecha_final == reg.fin:
             file.write("Skipped")
         else:
