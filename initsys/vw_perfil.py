@@ -8,6 +8,7 @@ from .models import Usr, Permiso
 from .vw_permiso import PermisoTableStruct
 from routines.mkitsafe import valida_acceso
 from routines.utils import hipernormalize
+import json
 
 
 @valida_acceso(['group.perfiles_grupo', 'group.perfiles_group'])
@@ -46,15 +47,23 @@ def index(request):
     'group.agregar_perfiles_grupo', 'group.agregar_perfiles_group'])
 def new(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
+    alerta = []
     if 'POST' == request.method:
-        obj = Group.objects.create(name=request.POST.get('nombre'))
-        obj.save()
-        for p in request.POST.getlist('permisos'):
-            perm = Permiso.objects.get(pk=p)
-            obj.permissions.add(perm)
-        obj.save()
-        return HttpResponseRedirect(reverse(
-            'perfil_see', kwargs={'pk': obj.pk}))
+        if not Group.objects.filter(
+                name=request.POST.get('nombre')).exists():
+            obj = Group.objects.create(name=request.POST.get('nombre'))
+            obj.save()
+            for p in request.POST.getlist('permisos'):
+                perm = Permiso.objects.get(pk=p)
+                obj.permissions.add(perm)
+            obj.save()
+            return HttpResponseRedirect(reverse(
+                'perfil_see', kwargs={'pk': obj.pk}))
+        else:
+            alerta.append(
+                'Ya existe un perfil con ese nombre, '
+                'por favor indique uno nuevo'
+            )
     root_perms = Permiso.objects.filter(
         permiso_padre__isnull=True).order_by('posicion')
     permisos = []
@@ -68,7 +77,8 @@ def new(request):
             'menu_main': usuario.main_menu_struct(),
             'titulo': 'Perfiles',
             'titulo_descripcion': 'Nuevo',
-            'permisos': permisos
+            'permisos': permisos,
+            'alertas': json.dumps(alerta),
         })
 
 
@@ -136,16 +146,24 @@ def update(request, pk):
         return HttpResponseRedirect(reverse(
             'item_no_encontrado'))
     gpo = Group.objects.get(pk=pk)
+    alerta = []
     if "POST" == request.method:
-        gpo.name = request.POST.get('nombre')
-        gpo.save()
-        gpo.permissions.clear()
-        for p in request.POST.getlist('permisos'):
-            perm = Permiso.objects.get(pk=p)
-            gpo.permissions.add(perm)
+        if(gpo.name != request.POST.get('nombre') and 
+            not Group.objects.filter(
+                name=request.POST.get('nombre')).exists()):
+            gpo.name = request.POST.get('nombre')
             gpo.save()
-        return HttpResponseRedirect(reverse(
-            'perfil_see', kwargs={'pk': gpo.pk}))
+            gpo.permissions.clear()
+            for p in request.POST.getlist('permisos'):
+                perm = Permiso.objects.get(pk=p)
+                gpo.permissions.add(perm)
+                gpo.save()
+            return HttpResponseRedirect(reverse(
+                'perfil_see', kwargs={'pk': gpo.pk}))
+        else:
+            alerta.append(
+                'Ya existe un grupo con ese nombre, '
+                'por favor asigne otro nombre para el grupo')
     root_perms = Permiso.objects.filter(
         permiso_padre__isnull=True).order_by('posicion')
     permisos = []
@@ -164,7 +182,8 @@ def update(request, pk):
             'titulo_descripcion': gpo.name,
             'gpo': gpo,
             'permisos': permisos,
-            'permisos_en_perfil': permisos_en_perfil
+            'permisos_en_perfil': permisos_en_perfil,
+            'alertas': json.dumps(alerta),
         }
     )
 

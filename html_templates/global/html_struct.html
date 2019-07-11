@@ -168,7 +168,18 @@
                 App.setReadOnlyForm();
             {% endif %}
             
-		</script>
+        </script>
+        
+        {% if alertas %}
+        <script type="text/javascript">
+            let alerta = {{ alertas|safe }};
+            if( alerta.length > 0 ) {
+                alerta = alerta.join('<br />');
+                alerta = `<span class="text-danger align-middle"><i class="fas fa-exclamation-triangle fa-3x"></i></span> ${alerta}`;
+                App.openPanel(alerta, "Error:");
+            }            
+        </script>
+        {% endif %}
 
     </body>
 </html>
