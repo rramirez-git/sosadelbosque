@@ -116,7 +116,7 @@ def see(request, pk):
             usuario.has_perm_or_has_perm_child(
                 'permission.eliminar_permisos_permiso')):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'permiso_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

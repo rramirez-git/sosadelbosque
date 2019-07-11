@@ -1,11 +1,21 @@
 from django.db import models
 from django.db.models import Max, Min, Sum
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
+import sys
 
 from initsys.models import Usr, Direccion
-from routines.utils import BootstrapColors
+from routines.utils import BootstrapColors, inter_periods_days, free_days
+from app.data_utils import (
+    df_data_generate_HLRDDay, df_load_HLRDDay, df_load_HLRDDay_agg,
+    df_save_HLRDDay,
+    df_update,
+    df_load_HLRD_periodo_continuo_laborado,
+    df_generate_HLRD_periodo_continuo_laborado,
+    df_generate_data_cotiz_HLRD_periodo_continuo_laborado,
+    df_save_HLRD_periodo_continuo_laborado
+)
 
 # Create your models here.
 
@@ -415,6 +425,9 @@ class HistoriaLaboral(models.Model):
     comentarios = models.TextField(blank=True)
     uma = models.ForeignKey(
         'UMA', on_delete=models.PROTECT, related_name='+', default=getmaxUMA)
+    dias_salario_promedio = models.PositiveSmallIntegerField(
+        default=1750,
+        verbose_name="Cantidad de Días para calculo de salario promedio")
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
@@ -424,155 +437,117 @@ class HistoriaLaboral(models.Model):
         null=True, blank=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
 
-    DataFrameDays = None
-    DataFramePeriod = None
-    DataFrameGraph = None
-
     @property
     def dias_cotizados(self):
-        return self.data_table_period()['subtotal']['dias_cotizados']
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['sum'])['dias_cotiz']['sum']
+        if res is None:
+            return 0
+        return res
 
     @property
     def semanas_cotizadas(self):
-        return self.dias_cotizados / 7
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['sum'])['semanas_cotiz']['sum']
+        if res is None:
+            return 0
+        return res
 
-    def data_table_days(self):
-        if self.DataFrameDays:
-            return self.DataFrameDays
-        df_day = pd.DataFrame(columns=['fecha', 'empresa', 'salario_base'])
-        for reg in self.registros.all():
-            for det in reg.detalle.all():
-                df_day = df_day.append(pd.DataFrame({
-                    'fecha': pd.date_range(det.inicio, det.fin),
-                    'empresa': "{}\n".format(reg),
-                    'salario_base': det.salario_base,
-                }), ignore_index=True)
-        df_day = df_day.sort_values(by=['fecha', 'empresa'])
-        self.DataFrameDays = df_day
-        return self.DataFrameDays
+    @property
+    def inicio(self):
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['min'])['fecha_inicio']['min']
+        return res
 
-    def data_table_period(self):
-        if self.DataFramePeriod:
-            return self.DataFramePeriod
-        df = pd.DataFrame(columns=[
-            'empresa',
-            'inicio', 'fin', 'dias_cotizados', 'semanas_cotizadas',
-            'salario_base', 'suma_salario', 'salario_comentario'])
+    @property
+    def fin(self):
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
+        res = df_pers.agg(['max'])['fecha_fin']['max']
+        return res
+
+    def agg_salario(self, dias=None):
+        """
+        Calcula los elementos relacionados con el Salario Promedio Diario
+
+        Parameters
+        ----------
+        dias : integer, optional
+            Número de últimos días para realizar el cálculo del
+            Salario Promedio Diario, si su valor es None se tomará en
+            cuenta el valor establecido en el miembro dias_salario_promedio
+
+        Returns
+        -------
+        dict
+            diccionario con la estructura de datos relacionada con el
+            cálculo del Salario Promedio Diario:
+
+            {
+                'suma_salario': Decimal,
+                'salario_promedio': Decimal,
+                'fecha_minima': Date,
+                'fecha_maxima': Date,
+                'salario_df': pandas.DataFrame(
+                    columns=[
+                        'f_ini', 'f_fin', 'n', 'salario', 'salario_topado', 'suma_salario'
+                    ]),
+            }
+
+            for reg in salario_df.itertuples():
+                print(reg[1],reg[2],reg[3],reg[4],reg[5])
+        """
+        if dias is None:
+            dias = self.dias_salario_promedio
+        df = df_load_HLRDDay_agg(self.cliente.pk).head(dias)
         tope_uma = 25 * self.uma.valor
-        df_day = self.data_table_days()
-        fecha_inicio = None
-        fecha_fin = None
-        empresa = None
-        salario_base = None
-        fecha_inicio_ant = None
-        fecha_fin_ant = None
-        empresa_ant = None
-        salario_base_ant = None
-        for reg in df_day.groupby(['fecha']).agg(['sum']).iterrows():
-            r_fecha, r_empresa, r_salario_base = reg[0], reg[1][0], reg[1][1]
-            if fecha_inicio is None:
-                fecha_inicio = r_fecha
-            fecha_fin = r_fecha
-            if empresa is None:
-                empresa = r_empresa
-            if salario_base is None:
-                salario_base = r_salario_base
-            if empresa != r_empresa or salario_base != r_salario_base:
-                dc = (fecha_fin_ant - fecha_inicio_ant).days + 1
-                sb = salario_base_ant
-                sb_commentario = ''
-                if sb > tope_uma:
-                    sb_commentario = (
-                        "El salario base es de ${} pero "
-                        "el tope UMA es de ${}").format(sb, tope_uma)
-                    sb = tope_uma
-                df = df.append({
-                    'empresa': empresa_ant,
-                    'inicio': fecha_inicio_ant,
-                    'fin': fecha_fin_ant,
-                    'salario_base': sb,
-                    'salario_comentario': sb_commentario,
-                    'dias_cotizados': dc,
-                    'semanas_cotizadas': dc / 7,
-                    'suma_salario': sb * dc,
-                    }, ignore_index=True)
-                fecha_inicio = r_fecha
-                empresa = r_empresa
-                salario_base = r_salario_base
-            else:
-                fecha_inicio_ant = fecha_inicio
-                fecha_fin_ant = fecha_fin
-                empresa_ant = empresa
-                salario_base_ant = salario_base
-        if fecha_fin_ant and fecha_inicio_ant:
-            dc = (fecha_fin_ant - fecha_inicio_ant).days + 1
-            sb = salario_base_ant
-            sb_commentario = ''
-            if sb > tope_uma:
-                sb_commentario = (
-                    "El salario base es de ${} pero el "
-                    "tope UMA es de ${}").format(sb, tope_uma)
-                sb = tope_uma
-            df = df.append({
-                'empresa': empresa_ant,
-                'inicio': fecha_inicio_ant,
-                'fin': fecha_fin_ant,
-                'salario_base': sb,
-                'salario_comentario': sb_commentario,
-                'dias_cotizados': dc,
-                'semanas_cotizadas': dc / 7,
-                'suma_salario': sb * dc,
-                }, ignore_index=True)
-        df = df.sort_values(by=['inicio', 'fin', 'empresa'])
-        subt = df.agg(['sum', 'min', 'max'])
-        subtotal = {
-            'inicio': subt['inicio'][1],
-            'fin': subt['fin'][2],
-            'dias_cotizados': subt['dias_cotizados'][0],
-            'semanas_cotizadas': subt['semanas_cotizadas'][0],
-            'suma_salario': subt['suma_salario'][0],
-            }
-        subtotal['salario_promedio'] = subtotal['suma_salario'] \
-            / subtotal['dias_cotizados']
-        self.DataFramePeriod = {
-            'data': df,
-            'subtotal': subtotal,
-            }
-        return self.DataFramePeriod
-
-    def data_table_graph(self):
-        if self.DataFrameGraph:
-            return self.DataFrameGraph
-        dtp = self.data_table_period()
-        inicio = date(
-            dtp['subtotal']['inicio'].year,
-            dtp['subtotal']['inicio'].month,
-            dtp['subtotal']['inicio'].day)
-        fin = date(
-            dtp['subtotal']['fin'].year,
-            dtp['subtotal']['fin'].month,
-            dtp['subtotal']['fin'].day)
-        dias = (fin - inicio).days + 1
-        data = []
-        for reg in self.registros.all():
-            periodos = []
-            for det in reg.detalle.all():
-                pdias = (det.fin - det.inicio).days + 1
-                dias_from_start = (det.inicio - inicio).days
+        df['salario_topado'] = df.salario
+        df.loc[df.salario > tope_uma, 'salario_topado' ] = tope_uma
+        ss = df.agg(['sum', 'min', 'max'])
+        periodos = []
+        inicio = None
+        fin = None
+        salario = None
+        salario_topado = None
+        for reg in df.sort_index(ascending=False).itertuples():
+            if inicio is None:
+                inicio = reg[1]
+            if fin is None:
+                fin = reg[1]
+            if salario is None:
+                salario = reg[2]
+            if salario_topado is None:
+                salario_topado = reg[3]
+            if (reg[1] - fin).days > 1 or salario != reg[2]:
+                dias = (fin - inicio).days + 1
                 periodos.append({
-                    'inicio': det.inicio.strftime('%d/%m/%Y'),
-                    'fin': det.fin.strftime('%d/%m/%Y'),
-                    'salario_base': float(det.salario_base),
-                    'dias': pdias,
-                    'porc': float(pdias * 100 / dias),
-                    'porc_from_start': float(dias_from_start * 100 / dias)
-                    })
-            data.append({'empresa': "{}".format(reg), 'periodos': periodos})
-        self.DataFrameGraph = {
-            'data_table_period': dtp,
-            'data_table_graph': data,
-            'dias': dias}
-        return self.DataFrameGraph
+                    'f_ini': inicio,
+                    'f_fin': fin,
+                    'n': dias,
+                    'salario': salario,
+                    'salario_topado': salario_topado,
+                    'suma_salario': dias * salario_topado})
+                inicio = reg[1]
+                salario = reg[2]
+                salario_topado = reg[3]
+            fin = reg[1]
+        dias = (fin - inicio).days + 1
+        periodos.append({
+            'f_ini': inicio,
+            'f_fin': fin,
+            'n': dias,
+            'salario': salario,
+            'salario_topado': salario_topado,
+            'suma_salario': dias * salario_topado})
+        salary_df = pd.DataFrame(periodos, columns=[
+            'f_ini','f_fin','n','salario','salario_topado','suma_salario'
+            ]).sort_values(['f_ini','f_fin'], ascending=[False,False])
+        return {
+            'suma_salario': ss['salario_topado']['sum'],
+            'salario_promedio': ss['salario_topado']['sum'] / dias,
+            'fecha_minima': ss['fecha']['min'],
+            'fecha_maxima': ss['fecha']['max'],
+            'salario_df': salary_df,
+        }
 
     class Meta:
         ordering = ["cliente", "-updated_at"]
@@ -605,22 +580,32 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def salario_base(self):
-        return self.detalle.all()[0].salario_base
+        try:
+            return self.detalle.all()[0].salario_base
+        except IndexError:
+            return 0.0
 
     @property
     def dias_cotizados(self):
-        dias = 0
-        for det in self.detalle.all():
-            dias += det.dias_cotizados
-        return dias
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers = df_pers[df_pers.historialaboralregistro_pk == self.pk]
+        res = df_pers.agg(['sum'])['dias_cotiz']['sum']
+        if res is None:
+            return 0
+        return res
 
     @property
     def semanas_cotizadas(self):
-        return self.dias_cotizados / 7
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers = df_pers[df_pers.historialaboralregistro_pk == self.pk]
+        res = df_pers.agg(['sum'])['semanas_cotiz']['sum']
+        if res is None:
+            return 0
+        return res
 
     @property
     def anios_cotizados(self):
-        return self.dias_cotizados / 365
+        return round(self.semanas_cotizadas / 52, 2)
 
     @property
     def dias_inactivos(self):
@@ -632,7 +617,7 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def semanas_inactivos(self):
-        return self.dias_inactivos / 7
+        return round(self.dias_inactivos / 7)
 
     @property
     def anios_inactivos(self):
@@ -640,20 +625,26 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def inicio(self):
-        return date(
-            self.fecha_de_alta.year,
-            self.fecha_de_alta.month,
-            self.fecha_de_alta.day)
+        try:
+            return date(
+                self.fecha_de_alta.year,
+                self.fecha_de_alta.month,
+                self.fecha_de_alta.day)
+        except AttributeError:
+            return date.today()
 
     @property
     def fin(self):
         if self.vigente:
             return date.today()
         else:
-            return date(
-                self.fecha_de_baja.year,
-                self.fecha_de_baja.month,
-                self.fecha_de_baja.day)
+            try:
+                return date(
+                    self.fecha_de_baja.year,
+                    self.fecha_de_baja.month,
+                    self.fecha_de_baja.day)
+            except AttributeError:
+                return date.today()
 
     def setDates(self):
         vigente = False
@@ -661,6 +652,7 @@ class HistoriaLaboralRegistro(models.Model):
         fecha_final = self.detalle.all().aggregate(Max('fecha_final'))
         for det in self.detalle.all():
             vigente = vigente or det.vigente
+            det.fill_days()
         self.vigente = vigente
         self.fecha_de_alta = fecha_inicial['fecha_inicial__min']
         if not vigente:
@@ -668,6 +660,15 @@ class HistoriaLaboralRegistro(models.Model):
         else:
             self.fecha_de_baja = None
         self.save()
+        self.createPeriodos()
+
+    def createPeriodos(self):
+        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers_new = df_generate_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, self)
+        df_pers = df_update(df_pers, df_pers_new, reg = self.pk)
+        df_save_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, df_pers)
+        df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_save_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, df_pers)
 
     class Meta:
         ordering = ["historia_laboral", "-fecha_de_alta", "-fecha_de_baja"]
@@ -736,11 +737,17 @@ class HistoriaLaboralRegistroDetalle(models.Model):
 
     @property
     def semanas_cotizadas(self):
-        return self.dias_cotizados / 7
+        return round(self.dias_cotizados / 7)
 
     @property
     def anios_cotizados(self):
-        return self.dias_cotizados / 365
+        return round(self.semanas_cotizadas / 52, 2)
+
+    def fill_days(self):
+        reg = self.historia_laboral_registro
+        df_day = df_load_HLRDDay(reg.historia_laboral.cliente.pk)
+        df_day = df_update(df_day, df_data_generate_HLRDDay(self), det=self.pk)
+        df_save_HLRDDay(reg.historia_laboral.cliente.pk, df_day)
 
     class Meta:
         ordering = [
@@ -777,3 +784,54 @@ class UMA(models.Model):
 
     def __unicode__(self):
         return self.__str__()
+
+
+class Cuantiabasica(models.Model):
+    idcuantia = models.AutoField(primary_key=True)
+    salario_inicio = models.DecimalField(max_digits=6, decimal_places=4)
+    salario_fin = models.DecimalField(max_digits=6, decimal_places=4)
+    porcentaje_de_cuantia_basica = models.DecimalField(
+        max_digits=5, decimal_places=3)
+    porcentaje_de_incremento_anual = models.DecimalField(
+        max_digits=5, decimal_places=3)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['salario_inicio', 'salario_fin']
+
+    def __str__(self):
+        return "de {} a {}".format(self.salario_inicio, self.salario_fin)
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class Factoredad(models.Model):
+    idfactoredad = models.AutoField(primary_key=True)
+    edad = models.PositiveSmallIntegerField()
+    factor_de_edad = models.DecimalField(max_digits=6, decimal_places=3)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['edad']
+
+    def __str__(self):
+        return "{} ({}%%)".format(self.edad, self.factor_de_edad)
+
+    def __unicode__(self):
+        return self.__str__()
+

@@ -1,31 +1,34 @@
 {% extends "global/html_struct.html" %}
 {% load i18n %}
+{% load util_filters %}
 {% block content %}
 
 <table class="table table-striped table-sm table-responsive-md">
     <thead>
         <tr>
-            <th>Estatus de Actividad</th>
+            <th>Edad</th>
+            <th>Porcenatje de Factor de Edad</th>
             <th class="text-right" colspan="3"></th>
         </tr>
     </thead>
     <tbody id="data-tbl">
         {% for reg in data %}
             <tr>
-                <td>{{ reg.nombre }}</td>
+                <td class="text-center">{{ reg.edad }}</td>
+                <td class="text-center">$ {{ reg.factor_de_edad }}</td>
                 <td class="text-center">
                     {% if cperms.see %}
-                    <a href="{% url 'estatusactividad_see' pk=reg.pk %}" class="btn btn-outline-secondary" title="Ver"><i class="far fa-eye"></i></a>
+                    <a href="{% url 'factoredad_see' pk=reg.pk %}" class="btn btn-outline-secondary" title="Ver"><i class="far fa-eye"></i></a>
                     {% endif %}
                 </td>
                 <td class="text-center">
                     {% if cperms.update %}
-                    <a href="{% url 'estatusactividad_update' pk=reg.pk %}" class="btn btn-outline-secondary" title="Actualizar"><i class="far fa-edit"></i></a>
+                    <a href="{% url 'factoredad_update' pk=reg.pk %}" class="btn btn-outline-secondary" title="Actualizar"><i class="far fa-edit"></i></a>
                     {% endif %}
                 </td>
                 <td class="text-center">
                     {% if cperms.delete %}
-                    <a href="#" onclick="App.showDeletingConfirmation(`{% url 'estatusactividad_delete' pk=reg.pk %}`)" title="Eliminar" class="btn btn-outline-secondary">
+                    <a href="#" onclick="App.showDeletingConfirmation(`{% url 'factoredad_delete' pk=reg.pk %}`)" title="Eliminar" class="btn btn-outline-secondary">
                         <i class="far fa-trash-alt"></i>
                     </a>
                     {% endif %}

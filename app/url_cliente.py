@@ -15,6 +15,8 @@ urlpatterns = [
           name="{}_update".format(object_name)),
      path('eliminar/<pk>/', views.delete,
           name="{}_delete".format(object_name)),
+     path('eliminar_documento/<pk>/', views.delete_documento,
+          name="{}_eliminar_documento".format(object_name)),
      path('historial_laboral/<pk>/', views.historia_laboral,
           name="{}_historia_laboral".format(object_name)),
      path('reporte/maestro/', views.reporte_maestro,
@@ -27,4 +29,9 @@ urlpatterns = [
           name="{}_vista_tabular".format(object_name)),
      path('vista_grafica/<pk>/', views.historia_laboral_vista_grafica,
           name="{}_vista_grafica".format(object_name)),
+     path('actualiza/detalle/salario/complete/',
+          views.update_all_salarios_complete,
+          name="{}_update_dalarios_complete"),
+     path('actualiza/detalle/salario/', views.update_all_salarios,
+          name="{}_update_dalarios"),
 ]

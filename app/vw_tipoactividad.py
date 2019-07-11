@@ -84,7 +84,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'tipoactividad.eliminar_tipo_de_actividad_tipo actividad'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'tipoactividad_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})

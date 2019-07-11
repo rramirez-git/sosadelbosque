@@ -27,27 +27,39 @@
                 <tbody>
                     <tr>
                         <th>Fecha Inicial</th>
-                        <td class="text-right">{{ data.subtotal.inicio|date:'d/M/Y' }}</td>
+                        <td class="text-right">
+                            {{ historia.inicio|date:'d/M/Y' }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Fecha Final</th>
-                        <td class="text-right">{{ data.subtotal.fin|date:'d/M/Y' }}</td>
+                        <td class="text-right">
+                            {{ historia.fin|date:'d/M/Y' }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Días Cotizados</th>
-                        <td class="text-right">{{ data.subtotal.dias_cotizados|money2display }}</td>
+                        <td class="text-right">
+                            {{ historia.dias_cotizados }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Semanas Cotizadas</th>
-                        <td class="text-right">{{ data.subtotal.semanas_cotizadas|money2display }}</td>
+                        <td class="text-right">
+                            {{ historia.semanas_cotizadas }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Suma de Salario</th>
-                        <td class="text-right">$ {{ data.subtotal.suma_salario|money2display }}</td>
+                        <td class="text-right">
+                            $ {{ historia.agg_salario.suma_salario|money2display }}
+                        </td>
                     </tr>
                     <tr>
                         <th> Salario Promedio</th>
-                        <td class="text-right">$ {{ data.subtotal.salario_promedio|money2display }}</td>
+                        <td class="text-right">
+                            $ {{ historia.agg_salario.salario_promedio|money2display }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -55,66 +67,150 @@
     </div>
 </div>
 
-<h5>Detalle</h5>
+<h5>Detalle de Cálculo de Salario Promedio</h5>
+
+<div class="row">
+    <div class="col-sm-8">
+        <table class="table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Días Transcurridos</th>
+                    <th>Salario</th>
+                    <th>Suma a Salario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reg in historia.agg_salario.salario_df.itertuples %}
+                <tr>
+                    <td>{{ reg.f_ini|date:'d/M/Y' }}</td>
+                    <td>{{ reg.f_fin|date:'d/M/Y' }}</td>
+                    <td class="text-right">{{ reg.n }}</td>
+                    <td class="text-right">$ {{ reg.salario_topado|money2display }}</td>
+                    <td class="text-right">$ {{ reg.suma_salario|money2display }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-4">
+        <p class="lead">Resumen</p>
+        <table class="table table-striped table-sm table-responsive-md">
+            <tbody>
+                <tr>
+                    <th>Fecha Inicial</th>
+                    <td class="text-right">
+                        {{ historia.agg_salario.fecha_minima|date:'d/M/Y' }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Fecha Final</th>
+                    <td class="text-right">
+                        {{ historia.agg_salario.fecha_maxima|date:'d/M/Y' }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Días</th>
+                    <td class="text-right">
+                        {{ historia.dias_salario_promedio }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Suma de Salario</th>
+                    <td class="text-right">
+                        $ {{ historia.agg_salario.suma_salario|money2display }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Salario Promedio Diario</th>
+                    <td class="text-right">
+                        $ {{ historia.agg_salario.salario_promedio|money2display }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h5>Detalle de Cálculo de Semanas Cotizadas</h5>
 
 <table class="table table-striped table-sm table-responsive-md">
     <thead>
         <tr>
-            <th>Empresa</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Salario Base</th>
-            <th>Días Cotizados</th>
-            <th>Semanas Cotizadas</th>
-            <th>Suma a Promedio</th>
+            <th rowspan="2">Empresa</th>
+            <th rowspan="2">Inicio del Periodo</th>
+            <th rowspan="2">Fin del Periodo</th>
+            <th colspan="3" style="border-left: rgb(194, 195, 196) solid 1px; border-right: rgb(194, 195, 196) solid 1px">Periodos Cotizados</th>
+            <th colspan="3">Periodos Inactivos</th>
+        </tr>
+        <tr>
+            <th style="border-left: rgb(194, 195, 196) solid 1px;">Días</th>
+            <th>Semanas</th>
+            <th style="border-right: rgb(194, 195, 196) solid 1px;">Años</th>
+            <th>Días</th>
+            <th>Semanas</th>
+            <th>Años</th>
         </tr>
     </thead>
-    <tbody id="data-tbl">
-        {% for reg in data.data.itertuples %}
-        {% if forloop.counter|divisibleby:15 %}
-        <tr class="d-print-none">
-            <th>Empresa</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Salario Base</th>
-            <th>Días Cotizados</th>
-            <th>Semanas Cotizadas</th>
-            <th>Suma a Promedio</th>
-        </tr>
-        {% endif %}
+    <tbody>
+        {% for reg in peridodos_laborados.itertuples %}
         <tr>
-            <td>{{ reg.empresa|as_paragraph|safe }}</td>
-            <td>{{ reg.inicio|date:'d/M/Y' }}</td>
-            <td>{{ reg.fin|date:'d/M/Y' }}</td>
-            <td class="text-right {% if reg.salario_comentario %}table-info{% endif %}" title="{{ reg.salario_comentario }}" {% if reg.salario_comentario %}data-toggle="tooltip"{% endif %}>
-                $ {{ reg.salario_base|money2display }}
-            </td>
-            <td class="text-right">{{ reg.dias_cotizados }}</td>
-            <td class="text-right">{{ reg.semanas_cotizadas|money2display }}</td>
-            <td class="text-right">$ {{ reg.suma_salario|money2display }}</td>
+            <td>{{ reg.historialaboralregistro }}</td>
+            <td class="text-center">{{ reg.fecha_inicio|date:'d/M/Y' }}</td>
+            <td class="text-center">{{ reg.fecha_fin|date:'d/M/Y' }}</td>
+            <td class="text-right" style="border-left: rgb(194, 195, 196) solid 1px;">{{ reg.dias_cotiz }}</td>
+            <td class="text-right">{{ reg.semanas_cotiz }}</td>
+            <td class="text-right" style="border-right: rgb(194, 195, 196) solid 1px;">{{ reg.anios_cotiz|money2display }}</td>
+            <td class="text-right">{{ reg.dias_inact }}</td>
+            <td class="text-right">{{ reg.semanas_inact }}</td>
+            <td class="text-right">{{ reg.anios_inact|money2display }}</td>
         </tr>
         {% endfor %}
     </tbody>
-    <tfoot>
-        <tr>
-            <th>Empresa</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Salario Base</th>
-            <th>Días Cotizados</th>
-            <th>Semanas Cotizadas</th>
-            <th>Suma a Promedio</th>
-        </tr>
-        <tr>
-            <th>Totales</th>
-            <th>{{ data.subtotal.inicio|date:'d/M/Y' }}</th>
-            <th>{{ data.subtotal.fin|date:'d/M/Y' }}</th>
-            <th class="text-right"></th>
-            <th class="text-right">{{ data.subtotal.dias_cotizados|money2display }}</th>
-            <th class="text-right">{{ data.subtotal.semanas_cotizadas|money2display }}</th>
-            <th class="text-right">$ {{ data.subtotal.suma_salario|money2display }}</th>
-        </tr>
-    </tfoot>
 </table>
+<p>&nbsp;</p>
+<div class="row">
+    <div class="col-sm-8 offset-sm-2">
+        <table class="table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Días</th>
+                    <th>Semanas</th>
+                    <th>Años</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-right">Semanas transcurridas desde el alta de número social a la fecha</td>
+                    <td class="text-right">+{{ aggr_per_lab.dias_transc }}</td>
+                    <td class="text-right">+{{ aggr_per_lab.sem_transc }}</td>
+                    <td class="text-right">+{{ aggr_per_lab.anios_transc|money2display }}</td>
+                </tr>
+                <tr>
+                    <td class="text-right">Semanas reconocidas por el IMSS</td>
+                    <td class="text-right">-{{ aggr_per_lab.dias_rec }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.sem_rec }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.anios_rec|money2display }}</td>
+                </tr>
+                <tr>
+                    <td class="text-right">Periodos inactivos</td>
+                    <td class="text-right">-{{ aggr_per_lab.dias_inac }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.sem_inac }}</td>
+                    <td class="text-right">-{{ aggr_per_lab.anios_inac|money2display }}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th class="text-right">Diferencia</th>
+                    <th class="text-right">{{ aggr_per_lab.dias_dif }}</th>
+                    <th class="text-right">{{ aggr_per_lab.sem_dif }}</th>
+                    <th class="text-right">{{ aggr_per_lab.anios_dif|money2display }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
 
 {% endblock %}

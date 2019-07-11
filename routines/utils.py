@@ -2,9 +2,12 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
+from datetime import date, timedelta, datetime
 from os import path, mkdir
 from unicodedata import normalize
 from email.mime.image import MIMEImage
+
+import pandas as pd
 
 
 def print_error(message, level="Warning"):
@@ -238,6 +241,81 @@ def send_mail(
         email.attach(data_image)
     print(email.send())
 
+
+def inter_periods_days(p1_inicio, p1_fin, p2_inicio, p2_fin):
+    """
+    Detecta el numero de días entre dos periodos
+
+    Parameters
+    p1_inicio : datetime.date
+        Fecha inicial del primer periodo
+    p1_fin : datetime.date
+        Fecha final del primer periodo
+    p2_inicio : datetime.date
+        Fecha inicial del segundo periodo
+    p2_fin : datetime.date
+        Fecha final del segundo periodo
+    ----------
+    Returns
+    -------
+    integer
+        numero de días entre los dos periodos
+        0 si el primer periodo esta dentro del segundo
+        0 si el segundo periodo esta dentro del primero
+        0 si un periodo inicia dentro de otro
+    """
+    p1 = {'ini': p1_inicio, 'fin': p1_fin}
+    p2 = {'ini': p2_inicio, 'fin': p2_fin}
+    if ((p1['ini'] == p2['ini'] and p1['fin'] < p2['fin']) or
+            (p1['fin'] == p2['fin'] and p1['ini'] > p2['ini']) or
+            (p1['ini'] > p2['ini'])):
+        t1 = p1
+        p1 = p2
+        p2 = t1
+    if p1['fin'] < p2['ini']:
+        return (p2['ini'] - p1['fin']).days
+    return 0
+
+
+def free_days(p1_inicio, p1_fin, p2_inicio, p2_fin):
+    """
+    Detecta los días del segundo período
+    que no pertenecen al primero
+
+    Parameters
+    p1_inicio : datetime.date
+        Fecha inicial del primer periodo
+    p1_fin : datetime.date
+        Fecha final del primer periodo
+    p2_inicio : datetime.date
+        Fecha inicial del segundo periodo
+    p2_fin : datetime.date
+        Fecha final del segundo periodo
+    ----------
+    Returns
+    -------
+    list
+        lista de objetos datetime.date
+    """
+    p1 = create_date_range(p1_inicio, p1_fin)
+    p2 = create_date_range(p2_inicio, p2_fin)
+    res = []
+    for val in p2:
+        isIn = False
+        for item in p1:
+            if val == item:
+                isIn = True
+                break
+        if isIn is False:
+            res.append(val)
+    return res
+
+
+def create_date_range(inicio, fin):
+    result = []
+    for x in pd.date_range(inicio,fin):
+        result.append(date(x.year, x.month, x.day))
+    return result
 
 BootstrapColors = (
     ('', 'Ninguno'),

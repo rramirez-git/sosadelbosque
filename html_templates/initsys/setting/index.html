@@ -39,7 +39,7 @@
                 </td>
                 <td class="text-center">
                     {% if perms.seguridad.eliminar_settings_setting %}
-                        <a href="{% url 'setting_delete' pk=reg.pk %}" class="btn btn-outline-secondary" title="Eliminar">
+                        <a href="#" onclick="App.showDeletingConfirmation(`{% url 'setting_delete' pk=reg.pk %}`)" title="Eliminar" class="btn btn-outline-secondary">
                             <i class="far fa-trash-alt"></i>
                         </a>
                     {% endif %}

@@ -10,20 +10,25 @@
         <div class="col-sm-2">
             {% if cte.documentos.all %}
             <h5>Documentos</h5>
-            <div class="list-group">
+            <ul class="list-group">
                 {% for docto in cte.documentos.all %}
+                <li class="list-group-item" 
+                    {% if docto.observaciones %}
+                    data-toggle="tooltip" data-placement="right" data-html="true"
+                    title="{{ docto.observaciones | as_paragraph }}"
+                    {% endif %}>
+                    <div class="float-right">
+                        <a href="#" onclick="App.showDeletingConfirmation('{% url 'cliente_eliminar_documento' pk=docto.pk %}')" class="btn btn-outline-secondary btn-sm">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    </div>
                     <a href="{{ docto.anverso.url}}" 
-                        class="list-group-item list-group-item-action" 
-                        target="blank" 
-                        {% if docto.observaciones %}
-                        data-toggle="tooltip" data-placement="right" data-html="true"
-                        title="{{ docto.observaciones | as_paragraph }}"
-                        {% endif %}
-                        >
+                        target="_blank">
                         {{ docto }}
                     </a>
+                </li>
                 {% endfor %}
-            </div>
+            </ul>
             {% endif %}
         </div>
         <div class="col-sm-4">

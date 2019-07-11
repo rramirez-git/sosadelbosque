@@ -2,7 +2,8 @@ from django import forms
 
 from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
                      TipoActividad, TipoDocumento, EstatusActividad,
-                     Actividad, ActividadHistoria, Externo, UMA)
+                     Actividad, ActividadHistoria, Externo, UMA,
+                     Cuantiabasica, Factoredad)
 
 
 class frmTaxonomia(forms.ModelForm):
@@ -224,4 +225,26 @@ class frmUMA(forms.ModelForm):
         fields = [
             'año',
             'valor'
+        ]
+
+
+class frmCuantiaBasica(forms.ModelForm):
+
+    class Meta:
+        model = Cuantiabasica
+        fields = [
+            'salario_inicio',
+            'salario_fin',
+            'porcentaje_de_cuantia_basica',
+            'porcentaje_de_incremento_anual',
+        ]
+
+
+class frmFactorEdad(forms.ModelForm):
+
+    class Meta:
+        model = Factoredad
+        fields = [
+            'edad',
+            'factor_de_edad',
         ]

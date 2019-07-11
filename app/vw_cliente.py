@@ -1,23 +1,32 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import Group
 from django.db.models import ProtectedError, Max, Min, Sum
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from decimal import Decimal
+import pandas as pd
 import json
+import os
+import sys
 
 from routines.mkitsafe import valida_acceso
 
 from .models import (
     Cliente, TaxonomiaExpediente, HistoriaLaboral,
-    HistoriaLaboralRegistro, HistoriaLaboralRegistroDetalle, UMA)
+    HistoriaLaboralRegistro, HistoriaLaboralRegistroDetalle, UMA,
+    DoctoGral)
 from .forms import (
     frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
     frmClienteObservaciones)
 from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
-from routines.utils import requires_jquery_ui, move_uploaded_file
+from routines.utils import (
+    requires_jquery_ui, move_uploaded_file,
+    inter_periods_days, free_days)
+from app.data_utils import (
+    df_load_HLRD_periodo_continuo_laborado, df_load_HLRDDay)
 
 
 def add_nota(cte, nota, fecha_notificacion, usr):
@@ -139,6 +148,7 @@ def see(request, pk):
             docto.created_by = usuario
             docto.updated_by = usuario
             docto.save()
+        return HttpResponseRedirect(reverse('cliente_see', kwargs={'pk': pk}))
     toolbar = []
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
         toolbar.append({
@@ -176,7 +186,7 @@ def see(request, pk):
     if usuario.has_perm_or_has_perm_child(
             'cliente.eliminar_clientes_cliente'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'cliente_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
@@ -332,6 +342,7 @@ def historia_laboral(request, pk):
         if "update-comments" == request.POST.get('action'):
             historia.comentarios = request.POST.get('comentarios')
             historia.uma = UMA.objects.get(pk=request.POST.get('uma'))
+            historia.dias_salario_promedio = request.POST.get('dias')
             historia.updated_by = usuario
             historia.save()
         elif "captura-manual" == request.POST.get('action'):
@@ -598,9 +609,12 @@ def delete_registro(request, pk):
     if not HistoriaLaboralRegistro.objects.filter(pk=pk).exists():
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = HistoriaLaboralRegistro.objects.get(pk=pk)
-    pk_cliente = obj.historia_laboral.cliente.pk
+    hl = obj.historia_laboral
+    pk_cliente = hl.cliente.pk
     try:
         obj.delete()
+        for reg in hl.registros.all():
+            reg.setDates()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
     except ProtectedError:
@@ -614,8 +628,10 @@ def delete_detalle(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = HistoriaLaboralRegistroDetalle.objects.get(pk=pk)
     pk_cliente = obj.historia_laboral_registro.historia_laboral.cliente.pk
+    reg = obj.historia_laboral_registro
     try:
         obj.delete()
+        reg.setDates()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
     except ProtectedError:
@@ -640,14 +656,39 @@ def historia_laboral_vista_tabular(request, pk):
         'label': '<i class="fas fa-file-medical-alt"></i>'
         ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
-    data = historia_laboral.data_table_period()
+    df_pers = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
+    df_pers[
+        'historialaboralregistro'
+        ] = df_pers.historialaboralregistro_pk.apply(
+            lambda x: HistoriaLaboralRegistro.objects.get(pk=x).__str__()
+            )
+    df_pers_agg = df_pers.agg(['min', 'max', 'sum'])
+    f_max = df_pers_agg.fecha_fin['max']
+    f_min = df_pers_agg.fecha_inicio['min']
+    dias_t = (f_max- f_min).days
+    aggr_per_lab = {
+        'dias_transc': dias_t,
+        'dias_rec': df_pers_agg.dias_cotiz['sum'],
+        'sem_rec': df_pers_agg.semanas_cotiz['sum'],
+        'anios_rec': df_pers_agg.anios_cotiz['sum'],
+        'dias_inac': df_pers_agg.dias_inact['sum'],
+        'sem_inac': df_pers_agg.semanas_inact['sum'],
+        'anios_inac': df_pers_agg.anios_inact['sum'],
+        'sem_transc': round(dias_t / 7),
+        'anios_transc': round(dias_t / 7) / 52,
+    }
+    aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc'] - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
+    aggr_per_lab['sem_dif'] = aggr_per_lab['sem_transc'] - aggr_per_lab['sem_rec'] - aggr_per_lab['sem_inac']
+    aggr_per_lab['anios_dif'] = aggr_per_lab['anios_transc'] - aggr_per_lab['anios_rec'] - aggr_per_lab['anios_inac']
+
     return render(request, 'app/cliente/vista_tabular.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Detalle Laboral',
         'titulo_descripcion': historia_laboral.cliente,
         'toolbar': toolbar,
         'historia': historia_laboral,
-        'data': data,
+        'aggr_per_lab': aggr_per_lab,
+        'peridodos_laborados': df_pers,
     })
 
 
@@ -669,14 +710,138 @@ def historia_laboral_vista_grafica(request, pk):
         'label': '<i class="fas fa-file-medical-alt"></i>'
         ' Ver Historia Laboral',
         'pk': historia_laboral.cliente.pk})
-    data = historia_laboral.data_table_graph()
+    periodos = []
+    dtotal = (historia_laboral.fin - historia_laboral.inicio).days
+    df_periodos = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
+    df_periodos.sort_index(ascending=False,inplace=True)
+    print(df_periodos)
+    for reg in historia_laboral.registros.all():
+        r = {'empresa': '{}'.format(reg), 'periodos': []}
+        df_pers = df_periodos[df_periodos.historialaboralregistro_pk == reg.pk]
+        for p in df_pers.itertuples():
+            d = (p[3] - historia_laboral.inicio).days
+            r['periodos'].append({
+                'dias': p[5],
+                'fin': p[4].strftime('%d/%m/%Y'),
+                'inicio': p[3].strftime('%d/%m/%Y'),
+                'porc': p[5] * 100 / historia_laboral.dias_cotizados,
+                'porc_from_start': d * 100 / dtotal,
+            })
+        periodos.append(r)
     return render(request, 'app/cliente/vista_grafica.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Gráfico Laboral',
         'titulo_descripcion': historia_laboral.cliente,
         'toolbar': toolbar,
         'historia': historia_laboral,
-        'data': data['data_table_period'],
-        'dias': data['dias'],
-        'periods': json.dumps(data['data_table_graph']),
+        'periods': json.dumps(periodos),
     })
+
+
+@valida_acceso(['cliente.clientes_cliente'])
+def delete_documento(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not DoctoGral.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = DoctoGral.objects.get(pk=pk)
+    pk_cliente = obj.cliente.pk
+    try:
+        obj.delete()
+        return HttpResponseRedirect(reverse(
+            'cliente_see', kwargs={'pk': pk_cliente}))
+    except ProtectedError:
+        return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+
+def update_all_salarios(request):
+    today = datetime.now()
+    file_dir = os.path.join(
+        settings.MEDIA_ROOT,
+        'autoupdates')
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%Y")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%m")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_path = os.path.join(
+        file_dir,
+        "updates_{}.txt".format(today.strftime("%Y_%m_%d_%H_%M")))
+    file = open(file_path, "a", encoding="utf8")
+    regs = HistoriaLaboralRegistro.objects.filter(vigente=True)
+    file.write("\n\n\nActualizacion de registros de salarios\n")
+    file.write(datetime.now().strftime("%Y-%m-%d at %H:%M"))
+    file.write("\n{} records to update found\n".format(regs.count()))
+    for reg in regs:
+        df = df_load_HLRDDay(reg.historia_laboral.cliente.pk)
+        df = df[df.historialaboralregistro_pk == reg.pk]
+        d = df.agg('max').fecha
+        try:
+            fecha_final = date(d.year, d.month, d.day)
+        except AttributeError:
+            fecha_final = None
+        file.write("\n{}\t{:70}\t{:70}".format(
+            datetime.now().strftime("%Y-%m-%d at %H:%M"),
+            reg.__str__(),
+            reg.historia_laboral.cliente.__str__()))
+        file.flush()
+        if fecha_final == reg.fin:
+            file.write("Skipped")
+        else:
+            reg.setDates()
+            file.write("Updated")
+    file.close()
+    return render(request, "global/html.html", {})
+
+
+def update_all_salarios_complete(request):
+    today = datetime.now()
+    file_dir = os.path.join(
+        settings.MEDIA_ROOT,
+        'autoupdates_complete')
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%Y")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_dir = os.path.join(
+        file_dir,
+        '{}'.format(today.strftime("%m")))
+    if not os.path.exists(file_dir):
+        os.mkdir(file_dir)
+    file_path = os.path.join(
+        file_dir,
+        "updates_{}.txt".format(today.strftime("%Y_%m_%d_%H_%M")))
+    file = open(file_path, "a", encoding="utf8")
+    regs = HistoriaLaboralRegistro.objects.all()
+    file.write("\n\n\nActualizacion de registros de salarios\n")
+    file.write(datetime.now().strftime("%Y-%m-%d at %H:%M"))
+    file.write("\n{} records to update found\n".format(regs.count()))
+    for reg in regs:
+        df = df_load_HLRDDay(reg.historia_laboral.cliente.pk)
+        df = df[df.historialaboralregistro_pk == reg.pk]
+        d = df.agg('max').fecha
+        try:
+            fecha_final = date(d.year, d.month, d.day)
+        except AttributeError:
+            fecha_final = None
+        file.write("\n{}\t{:70}\t{:70}".format(
+            datetime.now().strftime("%Y-%m-%d at %H:%M"),
+            reg.__str__(),
+            reg.historia_laboral.cliente.__str__()))
+        file.flush()
+        if fecha_final == reg.fin:
+            file.write("Skipped")
+        else:
+            reg.setDates()
+            file.write("Updated")
+    file.close()
+    return render(request, "global/html.html", {})

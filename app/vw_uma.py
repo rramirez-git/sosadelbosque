@@ -77,7 +77,7 @@ def see(request, pk):
             'pk': pk})
     if usuario.has_perm_or_has_perm_child('uma.eliminar_uma_uma'):
         toolbar.append({
-            'type': 'link_pk',
+            'type': 'link_pk_del',
             'view': 'uma_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
@@ -97,11 +97,8 @@ def update(request, pk):
     if not UMA.objects.filter(pk=pk).exists():
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = UMA.objects.get(pk=pk)
-    frm = frmUMA(instance=obj)
-    print(request.method)
-    print(frm.is_valid())
-    print(frm.errors)
-    if 'POST' == request.method and (frm.is_valid() or not frm.errors):
+    frm = frmUMA(instance=obj, data=request.POST or None)
+    if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.updated_by = usuario
         obj.save()

@@ -63,3 +63,12 @@ def keyvalue(dict, key):
 @register.filter
 def ifNone(value, default=""):
     return value or default
+
+@register.filter
+def division(num, div):
+    if div == 0:
+        return 0
+    try:
+        return int("0{}".format(num)) / div
+    except ValueError:
+        return 0

@@ -20,28 +20,40 @@
             <table class="table table-striped table-sm table-responsive-md">
                 <tbody>
                     <tr>
-                        <th>Fecha Inicial</th>
-                        <td class="text-right">{{ data.subtotal.inicio|date:'d/M/Y' }}</td>
+                        <th>Fecha Alta</th>
+                        <td class="text-right">
+                            {{ historia.inicio|date:'d/M/Y' }}
+                        </td>
                     </tr>
                     <tr>
-                        <th>Fecha Final</th>
-                        <td class="text-right">{{ data.subtotal.fin|date:'d/M/Y' }}</td>
+                        <th>Fecha Baja</th>
+                        <td class="text-right">
+                            {{ historia.fin|date:'d/M/Y' }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Días Cotizados</th>
-                        <td class="text-right">{{ data.subtotal.dias_cotizados|money2display }}</td>
+                        <td class="text-right">
+                            {{ historia.dias_cotizados }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Semanas Cotizadas</th>
-                        <td class="text-right">{{ data.subtotal.semanas_cotizadas|money2display }}</td>
+                        <td class="text-right">
+                            {{ historia.semanas_cotizadas }}
+                        </td>
                     </tr>
                     <tr>
                         <th>Suma de Salario</th>
-                        <td class="text-right">$ {{ data.subtotal.suma_salario|money2display }}</td>
+                        <td class="text-right">
+                            $ {{ historia.agg_salario.suma_salario|money2display }}
+                        </td>
                     </tr>
                     <tr>
                         <th> Salario Promedio</th>
-                        <td class="text-right">$ {{ data.subtotal.salario_promedio|money2display }}</td>
+                        <td class="text-right">
+                            $ {{ historia.agg_salario.salario_promedio|money2display }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -91,11 +103,14 @@
             let tdprogress = $( `<td></td>` );
             per.periodos.reverse();
             per.periodos.forEach( function( p, idx ) {
-                if( p.porc > 1 ) {
+                if( p.porc < 0.2 ) {
+                    p.porc = 0.2;
+                }
+                if( p.porc > 0.0 ) {
                     let dprogress = $( `<div class="progress"></div>` );
-                    let title = `Periodo de ${p.inicio} a ${p.fin}<br />${p.dias} días<br />Salario: $${p.salario_base}`;
-                    dprogress.append( $( `<div style="width: ${parseInt(p.porc_from_start)}%" aria-valuenow="${parseInt(p.porc_from_start)}" aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-prev" role="progressbar" ></div>` ) );
-                    dprogress.append( $( `<div style="width: ${parseInt(p.porc)}%" aria-valuenow="${parseInt(p.porc)}" title="${title}" aria-valuemin="0" aria-valuemax="100" class="progress-bar" role="progressbar" data-toggle="tooltip" data-html="true"></div>` ) );
+                    let title = `Periodo de ${p.inicio} a ${p.fin}<br />${p.dias} días.`;
+                    dprogress.append( $( `<div style="width: ${p.porc_from_start}%" aria-valuenow="${p.porc_from_start}" aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-prev" role="progressbar" ></div>` ) );
+                    dprogress.append( $( `<div style="width: ${p.porc}%" aria-valuenow="${p.porc}" title="${title}" aria-valuemin="0" aria-valuemax="100" class="progress-bar" role="progressbar" data-toggle="tooltip" data-html="true"></div>` ) );
                     tdprogress.append(dprogress);
                 }
             } );

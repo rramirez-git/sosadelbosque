@@ -13,7 +13,7 @@
             {% if cte.RFC %}RFC: {{ cte.RFC }}<br />{% endif %}
         </p>
         
-        <p>Semanas Cotizadas: {{ historia.semanas_cotizadas|money2display }}</p>
+        <p>Semanas Cotizadas: {{ historia.semanas_cotizadas }}</p>
     </div>
     <div class="col-sm-7 card">
         <div class="card-body">
@@ -21,7 +21,8 @@
                 <i class="fas fa-pencil-alt"></i>
             </button>
             <p>
-                <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})
+                <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})<br />
+                <strong>{{ historia.dias_salario_promedio }}</strong> días para calculo de salario promedio diario.
             </p>
             <p>
                 <strong>Comentarios:</strong><br />
@@ -54,7 +55,7 @@
                 <button type="button" class="btn btn-outline-secondary" onclick="openUpdRegistro({{ reg.pk }}, '{{ reg.empresa }}', '{{ reg.registro_patronal }}')" title="Actualizar Empresa / Registro Patronal">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
-                <a href="{% url 'cliente_delete_registro' pk=reg.pk %}" class="btn btn-outline-secondary" title="Eliminar">
+                <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_registro' pk=reg.pk %}`, 'registro del patron seleccionado y su detalle de periodos')" title="Eliminar" class="btn btn-outline-secondary">
                     <i class="far fa-trash-alt"></i>
                 </a>
             </div>
@@ -90,7 +91,7 @@
                             </button>
                         </td>
                         <td class="text-center">
-                            <a href="{% url 'cliente_delete_detalle' pk=det.pk %}" class="btn btn-outline-secondary" title="Eliminar">
+                            <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_detalle' pk=det.pk %}`, 'periodo seleccionado')" title="Eliminar" class="btn btn-outline-secondary">
                                 <i class="far fa-trash-alt"></i>
                             </a>
                         </td>
@@ -269,6 +270,10 @@
                     <option value="{{ uma.pk }}" {% if uma.pk == historia.uma.pk %}selected="select"{% endif %}>{{ uma }} ($ {{ uma.valor|money2display }})</option>
                 {% endfor %}
             </select>
+        </div>
+        <div class="form-group">
+            <label for="dias">Días para cálculo de salario promedio:</label>
+            <input type="number" name="dias" id="dias" value="{{ historia.dias_salario_promedio }}"class="form-control" required="required" min="1" max="15000" />
         </div>
         <div class="form-group">
             <label for="comentarios">Comentarios</label>
