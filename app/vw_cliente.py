@@ -27,6 +27,7 @@ from routines.utils import (
     inter_periods_days, free_days)
 from app.data_utils import (
     df_load_HLRD_periodo_continuo_laborado, df_load_HLRDDay)
+from routines.utils import hipernormalize
 
 
 def add_nota(cte, nota, fecha_notificacion, usr):
@@ -60,12 +61,27 @@ def add_alert(nota, fecha_notificacion, usr_to, usr_creator):
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = list(Cliente.objects.all())
+    search_value = ""
     toolbar = []
     if usuario.has_perm_or_has_perm_child('cliente.agregar_clientes_cliente'):
         toolbar.append({
             'type': 'link',
             'view': 'cliente_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
+    toolbar.append({'type': 'search'})
+    if "POST" == request.method:
+        if "search" == request.POST.get('action'):
+            search_value = hipernormalize(request.POST.get('valor'))
+            data = [reg
+                    for reg in data if (search_value in hipernormalize(
+                        reg.first_name) 
+                        or search_value in hipernormalize(reg.last_name)
+                        or search_value in hipernormalize(
+                            reg.apellido_materno)
+                        or search_value in hipernormalize(reg.CURP)
+                        or search_value in hipernormalize(reg.NSS)
+                        or search_value in hipernormalize(reg.RFC))
+                    ]
     return render(
         request,
         'app/cliente/index.html', {
@@ -74,6 +90,7 @@ def index(request):
             'data': data,
             'toolbar': toolbar,
             'req_ui': requires_jquery_ui(request),
+            'search_value': search_value,
             })
 
 
