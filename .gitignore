@@ -109,3 +109,5 @@ files/media/
 managed/managed.imgx
 managed/
 *.imgx
+*.imgx
+managed/managed.imgx

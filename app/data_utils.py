@@ -2,7 +2,7 @@ import pandas as pd
 import zipfile as zf
 import sys
 from os import path, mkdir, remove
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.conf import settings
 
@@ -16,6 +16,19 @@ def get_directory(usr_pk):
     if not path.exists(directory):
         mkdir(directory)
     return directory
+
+
+def delete_files(usr_pk):
+    direct = get_directory(usr_pk)
+    file = path.join(direct, "hldr_day.csv.zip")
+    if path.exists(file):
+        remove(file)
+    file = path.join(direct, "hldr_day_agg.csv.zip")
+    if path.exists(file):
+        remove(file)
+    file = path.join(direct, "hldr_per_cont_lab.csv.zip")
+    if path.exists(file):
+        remove(file)
 
 
 def df_struct_HLRDDay():
@@ -139,7 +152,7 @@ def df_update(df, df2, hl=None, reg=None, det=None):
         df = df[df.historialaboralregistro_pk != reg]
     if not det is None:
         df = df[df.historialaboralregistrodetalle_pk != det]
-    df = df = df.append(df2, ignore_index=True)
+    df = df.append(df2, ignore_index=True)
     return df
 
 
@@ -257,3 +270,25 @@ def df_save_HLRD_periodo_continuo_laborado(cte_pk, df):
         zipf.write(file,path.basename(file), zf.ZIP_BZIP2)
     remove(file)
     return True
+
+
+def df_reset_data(cte_pk, historia):
+    delete_files(cte_pk)
+    df_day = df_load_HLRDDay(cte_pk)
+    df_pers = df_load_HLRD_periodo_continuo_laborado(cte_pk)
+    for reg in historia.registros.all():
+        for det in reg.detalle.all():
+            for dt in pd.date_range(det.inicio, det.fin):
+                df_day = df_day.append({
+                    'historialaboralregistrodetalle_pk': det.pk,
+                    'historialaboralregistro_pk': reg.pk,
+                    'historialaboral_pk': historia.pk,
+                    'fecha': dt,
+                    'salario_base': det.salario_base,
+                }, ignore_index=True)
+    df_save_HLRDDay(cte_pk, df_day)
+    for reg in historia.registros.all():
+        df_pers_new = df_generate_HLRD_periodo_continuo_laborado(cte_pk, reg)
+        df_pers = df_update(df_pers, df_pers_new)
+    df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers)
+    df_save_HLRD_periodo_continuo_laborado(cte_pk, df_pers)

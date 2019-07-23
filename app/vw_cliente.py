@@ -27,6 +27,7 @@ from routines.utils import (
     inter_periods_days, free_days)
 from app.data_utils import (
     df_load_HLRD_periodo_continuo_laborado, df_load_HLRDDay)
+from routines.utils import hipernormalize
 
 
 def add_nota(cte, nota, fecha_notificacion, usr):
@@ -38,8 +39,12 @@ def add_nota(cte, nota, fecha_notificacion, usr):
             updated_by=usr,
         )
         if "" != fecha_notificacion:
+            url = reverse('cliente_see', kwargs={'pk': cte.pk})
+            link = '<a href="{}" target="_blank">{}</a>'.format(
+                url, cte)
             add_alert(
-                "En referencia al cliente {}:\n\n{}".format(cte, nota),
+                "En referencia al cliente {}:\n\n{}".format(
+                    link, nota),
                 fecha_notificacion,
                 usr,
                 usr)
@@ -60,12 +65,27 @@ def add_alert(nota, fecha_notificacion, usr_to, usr_creator):
 def index(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     data = list(Cliente.objects.all())
+    search_value = ""
     toolbar = []
     if usuario.has_perm_or_has_perm_child('cliente.agregar_clientes_cliente'):
         toolbar.append({
             'type': 'link',
             'view': 'cliente_new',
             'label': '<i class="far fa-file"></i> Nuevo'})
+    toolbar.append({'type': 'search'})
+    if "POST" == request.method:
+        if "search" == request.POST.get('action'):
+            search_value = hipernormalize(request.POST.get('valor'))
+            data = [reg
+                    for reg in data if (search_value in hipernormalize(
+                        reg.first_name) 
+                        or search_value in hipernormalize(reg.last_name)
+                        or search_value in hipernormalize(
+                            reg.apellido_materno)
+                        or search_value in hipernormalize(reg.CURP)
+                        or search_value in hipernormalize(reg.NSS)
+                        or search_value in hipernormalize(reg.RFC))
+                    ]
     return render(
         request,
         'app/cliente/index.html', {
@@ -74,6 +94,7 @@ def index(request):
             'data': data,
             'toolbar': toolbar,
             'req_ui': requires_jquery_ui(request),
+            'search_value': search_value,
             })
 
 
@@ -397,7 +418,7 @@ def historia_laboral(request, pk):
                             created_by=usuario,
                             updated_by=usuario
                         ).save()
-            reg.setDates()
+            historia.reset_and_calculate_history()
         elif "captura-excel" == request.POST.get('action'):
             for x in range(int(request.POST.get('rows'))):
                 registro_patronal = request.POST.get(
@@ -454,7 +475,7 @@ def historia_laboral(request, pk):
                             created_by=usuario,
                             updated_by=usuario
                         ).save()
-                reg.setDates()
+            historia.reset_and_calculate_history()
         elif "captura-word" == request.POST.get('action'):
             for x in range(int(request.POST.get('rows'))):
                 registro_patronal = request.POST.get(
@@ -510,7 +531,7 @@ def historia_laboral(request, pk):
                             created_by=usuario,
                             updated_by=usuario
                         ).save()
-                reg.setDates()
+            historia.reset_and_calculate_history()
         elif "captura-pdf" == request.POST.get('action'):
             registro_patronal = request.POST.get('registro_patronal')
             empresa = request.POST.get('empresa')
@@ -565,7 +586,7 @@ def historia_laboral(request, pk):
                             created_by=usuario,
                             updated_by=usuario
                         ).save()
-            reg.setDates()
+            historia.reset_and_calculate_history()
         elif "update-registro" == request.POST.get('action'):
             id_data = request.POST.get('id_data')
             registro_patronal = request.POST.get('registro_patronal')
@@ -590,7 +611,7 @@ def historia_laboral(request, pk):
             reg.salario_base = salario
             reg.vigente = vigente
             reg.save()
-            reg.historia_laboral_registro.setDates()
+            historia.reset_and_calculate_history()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk}))
     return render(request, 'app/cliente/historial.html', {
@@ -613,8 +634,7 @@ def delete_registro(request, pk):
     pk_cliente = hl.cliente.pk
     try:
         obj.delete()
-        for reg in hl.registros.all():
-            reg.setDates()
+        hl.reset_and_calculate_history()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
     except ProtectedError:
@@ -631,7 +651,7 @@ def delete_detalle(request, pk):
     reg = obj.historia_laboral_registro
     try:
         obj.delete()
-        reg.setDates()
+        hl.reset_and_calculate_history()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
     except ProtectedError:
