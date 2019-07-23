@@ -14,7 +14,9 @@ from app.data_utils import (
     df_load_HLRD_periodo_continuo_laborado,
     df_generate_HLRD_periodo_continuo_laborado,
     df_generate_data_cotiz_HLRD_periodo_continuo_laborado,
-    df_save_HLRD_periodo_continuo_laborado
+    df_save_HLRD_periodo_continuo_laborado,
+    delete_files,
+    df_reset_data,
 )
 
 # Create your models here.
@@ -465,13 +467,13 @@ class HistoriaLaboral(models.Model):
         res = df_pers.agg(['max'])['fecha_fin']['max']
         return res
 
-    def agg_salario(self, dias=None):
+    def agg_salario(self, dias_calculo=None):
         """
         Calcula los elementos relacionados con el Salario Promedio Diario
 
         Parameters
         ----------
-        dias : integer, optional
+        dias_calculo : integer, optional
             Número de últimos días para realizar el cálculo del
             Salario Promedio Diario, si su valor es None se tomará en
             cuenta el valor establecido en el miembro dias_salario_promedio
@@ -496,9 +498,9 @@ class HistoriaLaboral(models.Model):
             for reg in salario_df.itertuples():
                 print(reg[1],reg[2],reg[3],reg[4],reg[5])
         """
-        if dias is None:
-            dias = self.dias_salario_promedio
-        df = df_load_HLRDDay_agg(self.cliente.pk).head(dias)
+        if dias_calculo is None:
+            dias_calculo = self.dias_salario_promedio
+        df = df_load_HLRDDay_agg(self.cliente.pk).head(dias_calculo)
         tope_uma = 25 * self.uma.valor
         df['salario_topado'] = df.salario
         df.loc[df.salario > tope_uma, 'salario_topado' ] = tope_uma
@@ -543,11 +545,16 @@ class HistoriaLaboral(models.Model):
             ]).sort_values(['f_ini','f_fin'], ascending=[False,False])
         return {
             'suma_salario': ss['salario_topado']['sum'],
-            'salario_promedio': ss['salario_topado']['sum'] / dias,
+            'salario_promedio': ss['salario_topado']['sum'] / dias_calculo,
             'fecha_minima': ss['fecha']['min'],
             'fecha_maxima': ss['fecha']['max'],
             'salario_df': salary_df,
         }
+
+    def reset_and_calculate_history(self):
+        for reg in self.registros.all():
+            reg.setFechasIniFin(False)
+        df_reset_data(self.cliente.pk, self)
 
     class Meta:
         ordering = ["cliente", "-updated_at"]
@@ -646,13 +653,14 @@ class HistoriaLaboralRegistro(models.Model):
             except AttributeError:
                 return date.today()
 
-    def setDates(self):
+    def setFechasIniFin(self, filling_days=True):
         vigente = False
         fecha_inicial = self.detalle.all().aggregate(Min('fecha_inicial'))
         fecha_final = self.detalle.all().aggregate(Max('fecha_final'))
         for det in self.detalle.all():
             vigente = vigente or det.vigente
-            det.fill_days()
+            if filling_days:
+                det.fill_days()
         self.vigente = vigente
         self.fecha_de_alta = fecha_inicial['fecha_inicial__min']
         if not vigente:
@@ -660,6 +668,9 @@ class HistoriaLaboralRegistro(models.Model):
         else:
             self.fecha_de_baja = None
         self.save()
+
+    def setDates(self):
+        self.setFechasIniFin()
         self.createPeriodos()
 
     def createPeriodos(self):

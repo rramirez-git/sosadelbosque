@@ -350,6 +350,9 @@ class Usr(User):
                 self.groups.filter(
                     name__icontains="Super-Administrador").exists())
 
+    class Meta:
+        ordering = ['first_name', 'last_name', 'apellido_materno']
+
 
 class Setting(models.Model):
     ENTERO = 'INTEGER'
