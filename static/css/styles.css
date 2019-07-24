@@ -19,7 +19,7 @@ body {
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6{
-    color: #007bff;
+    /*color: #007bff;*/
 }
 
 a, a:hover, a:active, a:visited, a:focus {
