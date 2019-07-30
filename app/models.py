@@ -430,6 +430,13 @@ class HistoriaLaboral(models.Model):
     dias_salario_promedio = models.PositiveSmallIntegerField(
         default=1750,
         verbose_name="Cantidad de Días para calculo de salario promedio")
+    factor_de_actualizacion = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        default=11, verbose_name="Factor de Actualización")
+    tiene_esposa = models.BooleanField(
+        default=False, verbose_name="¿Tiene esposa?")
+    numero_de_hijos = models.PositiveSmallIntegerField(
+        default=0, verbose_name="Número de Hijos")
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
@@ -841,8 +848,62 @@ class Factoredad(models.Model):
         ordering = ['edad']
 
     def __str__(self):
-        return "{} ({}%%)".format(self.edad, self.factor_de_edad)
+        return "{} ({}%)".format(self.edad, self.factor_de_edad)
 
     def __unicode__(self):
         return self.__str__()
 
+
+class OpcionPension(models.Model):
+    idopcionpension = models.AutoField(primary_key=True)
+    historia_laboral = models.ForeignKey(
+        HistoriaLaboral, on_delete=models.CASCADE,
+        related_name='opciones')
+    seleccionada = models.BooleanField(default=False)
+    uma_anio = models.PositiveSmallIntegerField()
+    uma_valor = models.DecimalField(max_digits=5, decimal_places=2)
+    salario_promedio = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.0)
+    salario_promedio_mensual = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.0)
+    dias_calculo_saldo_promedio = models.PositiveSmallIntegerField()
+    semanas_cotizadas = models.PositiveSmallIntegerField()
+    porcentaje_cuantia_basica = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    porcentaje_incremento_anual = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    edad = models.PositiveSmallIntegerField()
+    porcentaje_factor_edad = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    porcentaje_cuantia_basica_incremento = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    factor_actualizacion = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    porcentaje_esposa = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    porcentaje_hijos = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    porcentaje_asignaciones_familiares = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    pension_mensual_calculada = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.0)
+    porcentaje_de_salario_promedio = models.DecimalField(
+        max_digits=6, decimal_places=3)
+    comentarios = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-seleccionada', '-created_at']
+
+    def __str__(self):
+        return "{} ({})".format(self.historia_laboral.cliente, self.created_at)
+
+    def __unicode__(self):
+        return self.__str__()

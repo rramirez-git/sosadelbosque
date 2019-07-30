@@ -16,7 +16,7 @@ from routines.mkitsafe import valida_acceso
 from .models import (
     Cliente, TaxonomiaExpediente, HistoriaLaboral,
     HistoriaLaboralRegistro, HistoriaLaboralRegistroDetalle, UMA,
-    DoctoGral)
+    DoctoGral, OpcionPension, Factoredad, Cuantiabasica)
 from .forms import (
     frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
     frmClienteObservaciones)
@@ -364,6 +364,8 @@ def historia_laboral(request, pk):
             historia.comentarios = request.POST.get('comentarios')
             historia.uma = UMA.objects.get(pk=request.POST.get('uma'))
             historia.dias_salario_promedio = request.POST.get('dias')
+            historia.tiene_esposa = "on" == request.POST.get('tiene_esposa')
+            historia.numero_de_hijos = request.POST.get('numero_de_hijos')
             historia.updated_by = usuario
             historia.save()
         elif "captura-manual" == request.POST.get('action'):
@@ -865,3 +867,166 @@ def update_all_salarios_complete(request):
             file.write("Updated")
     file.close()
     return render(request, "global/html.html", {})
+
+
+@valida_acceso(['cliente.clientes_cliente'])
+def pensiones_list(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not Cliente.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    cte = Cliente.objects.get(pk=pk)
+    if HistoriaLaboral.objects.filter(cliente=cte).exists():
+        historia = HistoriaLaboral.objects.get(cliente=cte)
+    else:
+        historia = HistoriaLaboral.objects.create(
+            cliente=cte, created_by=usuario, updated_by=usuario)
+        historia.save()
+    toolbar = []
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'cliente_pension_new',
+        'label': '<i class="far fa-file"></i> Nuevo',
+        'pk': pk})
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'cliente_see',
+        'label': '<i class="far fa-eye"></i> Ver Cliente',
+        'pk': pk})
+    return render(request, 'app/cliente/pension_index.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Opciones de Pension',
+        'titulo_descripcion': cte,
+        'req_ui': requires_jquery_ui(request),
+        'read_only': True,
+        'toolbar': toolbar,
+        'cliente': cte,
+        'historia': historia,
+        'umas': list(UMA.objects.all()),
+        'factoresedad': list(Factoredad.objects.all()),
+    })
+
+
+@valida_acceso(['cliente.clientes_cliente'])
+def pensiones_new(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not Cliente.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    cte = Cliente.objects.get(pk=pk)
+    if HistoriaLaboral.objects.filter(cliente=cte).exists():
+        historia = HistoriaLaboral.objects.get(cliente=cte)
+    else:
+        historia = HistoriaLaboral.objects.create(
+            cliente=cte, created_by=usuario, updated_by=usuario)
+        historia.save()
+    toolbar = []
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'cliente_see',
+        'label': '<i class="far fa-eye"></i> Ver Cliente',
+        'pk': pk})
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'cliente_pension_index',
+        'label': '<i class="fas fa-list-ul"></i> Ver Opciones de Pensión',
+        'pk': pk})
+    if "POST" == request.method:
+        opcion = OpcionPension.objects.create(
+            historia_laboral=historia,
+            seleccionada=request.POST.get('seleccionada') == "on",
+            uma_anio=request.POST.get('uma_anio'),
+            uma_valor=request.POST.get('uma_valor'),
+            salario_promedio=request.POST.get('salario_promedio'),
+            salario_promedio_mensual=request.POST.get('salario_promedio_mensual'),
+            dias_calculo_saldo_promedio=historia.dias_salario_promedio,
+            semanas_cotizadas=request.POST.get('semanas_cotizadas'),
+            porcentaje_cuantia_basica=request.POST.get('porcentaje_cuantia_basica'),
+            porcentaje_incremento_anual=request.POST.get('porcentaje_incremento_anual'),
+            edad=request.POST.get('edad'),
+            porcentaje_factor_edad=request.POST.get('porcentaje_factor_edad'),
+            porcentaje_cuantia_basica_incremento=request.POST.get('porcentaje_cuantia_basica_incremento'),
+            factor_actualizacion=request.POST.get('factor_actualizacion'),
+            porcentaje_esposa=request.POST.get('porcentaje_esposa'),
+            porcentaje_hijos=request.POST.get('porcentaje_hijos'),
+            porcentaje_asignaciones_familiares=request.POST.get('porcentaje_asignaciones_familiares'),
+            pension_mensual_calculada=request.POST.get('pension_mensual_calculada'),
+            porcentaje_de_salario_promedio=request.POST.get('porcentaje_de_salario_promedio'),
+            comentarios=request.POST.get('comentarios'),
+            created_by=usuario,
+            updated_by=usuario,
+        )
+        return HttpResponseRedirect(reverse(
+            'cliente_pension_index', kwargs={'pk': cte.pk}
+        ))
+    else:
+        opcion = {
+            'created_at': date.today(),
+            'uma_anio': historia.uma.año,
+            'uma_valor': historia.uma.valor,
+            'semanas_cotizadas': historia.semanas_cotizadas,
+            'salario_promedio': historia.agg_salario()['salario_promedio'],
+            'edad': cte.edad,
+            'factor_actualizacion': historia.factor_de_actualizacion,
+            'porcentaje_esposa': historia.tiene_esposa * 15,
+            'porcentaje_hijos': historia.numero_de_hijos * 10,
+        }
+    return render(request, 'app/cliente/pension_new.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Nueva Opciones de Pension',
+        'titulo_descripcion': cte,
+        'req_ui': requires_jquery_ui(request),
+        'toolbar': toolbar,
+        'cliente': cte,
+        'historia': historia,
+        'umas': list(UMA.objects.all()),
+        'factoresedad': list(Factoredad.objects.all()),
+        'cbis': json.dumps([{
+            'inicio': float(cbi.salario_inicio),
+            'fin': float(cbi.salario_fin),
+            'cb': float(cbi.porcentaje_de_cuantia_basica),
+            'i': float(cbi.porcentaje_de_incremento_anual),
+            } for cbi in Cuantiabasica.objects.all()]),
+        'opcion': opcion,
+    })
+
+
+@valida_acceso(['cliente.clientes_cliente'])
+def pensiones_delete(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not OpcionPension.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = OpcionPension.objects.get(pk=pk)
+    pk_cliente = obj.historia_laboral.cliente.pk
+    try:
+        obj.delete()
+        return HttpResponseRedirect(reverse(
+            'cliente_pension_index', kwargs={'pk': pk_cliente}))
+    except ProtectedError:
+        return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+
+@valida_acceso(['cliente.clientes_cliente'])
+def pensiones_select(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not OpcionPension.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = OpcionPension.objects.get(pk=pk)
+    pk_cliente = obj.historia_laboral.cliente.pk
+    obj.seleccionada = True
+    obj.updated_by = usuario
+    obj.save()
+    return HttpResponseRedirect(reverse(
+        'cliente_pension_index', kwargs={'pk': pk_cliente}))
+
+
+@valida_acceso(['cliente.clientes_cliente'])
+def pensiones_unselect(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not OpcionPension.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = OpcionPension.objects.get(pk=pk)
+    pk_cliente = obj.historia_laboral.cliente.pk
+    obj.seleccionada = False
+    obj.updated_by = usuario
+    obj.save()
+    return HttpResponseRedirect(reverse(
+        'cliente_pension_index', kwargs={'pk': pk_cliente}))

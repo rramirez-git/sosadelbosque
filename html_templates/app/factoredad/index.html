@@ -7,7 +7,7 @@
     <thead>
         <tr>
             <th>Edad</th>
-            <th>Porcenatje de Factor de Edad</th>
+            <th>Porcentaje de Factor de Edad</th>
             <th class="text-right" colspan="3"></th>
         </tr>
     </thead>
@@ -15,7 +15,7 @@
         {% for reg in data %}
             <tr>
                 <td class="text-center">{{ reg.edad }}</td>
-                <td class="text-center">$ {{ reg.factor_de_edad }}</td>
+                <td class="text-center">{{ reg.factor_de_edad }} %</td>
                 <td class="text-center">
                     {% if cperms.see %}
                     <a href="{% url 'factoredad_see' pk=reg.pk %}" class="btn btn-outline-secondary" title="Ver"><i class="far fa-eye"></i></a>

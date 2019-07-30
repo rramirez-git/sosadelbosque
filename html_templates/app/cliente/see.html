@@ -53,6 +53,11 @@
                 Historia Laboral
             </a>
             <p></p>
+            <a href="{% url 'cliente_pension_index' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
+                <i class="fas fa-file-medical-alt"></i>
+                Pensión
+            </a>
+            <p></p>
             {% if cte.actividades_asociadas.all %}
             <h5>Actividades</h5>
             <div class="list-group">
