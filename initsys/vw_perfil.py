@@ -148,9 +148,14 @@ def update(request, pk):
     gpo = Group.objects.get(pk=pk)
     alerta = []
     if "POST" == request.method:
+        print(gpo.name, request.POST.get('nombre'), gpo.name != request.POST.get('nombre'))
         if(gpo.name != request.POST.get('nombre') and 
-            not Group.objects.filter(
+            Group.objects.filter(
                 name=request.POST.get('nombre')).exists()):
+            alerta.append(
+                'Ya existe un grupo con ese nombre, '
+                'por favor asigne otro nombre para el grupo')
+        else:
             gpo.name = request.POST.get('nombre')
             gpo.save()
             gpo.permissions.clear()
@@ -160,10 +165,6 @@ def update(request, pk):
                 gpo.save()
             return HttpResponseRedirect(reverse(
                 'perfil_see', kwargs={'pk': gpo.pk}))
-        else:
-            alerta.append(
-                'Ya existe un grupo con ese nombre, '
-                'por favor asigne otro nombre para el grupo')
     root_perms = Permiso.objects.filter(
         permiso_padre__isnull=True).order_by('posicion')
     permisos = []

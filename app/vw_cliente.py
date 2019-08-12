@@ -176,27 +176,31 @@ def see(request, pk):
             'type': 'link',
             'view': 'cliente_index',
             'label': '<i class="fas fa-list-ul"></i> Ver todos'})
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="far fa-comment-alt"></i> Notas',
-        'onclick': 'Cte.showNotasSglCte()',
-    })
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="far fa-bell"></i> Alerta',
-        'onclick': 'Cte.showAlertsSglCte()',
-    })
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="fas fa-file-upload"></i> Adjuntar',
-        'onclick': 'Cte.showFrmDoctoGral()'
-    })
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'actividad_new',
-        'label': '<i class="fas fa-paperclip"></i> Actividad',
-        'pk': obj.pk
-    })
+    if usuario.has_perm_or_has_perm_child('nota.notas_nota'):
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="far fa-comment-alt"></i> Notas',
+            'onclick': 'Cte.showNotasSglCte()',
+        })
+    if usuario.has_perm_or_has_perm_child('alerta.agregar_alertas_alerta'):
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="far fa-bell"></i> Alerta',
+            'onclick': 'Cte.showAlertsSglCte()',
+        })
+    if usuario.has_perm_or_has_perm_child('doctogral.agregar_documentos_docto gral'):
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="fas fa-file-upload"></i> Adjuntar',
+            'onclick': 'Cte.showFrmDoctoGral()'
+        })
+    if usuario.has_perm_or_has_perm_child('actividad.agregar_actividad_actividad'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'actividad_new',
+            'label': '<i class="fas fa-paperclip"></i> Actividad',
+            'pk': obj.pk
+        })
     if usuario.has_perm_or_has_perm_child(
             'cliente.actualizar_clientes_cliente'):
         toolbar.append({
@@ -211,6 +215,14 @@ def see(request, pk):
             'view': 'cliente_delete',
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
+    cperms = {
+        'ver_doctogral': usuario.has_perm_or_has_perm_child('doctogral.documentos_docto gral'),
+        'del_doctogral': usuario.has_perm_or_has_perm_child('doctogral.eliminar_documentos_docto gral'),
+        'ver_actividad': usuario.has_perm_or_has_perm_child('actividad.actividad_actividad'),
+        'del_actividad': usuario.has_perm_or_has_perm_child('actividad.eliminar_actividad_actividad'),
+        'ver_hl': usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'),
+        'ver_opcpen': usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcion pension'),
+    }
     return render(request, 'app/cliente/see.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
@@ -227,6 +239,7 @@ def see(request, pk):
         'cte': obj,
         'frmDocto': frmDocument(),
         'frmObs': frmCteObs,
+        'cperms': cperms,
     })
 
 
@@ -334,31 +347,36 @@ def historia_laboral(request, pk):
             cliente=cte, created_by=usuario, updated_by=usuario)
         historia.save()
     toolbar = []
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_see',
-        'label': '<i class="far fa-eye"></i> Ver Cliente',
-        'pk': cte.pk})
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="far fa-hand-paper"></i> C. Manual',
-        'onclick': 'openCaptManual()',
-    })
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="far fa-file-excel"></i> C. Excel',
-        'onclick': 'openCaptExcel()',
-    })
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="far fa-file-word"></i> C. Word',
-        'onclick': 'openCaptWord()',
-    })
-    toolbar.append({
-        'type': 'button',
-        'label': '<i class="far fa-file-pdf"></i> C. PDF',
-        'onclick': 'openCaptPDF()',
-    })
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):        
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_see',
+            'label': '<i class="far fa-eye"></i> Ver Cliente',
+            'pk': cte.pk})
+    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_manual_historia laboral'):        
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="far fa-hand-paper"></i> C. Manual',
+            'onclick': 'openCaptManual()',
+        })
+    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_desde_excel_historia laboral'):        
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="far fa-file-excel"></i> C. Excel',
+            'onclick': 'openCaptExcel()',
+        })
+    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_desde_word_historia laboral'):        
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="far fa-file-word"></i> C. Word',
+            'onclick': 'openCaptWord()',
+        })
+    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_desde_pdf_historia laboral'):        
+        toolbar.append({
+            'type': 'button',
+            'label': '<i class="far fa-file-pdf"></i> C. PDF',
+            'onclick': 'openCaptPDF()',
+        })
     if "POST" == request.method:
         if "update-comments" == request.POST.get('action'):
             historia.comentarios = request.POST.get('comentarios')
@@ -616,13 +634,23 @@ def historia_laboral(request, pk):
             historia.reset_and_calculate_history()
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk}))
+    cperms = {
+        'ver_dt': usuario.has_perm_or_has_perm_child('historialaboral.ver_detalle_tabular_historia laboral'),
+        'ver_dg': usuario.has_perm_or_has_perm_child('historialaboral.ver_detalle_grafico_historia laboral'),
+        'upd_hl': usuario.has_perm_or_has_perm_child('historialaboral.actualizar_historia_laboral_historia laboral'),
+        'upd_reg': usuario.has_perm_or_has_perm_child('historialaboralregistro.actualizar_registro_historia laboral registro'),
+        'del_reg': usuario.has_perm_or_has_perm_child('historialaboralregistro.eliminar_registro_historia laboral registro'),
+        'upd_det': usuario.has_perm_or_has_perm_child('historialaboralregistrodetalle.actualizar_detalle_historia laboral registro detalle'),
+        'del_det': usuario.has_perm_or_has_perm_child('historialaboralregistrodetalle.eliminar_detalle_historia laboral registro detalle'),
+    }
     return render(request, 'app/cliente/historial.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Historial Laboral',
         'toolbar': toolbar,
         'cte': cte,
         'historia': historia,
-        'umas': list(UMA.objects.all())
+        'umas': list(UMA.objects.all()),
+        'cperms': cperms,
     })
 
 
@@ -650,7 +678,7 @@ def delete_detalle(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     obj = HistoriaLaboralRegistroDetalle.objects.get(pk=pk)
     pk_cliente = obj.historia_laboral_registro.historia_laboral.cliente.pk
-    reg = obj.historia_laboral_registro
+    hl = obj.historia_laboral_registro.historia_laboral
     try:
         obj.delete()
         hl.reset_and_calculate_history()
@@ -667,17 +695,19 @@ def historia_laboral_vista_tabular(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     historia_laboral = HistoriaLaboral.objects.get(pk=pk)
     toolbar = []
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_see',
-        'label': '<i class="far fa-eye"></i> Ver Cliente',
-        'pk': historia_laboral.cliente.pk})
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_historia_laboral',
-        'label': '<i class="fas fa-file-medical-alt"></i>'
-        ' Ver Historia Laboral',
-        'pk': historia_laboral.cliente.pk})
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_see',
+            'label': '<i class="far fa-eye"></i> Ver Cliente',
+            'pk': historia_laboral.cliente.pk})
+    if usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_historia_laboral',
+            'label': '<i class="fas fa-file-medical-alt"></i>'
+            ' Ver Historia Laboral',
+            'pk': historia_laboral.cliente.pk})
     df_pers = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
     df_pers[
         'historialaboralregistro'
@@ -721,17 +751,19 @@ def historia_laboral_vista_grafica(request, pk):
         return HttpResponseRedirect(reverse('item_no_encontrado'))
     historia_laboral = HistoriaLaboral.objects.get(pk=pk)
     toolbar = []
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_see',
-        'label': '<i class="far fa-eye"></i> Ver Cliente',
-        'pk': historia_laboral.cliente.pk})
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_historia_laboral',
-        'label': '<i class="fas fa-file-medical-alt"></i>'
-        ' Ver Historia Laboral',
-        'pk': historia_laboral.cliente.pk})
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_see',
+            'label': '<i class="far fa-eye"></i> Ver Cliente',
+            'pk': historia_laboral.cliente.pk})
+    if usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_historia_laboral',
+            'label': '<i class="fas fa-file-medical-alt"></i>'
+            ' Ver Historia Laboral',
+            'pk': historia_laboral.cliente.pk})
     periodos = []
     dtotal = (historia_laboral.fin - historia_laboral.inicio).days
     df_periodos = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
@@ -869,7 +901,7 @@ def update_all_salarios_complete(request):
     return render(request, "global/html.html", {})
 
 
-@valida_acceso(['cliente.clientes_cliente'])
+@valida_acceso(['opcionpension.opciones_de_pension_opcion pension'])
 def pensiones_list(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Cliente.objects.filter(pk=pk).exists():
@@ -882,16 +914,23 @@ def pensiones_list(request, pk):
             cliente=cte, created_by=usuario, updated_by=usuario)
         historia.save()
     toolbar = []
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_pension_new',
-        'label': '<i class="far fa-file"></i> Nuevo',
-        'pk': pk})
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_see',
-        'label': '<i class="far fa-eye"></i> Ver Cliente',
-        'pk': pk})
+    if usuario.has_perm_or_has_perm_child('opcionpension.agregar_opcion_de_pension_opcion pension'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_pension_new',
+            'label': '<i class="far fa-file"></i> Nuevo',
+            'pk': pk})
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_see',
+            'label': '<i class="far fa-eye"></i> Ver Cliente',
+            'pk': pk})
+    cperms = {
+        'del_opc': usuario.has_perm_or_has_perm_child('opcionpension.eliminar_opcion_de_pension_opcion pension'),
+        'set_opc': usuario.has_perm_or_has_perm_child('opcionpension.seleccionar_opcion_de_pension_opcion pension'),
+        'ust_opc': usuario.has_perm_or_has_perm_child('opcionpension.deseleccionar_opcion_de_pension_opcion pension'),
+    }
     return render(request, 'app/cliente/pension_index.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Opciones de Pension',
@@ -903,6 +942,7 @@ def pensiones_list(request, pk):
         'historia': historia,
         'umas': list(UMA.objects.all()),
         'factoresedad': list(Factoredad.objects.all()),
+        'cperms': cperms,
     })
 
 

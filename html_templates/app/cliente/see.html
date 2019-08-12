@@ -8,7 +8,7 @@
     {% csrf_token %}
     <div class="row">
         <div class="col-sm-2">
-            {% if cte.documentos.all %}
+            {% if cperms.ver_doctogral and cte.documentos.all %}
             <h5>Documentos</h5>
             <ul class="list-group">
                 {% for docto in cte.documentos.all %}
@@ -17,11 +17,13 @@
                     data-toggle="tooltip" data-placement="right" data-html="true"
                     title="{{ docto.observaciones | as_paragraph }}"
                     {% endif %}>
+                    {% if cperms.del_doctogral %}
                     <div class="float-right">
                         <a href="#" onclick="App.showDeletingConfirmation('{% url 'cliente_eliminar_documento' pk=docto.pk %}')" class="btn btn-outline-secondary btn-sm">
                             <i class="far fa-trash-alt"></i>
                         </a>
                     </div>
+                    {% endif %}
                     <a href="{{ docto.anverso.url}}" 
                         target="_blank">
                         {{ docto }}
@@ -48,17 +50,21 @@
             {{ frm6 | crispy }}
         </div>
         <div class="col-sm-2">
+            {% if cperms.ver_hl %}
             <a href="{% url 'cliente_historia_laboral' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
                 <i class="fas fa-file-medical-alt"></i>
                 Historia Laboral
             </a>
             <p></p>
+            {% endif %}
+            {% if cperms.ver_opcpen %}
             <a href="{% url 'cliente_pension_index' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
                 <i class="fas fa-file-medical-alt"></i>
                 Pensión
             </a>
             <p></p>
-            {% if cte.actividades_asociadas.all %}
+            {% endif %}
+            {% if cperms.ver_actividad and cte.actividades_asociadas.all %}
             <h5>Actividades</h5>
             <div class="list-group">
                 {% for act in cte.actividades_asociadas.all %}
@@ -85,6 +91,7 @@
 <script type="text/x-handlebars-template" id="notas-template">
     <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
         {% csrf_token %}
+        {% if perms.initsys.agregar_notas_nota %}
         <input type="hidden" name="action" value="add-note" />
         <div class="row">
             <div class="col form-group">
@@ -99,7 +106,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-outline-primary">Agregar Nota</button>
-
+        {% endif %}
         {% for nota in cte.notas.all %}
         <hr />
         <div class="row">

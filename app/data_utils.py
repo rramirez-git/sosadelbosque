@@ -252,6 +252,8 @@ def df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers=None):
                         df_pers.fecha_fin[x])
                     if dias_inactivos > dias_i:
                         dias_inactivos = dias_i
+            if dias_inactivos > 0:
+                dias_inactivos = dias_inactivos - 1
         sc = round(int(dias_cotizados) / 7)
         si = round(int(dias_inactivos) / 7)
         df_pers.at[x, 'dias_cotiz'] = dias_cotizados
