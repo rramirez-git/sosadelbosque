@@ -221,7 +221,7 @@ def see(request, pk):
         'ver_actividad': usuario.has_perm_or_has_perm_child('actividad.actividad_actividad'),
         'del_actividad': usuario.has_perm_or_has_perm_child('actividad.eliminar_actividad_actividad'),
         'ver_hl': usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'),
-        'ver_opcpen': usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcion pension'),
+        'ver_opcpen': usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcionpension'),
     }
     return render(request, 'app/cliente/see.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -901,7 +901,7 @@ def update_all_salarios_complete(request):
     return render(request, "global/html.html", {})
 
 
-@valida_acceso(['opcionpension.opciones_de_pension_opcion pension'])
+@valida_acceso(['opcionpension.opciones_de_pension_opcion pension', 'opcionpension.opciones_de_pension_opcionpension'])
 def pensiones_list(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Cliente.objects.filter(pk=pk).exists():
@@ -914,7 +914,7 @@ def pensiones_list(request, pk):
             cliente=cte, created_by=usuario, updated_by=usuario)
         historia.save()
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('opcionpension.agregar_opcion_de_pension_opcion pension'):
+    if usuario.has_perm_or_has_perm_child('opcionpension.agregar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.agregar_opcion_de_pension_opcionpension'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'cliente_pension_new',
@@ -927,9 +927,9 @@ def pensiones_list(request, pk):
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': pk})
     cperms = {
-        'del_opc': usuario.has_perm_or_has_perm_child('opcionpension.eliminar_opcion_de_pension_opcion pension'),
-        'set_opc': usuario.has_perm_or_has_perm_child('opcionpension.seleccionar_opcion_de_pension_opcion pension'),
-        'ust_opc': usuario.has_perm_or_has_perm_child('opcionpension.deseleccionar_opcion_de_pension_opcion pension'),
+        'del_opc': usuario.has_perm_or_has_perm_child('opcionpension.eliminar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.eliminar_opcion_de_pension_opcionpension'),
+        'set_opc': usuario.has_perm_or_has_perm_child('opcionpension.seleccionar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.seleccionar_opcion_de_pension_opcionpension'),
+        'ust_opc': usuario.has_perm_or_has_perm_child('opcionpension.deseleccionar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.deseleccionar_opcion_de_pension_opcionpension'),
     }
     return render(request, 'app/cliente/pension_index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -946,7 +946,7 @@ def pensiones_list(request, pk):
     })
 
 
-@valida_acceso(['opcionpension.agregar_opcion_de_pension_opcion pension'])
+@valida_acceso(['opcionpension.agregar_opcion_de_pension_opcion pension', 'opcionpension.agregar_opcion_de_pension_opcionpension'])
 def pensiones_new(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Cliente.objects.filter(pk=pk).exists():
@@ -1029,7 +1029,7 @@ def pensiones_new(request, pk):
     })
 
 
-@valida_acceso(['opcionpension.eliminar_opcion_de_pension_opcion pension'])
+@valida_acceso(['opcionpension.eliminar_opcion_de_pension_opcion pension', 'opcionpension.eliminar_opcion_de_pension_opcionpension'])
 def pensiones_delete(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not OpcionPension.objects.filter(pk=pk).exists():
@@ -1044,7 +1044,7 @@ def pensiones_delete(request, pk):
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
 
-@valida_acceso(['opcionpension.seleccionar_opcion_de_pension_opcion pension'])
+@valida_acceso(['opcionpension.seleccionar_opcion_de_pension_opcion pension', 'opcionpension.seleccionar_opcion_de_pension_opcionpension'])
 def pensiones_select(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not OpcionPension.objects.filter(pk=pk).exists():
@@ -1058,7 +1058,7 @@ def pensiones_select(request, pk):
         'cliente_pension_index', kwargs={'pk': pk_cliente}))
 
 
-@valida_acceso(['opcionpension.deseleccionar_opcion_de_pension_opcion pension'])
+@valida_acceso(['opcionpension.deseleccionar_opcion_de_pension_opcion pension', 'opcionpension.deseleccionar_opcion_de_pension_opcionpension'])
 def pensiones_unselect(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not OpcionPension.objects.filter(pk=pk).exists():

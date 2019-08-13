@@ -25,7 +25,7 @@
             <p>
                 <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})<br />
                 <strong>{{ historia.dias_salario_promedio }}</strong> días para calculo de salario promedio diario.<br />
-                <input type="checkbox" disabled="disabled" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Tiene esposa.<br />
+                <input type="checkbox" disabled="disabled" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Asignacion Familiar (15%).<br />
                 {{ historia.numero_de_hijos }} hijos.
             </p>
             <p>
@@ -293,7 +293,7 @@
         </div>
         <div class="form-group">
             <label>
-                <input type="checkbox" value="on" name="tiene_esposa" id="tiene_esposa" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Tiene esposa
+                <input type="checkbox" value="on" name="tiene_esposa" id="tiene_esposa" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Asinación Familiar (15%)
             </label>
         </div>
         <div class="form-group">

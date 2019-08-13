@@ -434,7 +434,7 @@ class HistoriaLaboral(models.Model):
         max_digits=5, decimal_places=2,
         default=11, verbose_name="Factor de Actualización")
     tiene_esposa = models.BooleanField(
-        default=False, verbose_name="¿Tiene esposa?")
+        default=True, verbose_name="Asignacion Familiar (15%)")
     numero_de_hijos = models.PositiveSmallIntegerField(
         default=0, verbose_name="Número de Hijos")
     created_by = models.ForeignKey(
