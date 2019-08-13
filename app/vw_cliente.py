@@ -717,7 +717,7 @@ def historia_laboral_vista_tabular(request, pk):
     df_pers_agg = df_pers.agg(['min', 'max', 'sum'])
     f_max = df_pers_agg.fecha_fin['max']
     f_min = df_pers_agg.fecha_inicio['min']
-    dias_t = (f_max- f_min).days
+    dias_t = (f_max - f_min).days + 1
     aggr_per_lab = {
         'dias_transc': dias_t,
         'dias_rec': df_pers_agg.dias_cotiz['sum'],
@@ -730,8 +730,8 @@ def historia_laboral_vista_tabular(request, pk):
         'anios_transc': round(dias_t / 7) / 52,
     }
     aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc'] - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
-    aggr_per_lab['sem_dif'] = aggr_per_lab['sem_transc'] - aggr_per_lab['sem_rec'] - aggr_per_lab['sem_inac']
-    aggr_per_lab['anios_dif'] = aggr_per_lab['anios_transc'] - aggr_per_lab['anios_rec'] - aggr_per_lab['anios_inac']
+    aggr_per_lab['sem_dif'] = round(aggr_per_lab['dias_dif'] / 7)
+    aggr_per_lab['anios_dif'] = round(aggr_per_lab['dias_dif'] / 7) / 52
 
     return render(request, 'app/cliente/vista_tabular.html', {
         'menu_main': usuario.main_menu_struct(),
