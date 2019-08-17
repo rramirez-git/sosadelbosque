@@ -446,6 +446,8 @@ class HistoriaLaboral(models.Model):
         null=True, blank=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
 
+    df_agg_salario = None
+
     @property
     def dias_cotizados(self):
         df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
@@ -507,10 +509,13 @@ class HistoriaLaboral(models.Model):
         """
         if dias_calculo is None:
             dias_calculo = self.dias_salario_promedio
+        if not self.df_agg_salario is None:
+            return self.df_agg_salario
         df = df_load_HLRDDay_agg(self.cliente.pk).head(dias_calculo)
         tope_uma = 25 * self.uma.valor
         df['salario_topado'] = df.salario
         df.loc[df.salario > tope_uma, 'salario_topado' ] = tope_uma
+        df["salario_topado"] = pd.to_numeric(df["salario_topado"])
         ss = df.agg(['sum', 'min', 'max'])
         periodos = []
         inicio = None
@@ -550,13 +555,14 @@ class HistoriaLaboral(models.Model):
         salary_df = pd.DataFrame(periodos, columns=[
             'f_ini','f_fin','n','salario','salario_topado','suma_salario'
             ]).sort_values(['f_ini','f_fin'], ascending=[False,False])
-        return {
+        self.df_agg_salario = {
             'suma_salario': ss['salario_topado']['sum'],
             'salario_promedio': ss['salario_topado']['sum'] / dias_calculo,
             'fecha_minima': ss['fecha']['min'],
             'fecha_maxima': ss['fecha']['max'],
             'salario_df': salary_df,
         }
+        return self.df_agg_salario
 
     def reset_and_calculate_history(self):
         for reg in self.registros.all():

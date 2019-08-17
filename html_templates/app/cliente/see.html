@@ -87,7 +87,6 @@
         </div>
     </div>
 </form>
-
 <script type="text/x-handlebars-template" id="notas-template">
     <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
         {% csrf_token %}
@@ -104,6 +103,21 @@
                 <label for="fecha_notificacion">¿Crear una notificación?</label>
                 <input class="form-control" type="date" name="fecha_notificacion" id="fecha_notificacion" />
             </div>
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label>Notificando a:</label>
+            </div>
+        </div>
+        <div class="row">
+            {% for usr in usrs %}
+                <div class="col-sm-3">
+                    <label>
+                        <input value="{{ usr.pk }}" {% if request.session.usuario == usr.pk %}checked="checked"{% endif %} type="checkbox" name="usrs[]" id="usrs[]" />
+                        {{ usr }}
+                    </label>
+                </div>
+            {% endfor %}
         </div>
         <button type="submit" class="btn btn-outline-primary">Agregar Nota</button>
         {% endif %}
@@ -139,6 +153,21 @@
                 <input class="form-control" type="date" name="fecha_notificacion" id="fecha_notificacion" required="required" />
             </div>
         </div>
+        <div class="row">
+                <div class="col form-group">
+                    <label>Notificando también a:</label>
+                </div>
+            </div>
+            <div class="row">
+                {% for usr in usrs %}
+                    <div class="col-sm-3">
+                        <label>
+                            <input value="{{ usr.pk }}" {% if request.session.usuario == usr.pk %}checked="checked"{% endif %} type="checkbox" name="usrs[]" id="usrs[]" />
+                            {{ usr }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
         <button type="submit" class="btn btn-outline-primary">Agregar Alerta</button>
     </form>
 </script>

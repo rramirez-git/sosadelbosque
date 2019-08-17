@@ -30,7 +30,7 @@ from app.data_utils import (
 from routines.utils import hipernormalize
 
 
-def add_nota(cte, nota, fecha_notificacion, usr):
+def add_nota(cte, nota, fecha_notificacion, usr, lstusrs = None):
     if "" != nota.strip():
         nota = Nota.objects.create(
             usuario=cte,
@@ -42,12 +42,21 @@ def add_nota(cte, nota, fecha_notificacion, usr):
             url = reverse('cliente_see', kwargs={'pk': cte.pk})
             link = '<a href="{}" target="_blank">{}</a>'.format(
                 url, cte)
-            add_alert(
-                "En referencia al cliente {}:\n\n{}".format(
-                    link, nota),
-                fecha_notificacion,
-                usr,
-                usr)
+            if lstusrs:
+                for usr2 in lstusrs:
+                    add_alert(
+                    "En referencia al cliente {}:\n\n{}".format(
+                        link, nota),
+                    fecha_notificacion,
+                    Usr.objects.get(pk=usr2),
+                    usr)
+            else:
+                add_alert(
+                    "En referencia al cliente {}:\n\n{}".format(
+                        link, nota),
+                    fecha_notificacion,
+                    usr,
+                    usr)
 
 
 def add_alert(nota, fecha_notificacion, usr_to, usr_creator):
@@ -154,7 +163,8 @@ def see(request, pk):
                 obj,
                 request.POST.get('nota').strip(),
                 request.POST.get('fecha_notificacion'),
-                usuario)
+                usuario,
+                request.POST.getlist('usrs[]'))
         elif "add-alert" == request.POST.get("action"):
             add_alert(
                 request.POST.get('nota').strip(),
@@ -162,6 +172,13 @@ def see(request, pk):
                 obj,
                 usuario
             )
+            for usr2 in request.POST.getlist('usrs[]'):
+                add_alert(
+                    request.POST.get('nota').strip(),
+                    request.POST.get('fecha_notificacion'),
+                    Usr.objects.get(pk=usr2),
+                    usuario
+                )
         elif "add-document":
             frmDocto = frmDocument(request.POST or None, request.FILES)
             docto = frmDocto.save(commit=False)
@@ -223,6 +240,8 @@ def see(request, pk):
         'ver_hl': usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'),
         'ver_opcpen': usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcionpension'),
     }
+    lstNotCtesUsr = Usr.objects.exclude(
+        idusuario__in=Cliente.objects.all().values('idusuario'))
     return render(request, 'app/cliente/see.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
@@ -240,6 +259,7 @@ def see(request, pk):
         'frmDocto': frmDocument(),
         'frmObs': frmCteObs,
         'cperms': cperms,
+        'usrs': lstNotCtesUsr,
     })
 
 
