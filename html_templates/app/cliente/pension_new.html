@@ -65,7 +65,7 @@
         }
         let semanas = semanas_cotizadas - 500;
         let semanas_restantes = semanas % 52;
-        let anios_incremento = parseFloat( ( semanas - semanas_restantes ) / 52 ) + ( semanas_restantes < 13 ? 0.25 : ( semanas_restantes < 27 ? 0.5 : 1.0 ) );
+        let anios_incremento = parseFloat( ( semanas - semanas_restantes ) / 52 ) + ( semanas_restantes < 13 ? 0.0 : ( semanas_restantes < 27 ? 0.5 : 1.0 ) );
         let p_cbi = p_cb + anios_incremento * p_inc;
         let p_factor_edad = parseFloat( $( "#porcentaje_factor_edad" ).val() );
         let p_factor_actualizacion = parseFloat( $( "#factor_actualizacion" ).val() );

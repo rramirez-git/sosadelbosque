@@ -15,6 +15,7 @@ from .forms import AccUsr
 from .models import Usr
 from routines.mkitsafe import valida_acceso
 from routines.utils import is_mobile
+from app.models import Cliente
 
 from app.models import TaxonomiaExpediente, EstatusActividad
 
@@ -66,6 +67,9 @@ def item_with_relations(request):
 @valida_acceso()
 def panel(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
+    me_as_cte = None
+    if Cliente.objects.filter(idusuario=usuario.pk).exists():
+        me_as_cte = Cliente.objects.get(idusuario=usuario.pk)
     if "POST" == request.method:
         if "disble-alert" == request.POST.get('action'):
             alerta = usuario.alertas.get(pk=request.POST.get('alert'))
@@ -98,6 +102,7 @@ def panel(request):
                 mostrar_alerta=True, fecha_alerta__lte=date.today()),
             'taxonomias': taxonomias,
             'estatus_actividad': estatus_actividad,
+            'me_as_cte': me_as_cte,
         })
 
 

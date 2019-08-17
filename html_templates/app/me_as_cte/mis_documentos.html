@@ -1,0 +1,18 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% load util_filters %}
+
+{% block content %}
+
+<div class="list-group">
+    {% for docto in cte.documentos.all %}
+        {% if docto.tipo_de_documento.visible_para_usuario %}
+            <a href="{{ docto.anverso.url}}" class="list-group-item list-group-item-action" target="_blank">
+                <h5>{{ docto }}</h5>
+                {{ docto.observaciones | as_paragraph | safe }}
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}
