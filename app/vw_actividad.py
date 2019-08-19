@@ -42,7 +42,7 @@ def index(request):
     })
 
 
-@valida_acceso()
+@valida_acceso(['actividad.agregar_actividad_actividad'])
 def new(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     cliente = Cliente.objects.get(pk=pk)
@@ -64,7 +64,7 @@ def new(request, pk):
     })
 
 
-@valida_acceso()
+@valida_acceso(['actividad.actividad_actividad'])
 def see(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Actividad.objects.filter(pk=pk).exists():
@@ -84,25 +84,29 @@ def see(request, pk):
                 obj.save()
     frm = frmActividad(instance=obj)
     toolbar = []
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'cliente_see',
-        'label': '<i class="far fa-eye"></i> Ver Cliente',
-        'pk': obj.cliente.pk})
-    toolbar.append({
-        'type': 'button',
-        'onclick': 'ActividadHistoria.showFrmNew()',
-        'label': '<i class="fas fa-map-marker-alt"></i> Actualizar Estado'})
-    toolbar.append({
-        'type': 'link_pk',
-        'view': 'actividad_update',
-        'label': '<i class="far fa-edit"></i> Actualizar',
-        'pk': pk})
-    toolbar.append({
-        'type': 'link_pk_del',
-        'view': 'actividad_delete',
-        'label': '<i class="far fa-trash-alt"></i> Eliminar',
-        'pk': pk})
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_see',
+            'label': '<i class="far fa-eye"></i> Ver Cliente',
+            'pk': obj.cliente.pk})
+    if usuario.has_perm_or_has_perm_child('actividad.actualizar_estado_actividad'):
+        toolbar.append({
+            'type': 'button',
+            'onclick': 'ActividadHistoria.showFrmNew()',
+            'label': '<i class="fas fa-map-marker-alt"></i> Actualizar Estado'})
+    if usuario.has_perm_or_has_perm_child('actividad.actualizar_actividad_actividad'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'actividad_update',
+            'label': '<i class="far fa-edit"></i> Actualizar',
+            'pk': pk})
+    if usuario.has_perm_or_has_perm_child('actividad.eliminar_actividad_actividad'):
+        toolbar.append({
+            'type': 'link_pk_del',
+            'view': 'actividad_delete',
+            'label': '<i class="far fa-trash-alt"></i> Eliminar',
+            'pk': pk})
     return render(request, 'app/actividad/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Actividad',
@@ -115,7 +119,7 @@ def see(request, pk):
     })
 
 
-@valida_acceso()
+@valida_acceso(['actividad.actualizar_actividad_actividad'])
 def update(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Actividad.objects.filter(pk=pk).exists():
@@ -136,7 +140,7 @@ def update(request, pk):
     })
 
 
-@valida_acceso()
+@valida_acceso(['actividad.eliminar_actividad_actividad'])
 def delete(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Actividad.objects.filter(pk=pk).exists():

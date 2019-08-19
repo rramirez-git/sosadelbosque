@@ -236,22 +236,23 @@ def df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers=None):
         if 0 == x:
             dias_inactivos = 0
         else:
-            for y in range(len(df_pers)):
-                if y < x:
-                    dias_c = len(free_days(
-                        df_pers.fecha_inicio[y],
-                        df_pers.fecha_fin[y],
-                        df_pers.fecha_inicio[x],
-                        df_pers.fecha_fin[x]))
-                    if dias_cotizados > dias_c:
-                        dias_cotizados = dias_c
-                    dias_i = inter_periods_days(
-                        df_pers.fecha_inicio[y],
-                        df_pers.fecha_fin[y],
-                        df_pers.fecha_inicio[x],
-                        df_pers.fecha_fin[x])
-                    if dias_inactivos > dias_i:
-                        dias_inactivos = dias_i
+            for y in range(x):
+                dias_c = len(free_days(
+                    df_pers.fecha_inicio[y],
+                    df_pers.fecha_fin[y],
+                    df_pers.fecha_inicio[x],
+                    df_pers.fecha_fin[x]))
+                if dias_cotizados > dias_c:
+                    dias_cotizados = dias_c
+                dias_i = inter_periods_days(
+                    df_pers.fecha_inicio[y],
+                    df_pers.fecha_fin[y],
+                    df_pers.fecha_inicio[x],
+                    df_pers.fecha_fin[x])
+                if dias_inactivos > dias_i:
+                    dias_inactivos = dias_i
+            if dias_inactivos > 0:
+                dias_inactivos = dias_inactivos - 1
         sc = round(int(dias_cotizados) / 7)
         si = round(int(dias_inactivos) / 7)
         df_pers.at[x, 'dias_cotiz'] = dias_cotizados
@@ -260,6 +261,7 @@ def df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers=None):
         df_pers.at[x, 'dias_inact'] = dias_inactivos
         df_pers.at[x, 'semanas_inact'] = si
         df_pers.at[x, 'anios_inact'] = si / 52
+        # print(x,df_pers['fecha_inicio'][x],df_pers['fecha_fin'][x],dias_cotizados,dias_inactivos)
     return df_pers
 
 def df_save_HLRD_periodo_continuo_laborado(cte_pk, df):
@@ -290,5 +292,6 @@ def df_reset_data(cte_pk, historia):
     for reg in historia.registros.all():
         df_pers_new = df_generate_HLRD_periodo_continuo_laborado(cte_pk, reg)
         df_pers = df_update(df_pers, df_pers_new)
-    df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers)
+    df_save_HLRD_periodo_continuo_laborado(cte_pk, df_pers)
+    df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk)
     df_save_HLRD_periodo_continuo_laborado(cte_pk, df_pers)

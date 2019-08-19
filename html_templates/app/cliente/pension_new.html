@@ -1,0 +1,85 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+{% load util_filters %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-6">
+        <p>
+            <strong>{{ cliente }}</strong><br />
+            {% if cliente.CURP %}CURP: {{ cliente.CURP }}<br />{% endif %}
+            {% if cliente.NSS %}NSS: {{ cliente.NSS }}<br />{% endif %}
+            {% if cliente.RFC %}RFC: {{ cliente.RFC }}<br />{% endif %}
+        </p>
+    </div>
+</div>
+
+<form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+{% csrf_token %}
+{% include "app/cliente/opcion_pension.html" %}
+<p></p>
+<button type="submit" class="btn btn-outline-primary" id="btn-save">Guardar</button>
+</form>
+
+<script type="text/javascript">
+    let update_uma_value = ( anio ) => {
+        $( "#uma_valor" ).attr( 'value', $( `#uma_anio option[value="${anio}"]` ).attr( 'data-valor' ) );
+        calculate_pension();
+    }
+    let update_porcentaje_factor_edad = ( edad ) => {
+        $( "#porcentaje_factor_edad" ).attr( 'value', $( `#edad option[value="${edad}"]` ).attr( 'data-valor' ) );
+        calculate_pension();
+    }
+    let update_asignaciones_familiares = () => {
+        let p_esposa = parseFloat( $( "#porcentaje_esposa" ).val() ) || 0.0;
+        let p_hijos = parseFloat( $( "#porcentaje_hijos" ).val() ) || 0.0;
+        $( "#porcentaje_asignaciones_familiares" ).attr( 'value', p_esposa + p_hijos );
+        calculate_pension();
+    }
+    let cbis = {{ cbis|safe }};
+    let set_values = () => {
+        if( App.isEmpty( $( "#uma_valor" ).val() ) ) {
+            update_uma_value( $( "#uma_anio" ).val() );
+        }
+        if( App.isEmpty( $( "#porcentaje_factor_edad" ).val() ) ) {
+            update_porcentaje_factor_edad( $( "#edad" ).val() );
+        }
+        if( App.isEmpty( $( "#porcentaje_asignaciones_familiares" ).val() ) ) {
+            update_asignaciones_familiares()
+        }
+    }
+    let calculate_pension = () => {
+        let salario_promedio_diario = parseFloat( $( "#salario_promedio" ).val() );
+        let semanas_cotizadas = parseInt( $( "#semanas_cotizadas" ).val() );
+        let salario_promedio_mensual = salario_promedio_diario * 365 / 12;
+        let uma_valor = parseFloat( $( "#uma_valor" ).val() );
+        let aux_cbi = salario_promedio_diario / uma_valor;
+        let p_cb = cbis[ 0 ].cb;
+        let p_inc = cbis[ 0 ].i;
+        for( let idx in cbis ) {
+            if( cbis[ idx ].inicio <= aux_cbi && aux_cbi <= cbis[ idx ].fin ) {
+                p_cb = cbis[ idx ].cb;
+                p_inc = cbis[ idx ].i;
+            }
+        }
+        let semanas = semanas_cotizadas - 500;
+        let semanas_restantes = semanas % 52;
+        let anios_incremento = parseFloat( ( semanas - semanas_restantes ) / 52 ) + ( semanas_restantes < 13 ? 0.0 : ( semanas_restantes < 27 ? 0.5 : 1.0 ) );
+        let p_cbi = p_cb + anios_incremento * p_inc;
+        let p_factor_edad = parseFloat( $( "#porcentaje_factor_edad" ).val() );
+        let p_factor_actualizacion = parseFloat( $( "#factor_actualizacion" ).val() );
+        let p_asignaciones_familiares = parseFloat( $( "#porcentaje_asignaciones_familiares" ).val() );
+        let pension = ( p_cbi / 100 ) * ( p_factor_edad / 100 ) * ( 1 + p_factor_actualizacion / 100 ) * ( 1 + p_asignaciones_familiares / 100 ) * ( salario_promedio_diario * 365 / 12 );
+        let p_pension = pension * 100 / salario_promedio_mensual;
+        $( "#salario_promedio_mensual" )[ 0 ].value = salario_promedio_mensual.asMoney();
+        $( "#porcentaje_cuantia_basica" )[ 0 ].value = p_cb;
+        $( "#porcentaje_incremento_anual" )[ 0 ].value = p_inc;
+        $( "#porcentaje_cuantia_basica_incremento" )[ 0 ].value = p_cbi.asMoney();
+        $( "#pension_mensual_calculada" )[ 0 ].value = pension.asMoney();
+        $( "#porcentaje_de_salario_promedio" )[ 0 ].value = p_pension.asMoney();
+    }
+    set_values();
+</script>
+
+{% endblock %}

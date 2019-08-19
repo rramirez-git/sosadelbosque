@@ -83,4 +83,67 @@
 {% endfor %}
 {% endif %}
 
+{% if me_as_cte %}
+<h5>Resumen</h5>
+
+<div class="row">
+    <div class="col-sm-6">
+        <p>
+            <strong>{{ me_as_cte }}</strong><br />
+            {% if me_as_cte.CURP %}CURP: {{ me_as_cte.CURP }}<br />{% endif %}
+            {% if me_as_cte.NSS %}NSS: {{ me_as_cte.NSS }}<br />{% endif %}
+            {% if me_as_cte.RFC %}RFC: {{ me_as_cte.RFC }}<br />{% endif %}
+        </p>
+    </div>
+    <div class="col-sm-6 card">
+        <div class="card-body">
+            {% for historia in me_as_cte.historia.all %}
+            <table class="table table-striped table-sm table-responsive-md">
+                <tbody>
+                    <tr>
+                        <th>Fecha Inicial</th>
+                        <td class="text-right">
+                            {{ historia.inicio|date:'d/M/Y' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Fecha Final</th>
+                        <td class="text-right">
+                            {{ historia.fin|date:'d/M/Y' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Semanas Cotizadas</th>
+                        <td class="text-right">
+                            {{ historia.semanas_cotizadas }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th> Salario Promedio</th>
+                        <td class="text-right">
+                            $ {{ historia.agg_salario.salario_promedio|money2display }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% for historia in me_as_cte.historia.all %}
+    {% for opcion in historia.opciones.all %}
+        {% if opcion.seleccionada %}
+            <div class="card border-{%if opcion.seleccionada %}success{% else %}primary{% endif %}" style="margin-top: 10px;">
+                <div class="card-header">Opción de Pensión</div>
+                <div class="card-body">
+                    {% include "app/cliente/opcion_pension_view.html" %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+
+{% endif %}
+
 {% endblock %}

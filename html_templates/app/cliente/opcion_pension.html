@@ -1,0 +1,137 @@
+<table class="opcion-pension-tbl">
+    <tr>
+        <td colspan="7" rowspan="6">
+            <textarea rows="9" class="form-control" id="comentarios" name="comentarios">{{ opcion.comentarios }}</textarea>
+        </td>
+        <td colspan="2" class="text-center">
+            <!--<label>
+                <input type="checkbox" value="on" name="seleccionada" id="seleccionada" {% if opcion.seleccionada%}checked="checked"{% endif %} />
+                Opción de Pension Seleccionada
+            </label>-->
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right">
+            <label for="created_at">Fecha</label>
+        </td>
+        <td>
+            <input type="date" value="{{ opcion.created_at|date:'Y-m-d' }}" name="created_at" id="created_at" class="form-control text-center" readonly="readonly" />
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2" class="text-right">
+            <label for="uma_anio">UMA</label>
+        </td>
+        <td>
+            <select name="uma_anio" id="uma_anio" class="form-control" onchange="update_uma_value( $( this ).val() )">
+                {% for uma in umas %}
+                <option value="{{ uma.año }}" data-valor="{{ uma.valor }}" {% if uma.año == opcion.uma_anio %}selected="select"{% endif %}>{{ uma }}</option>
+                {% endfor %}
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="text" value="{{ opcion.uma_valor }}" name="uma_valor" id="uma_valor" class="form-control text-center" onchange="calculate_pension()" />
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right">
+            <label for="porcentaje_cuantia_basica">Cuantía Básica</label>
+        </td>
+        <td>
+            <input type="text" value="{{ opcion.porcentaje_cuantia_basica }}" name="porcentaje_cuantia_basica" id="porcentaje_cuantia_basica" class="form-control text-center" readonly="readonly" />
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right">
+            <label for="porcentaje_incremento_anual">Incrementos</label>
+        </td>
+        <td>
+            <input type="text" value="{{ opcion.porcentaje_incremento_anual }}" name="porcentaje_incremento_anual" id="porcentaje_incremento_anual" class="form-control text-center" readonly="readonly" />
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" class="text-right">
+            <label for="semanas_cotizadas">Semanas Reconocidas</label>
+        </td>
+        <td>
+            <input type="number" value="{{ opcion.semanas_cotizadas }}" name="semanas_cotizadas" id="semanas_cotizadas" onchange="calculate_pension()" class="form-control text-center" />
+        </td>
+        <td></td>
+        <td class="text-center">
+            <label for="salario_promedio_mensual">Mensual</label>
+        </td>
+        <td></td>
+        <td colspan="3" class="text-center">
+            <label for="porcentaje_de_salario_promedio">% de Salario Promedio</label>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" class="text-right">
+            <label for="salario_promedio">Salario Promedio Diario</label>
+        </td>
+        <td>
+            <input type="text" value="{{ opcion.salario_promedio }}" name="salario_promedio" id="salario_promedio" onchange="calculate_pension()" class="form-control text-center" />
+        </td>
+        <td></td>
+        <td>
+            <input type="text" value="{{ opcion.salario_promedio_mensual }}" name="salario_promedio_mensual" id="salario_promedio_mensual" class="form-control text-center" readonly="readonly" />
+        </td>
+        <td></td>
+        <td colspan="3">
+            <input type="text" value="{{ opcion.porcentaje_de_salario_promedio }}" name="porcentaje_de_salario_promedio" id="porcentaje_de_salario_promedio" class="form-control text-center" readonly="readonly" />
+        </td>
+    </tr>
+    <tr>
+        <td class="text-center"><label for="porcentaje_cuantia_basica_incremento">CUANTIA BASICA + INCREMENTOS</label></td>
+        <td></td>
+        <td class="text-center"><label for="edad">FACTOR DE EDAD</label></td>
+        <td></td>
+        <td class="text-center"><label for="factor_actualizacion">FACTOR DE ACTUALIZACIÓN</label></td>
+        <td></td>
+        <td class="text-center"><label for="porcentaje_esposa">ASIGNACIONES FAMILIARES</label></td>
+        <td></td>
+        <td class="text-center"><label for="pension_mensual_calculada">PENSION MENSUAL</label></td>
+    </tr>
+    <tr>
+        <td colspan="2"</td>
+        <td>
+            <select name="edad" id="edad" class="form-control" onchange="update_porcentaje_factor_edad( $( this ).val() )">
+                {% for ed in factoresedad %}
+                <option value="{{ ed.edad }}" data-valor="{{ ed.factor_de_edad }}" {% if ed.edad == opcion.edad %}selected="select"{% endif %}>{{ ed.edad }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td colspan="3"></td>
+        <td>
+            <div style="display: inline-block; width: 48%" class="float-left">
+                <input type="text" value="{{ opcion.porcentaje_esposa }}" name="porcentaje_esposa" id="porcentaje_esposa" onchange="update_asignaciones_familiares()" class="form-control text-center" />
+            </div>
+            <div style="display: inline-block; width: 48%" class="float-right">
+                <input type="text" value="{{ opcion.porcentaje_hijos }}" name="porcentaje_hijos" id="porcentaje_hijos" onchange="update_asignaciones_familiares()" class="form-control text-center" />
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="text" value="{{ opcion.porcentaje_cuantia_basica_incremento }}" name="porcentaje_cuantia_basica_incremento" id="porcentaje_cuantia_basica_incremento" class="form-control text-center" readonly="readonly" />
+        </td>
+        <td class="text-center"><i class="fas fa-times"></i></td>
+        <td>
+            <input type="text" value="{{ opcion.porcentaje_factor_edad }}" name="porcentaje_factor_edad" id="porcentaje_factor_edad" class="form-control text-center" onchange="calculate_pension()" />
+        </td>
+        <td class="text-center"><i class="fas fa-times"></i></td>
+        <td>
+            <input type="text" value="{{ opcion.factor_actualizacion }}" name="factor_actualizacion" id="factor_actualizacion" class="form-control text-center" />
+        </td>
+        <td class="text-center"><i class="fas fa-times"></i></td>
+        <td>
+            <input type="text" value="{{ opcion.porcentaje_asignaciones_familiares }}" name="porcentaje_asignaciones_familiares" id="porcentaje_asignaciones_familiares" class="form-control text-center" onchange="calculate_pension()" />
+        </td>
+        <td class="text-center"><i class="fas fa-equals"></i></td>
+        <td>
+            <input type="text" value="{{ opcion.pension_mensual_calculada }}" name="pension_mensual_calculada" id="pension_mensual_calculada" class="form-control text-center" readonly="readonly" />
+        </td>
+    </tr>
+</table>

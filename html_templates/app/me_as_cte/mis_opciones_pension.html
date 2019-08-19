@@ -1,0 +1,19 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% load util_filters %}
+
+{% block content %}
+
+{% for historia in cte.historia.all %}
+    {% for opcion in historia.opciones.all %}
+        <div class="card border-{%if opcion.seleccionada %}success{% else %}primary{% endif %}" style="margin-top: 10px;">
+            <div class="card-header">Opción de Pensión</div>
+            <div class="card-body">
+                {% include "app/cliente/opcion_pension_view.html" %}
+            </div>
+        </div>
+        <hr style="border-width: 5px; height: 25px; background-color: #007bff; border-color: #007bff;" />
+    {% endfor %}
+{% endfor %}
+
+{% endblock %}

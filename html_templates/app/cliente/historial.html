@@ -17,12 +17,16 @@
     </div>
     <div class="col-sm-7 card">
         <div class="card-body">
+            {% if cperms.upd_hl %}
             <button type="button" class="btn btn-outline-secondary float-right" onclick="openCommentsFrm()">
                 <i class="fas fa-pencil-alt"></i>
             </button>
+            {% endif %}
             <p>
                 <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})<br />
-                <strong>{{ historia.dias_salario_promedio }}</strong> días para calculo de salario promedio diario.
+                <strong>{{ historia.dias_salario_promedio }}</strong> días para calculo de salario promedio diario.<br />
+                <input type="checkbox" disabled="disabled" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Asignacion Familiar (15%).<br />
+                {{ historia.numero_de_hijos }} hijos.
             </p>
             <p>
                 <strong>Comentarios:</strong><br />
@@ -35,14 +39,18 @@
 {% if historia.registros.all %}
 <div class="text-center" style="margin-top: 10px;">
     <div class="btn-group" role="group" aria-label="">
+        {% if cperms.ver_dt %}
         <a href="{% url 'cliente_vista_tabular' pk=historia.pk %}" class="btn btn-outline-secondary">
             <i class="fas fa-table"></i>
             Vista Detalle Tabular
         </a>
+        {% endif %}
+        {% if cperms.ver_dg %}
         <a href="{% url 'cliente_vista_grafica' pk=historia.pk %}" class="btn btn-outline-secondary">
             <i class="far fa-chart-bar fa-rotate-270" data-fa-transform="flip-v"></i>
             Vista Gráfica
         </a>
+        {% endif %}
     </div>
 </div>
 {% endif %}
@@ -52,12 +60,16 @@
     <div class="card-header">
         <div class="btn-toolbar float-right" role="toolbar">
             <div class="btn-group" role="group">
+                {% if cperms.upd_reg %}
                 <button type="button" class="btn btn-outline-secondary" onclick="openUpdRegistro({{ reg.pk }}, '{{ reg.empresa }}', '{{ reg.registro_patronal }}')" title="Actualizar Empresa / Registro Patronal">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
+                {% endif %}
+                {% if cperms.del_reg %}
                 <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_registro' pk=reg.pk %}`, 'registro del patron seleccionado y su detalle de periodos')" title="Eliminar" class="btn btn-outline-secondary">
                     <i class="far fa-trash-alt"></i>
                 </a>
+                {% endif %}
             </div>
         </div>
         {{ reg }}
@@ -81,19 +93,23 @@
                     <tr>
                         <td>{{ det.fecha_inicial|date:'d/M/Y' }}</td>
                         <td>{{ det.fecha_final|date:'d/M/Y' }}</td>
-                        <td><input type="checkbox" {% if det.vigente %}checked="checked"{% endif %} /></td>
+                        <td><input type="checkbox" disabled="disabled" {% if det.vigente %}checked="checked"{% endif %} /></td>
                         <td class="text-right">{{ det.dias_cotizados }}</td>
                         <td class="text-right">{{ det.semanas_cotizadas|money2display }}</td>
                         <td class="text-right">$ {{ det.salario_base|money2display }}</td>
                         <td class="text-center">
+                            {% if cperms.upd_det %}
                             <button type="button" class="btn btn-outline-secondary" onclick="openUpdDetalle({{ det.pk}}, '{{ det.fecha_inicial|date:'Y-m-d' }}', '{{ det.fecha_final|date:'Y-m-d' }}', {{ det.salario_base }}, {% if det.vigente %}true{% else %}false{% endif %})" title="Actualizar Detalle">
                                 <i class="fas fa-pencil-alt"></i>
                             </button>
+                            {% endif %}
                         </td>
                         <td class="text-center">
+                            {% if cperms.del_det %}
                             <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_detalle' pk=det.pk %}`, 'periodo seleccionado')" title="Eliminar" class="btn btn-outline-secondary">
                                 <i class="far fa-trash-alt"></i>
                             </a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -119,7 +135,6 @@
     let openCommentsFrm = () => {
         App.openPanel( $( "#comentarios-template" ).html(), "Actualizar comentarios" );
     }
-    
     let openCaptManual = () => {
         App.openPanel( $( "#frm-captura-manual-template" ).html(), "Captura Manual" );
     }
@@ -242,6 +257,14 @@
                 nextDate = nextRow.fecha.addDays( -1 );
             } else if( "MODIFICACION DE SALARIO" == currentRow.mov && "BAJA" == nextRow.mov ) {
                 nextDate = nextRow.fecha;
+            } else if( "ALTA" == currentRow.mov && "MODIFICACION DE SALARIO" == nextRow.mov ) {
+                nextDate = nextRow.fecha.addDays( -1 );
+            } else if( "ALTA" == currentRow.mov && "BAJA" == nextRow.mov ) {
+                nextDate = nextRow.fecha;
+            } else if( "ALTA" == currentRow.mov && "MODIFICACION DE SALARIO" == nextRow.mov ) {
+                nextDate = nextRow.fecha.addDays( -1 );
+            } else if( "ALTA" == currentRow.mov && "BAJA" == nextRow.mov ) {
+                nextDate = nextRow.fecha;
             }
         }
         return nextDate;
@@ -274,6 +297,15 @@
         <div class="form-group">
             <label for="dias">Días para cálculo de salario promedio:</label>
             <input type="number" name="dias" id="dias" value="{{ historia.dias_salario_promedio }}"class="form-control" required="required" min="1" max="15000" />
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" value="on" name="tiene_esposa" id="tiene_esposa" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Asinación Familiar (15%)
+            </label>
+        </div>
+        <div class="form-group">
+            <label for="numero_de_hijos">Número de Hijos</label>
+            <input type="number" name="numero_de_hijos" id="numero_de_hijos" value="{{ historia.numero_de_hijos }}"class="form-control" required="required" min="0" max="20" />
         </div>
         <div class="form-group">
             <label for="comentarios">Comentarios</label>

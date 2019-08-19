@@ -1,0 +1,236 @@
+{% load util_filters %}
+
+<!--<table class="opcion-pension-tbl">
+    <tr>
+        <td colspan="5" rowspan="5" class=" align-top">
+            <div class="form-control text-white bg-{%if opcion.seleccionada %}success{% else %}primary{% endif %}" style="height: auto">
+            {{ opcion.comentarios | as_paragraph | safe }}
+            </div>
+        </td>
+        <td rowspan="5"></td>
+        <td class="text-right" colspan="2">
+            Fecha
+        </td>
+        <td></td>
+        <td>
+            <p class="form-control text-center">{{ opcion.created_at|date:'d/m/Y' }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2" colspan="2" class="text-right">
+            UMA
+        </td>
+        <td rowspan="2"></td>
+        <td>
+            <p class="form-control text-center">{{ opcion.uma_anio }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p class="form-control text-center">{{ opcion.uma_valor }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right" colspan="2">
+            Cuantía Básica
+        </td>
+        <td></td>
+        <td>
+            <p class="form-control text-center">{{ opcion.porcentaje_cuantia_basica }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right" colspan="2">
+            Incrementos
+        </td>
+        <td></td>
+        <td>
+            <p class="form-control text-center">{{ opcion.porcentaje_incremento_anual }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right">
+            Semanas Reconocidas
+        </td>
+        <td></td>
+        <td>
+            <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.semanas_cotizadas }}</strong></p>
+        </td>
+        <td></td>
+        <td class="text-center">
+            Mensual
+        </td>
+        <td></td>
+        <td colspan="4" class="text-center">
+            % de Salario Promedio
+        </td>
+    </tr>
+    <tr>
+        <td class="text-right">
+            Salario Promedio Diario
+        </td>
+        <td></td>
+        <td>
+            <p class="form-control text-center border-dark text-dark"><strong>$ {{ opcion.salario_promedio | money2display }}</strong></p>
+        </td>
+        <td></td>
+        <td>
+            <p class="form-control text-center border-dark text-dark"><strong>$ {{ opcion.salario_promedio_mensual | money2display }}</strong></p>
+        </td>
+        <td></td>
+        <td colspan="4">
+            <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_de_salario_promedio }} %</strong></p>
+        </td>
+    </tr>
+    <tr>
+        <td class="text-center">CUANTIA BASICA + INCREMENTOS</td>
+        <td></td>
+        <td class="text-center">FACTOR DE EDAD</td>
+        <td></td>
+        <td class="text-center">FACTOR DE ACTUALIZACIÓN</td>
+        <td></td>
+        <td colspan="2" class="text-center">ASIGNACIONES FAMILIARES</td>
+        <td></td>
+        <td class="text-center">PENSION MENSUAL</td>
+    </tr>
+    <tr>
+        <td colspan="2"</td>
+        <td>
+            <p class="form-control text-center">{{ opcion.edad }}</p>
+        </td>
+        <td colspan="3"></td>
+        <td>
+            <p class="form-control text-center">{{ opcion.porcentaje_esposa }}</p>
+        </td>
+        <td>
+            <p class="form-control text-center">{{ opcion.porcentaje_hijos }}</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_cuantia_basica_incremento }}</strong></p>
+        </td>
+        <td class="text-center align-middle"><i class="fas fa-times"></i></td>
+        <td>
+            <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_factor_edad }}</strong></p>
+        </td>
+        <td class="text-center align-middle"><i class="fas fa-times"></i></td>
+        <td>
+            <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.factor_actualizacion }}</strong></p>
+        </td>
+        <td class="text-center align-middle"><i class="fas fa-times"></i></td>
+        <td colspan="2">
+            <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_asignaciones_familiares }}</strong></p>
+        </td>
+        <td class="text-center align-middle"><i class="fas fa-equals"></i></td>
+        <td>
+            <p class="form-control text-center border-{%if opcion.seleccionada %}success{% else %}primary{% endif %} text-{%if opcion.seleccionada %}success{% else %}primary{% endif %}"><strong>$ {{ opcion.pension_mensual_calculada | money2display }}</strong></p>
+        </td>
+    </tr>
+</table>-->
+
+<div class="row">
+    <div class="col-sm-8 align-top">
+        <div class="form-control text-white bg-{%if opcion.seleccionada %}success{% else %}primary{% endif %}" style="height: auto">
+            {{ opcion.comentarios | as_paragraph | safe }}
+        </div>
+    </div>
+    <div class="col-sm-4 align-top">
+        <div class="row">
+            <div class="col text-right">Fecha</div>
+            <div class="col">
+                <p class="form-control text-center">{{ opcion.created_at|date:'d/m/Y' }}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">UMA</div>
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <p class="form-control text-center">{{ opcion.uma_anio }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                            <p class="form-control text-center">{{ opcion.uma_valor }}</p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">Cuantía Básica</div>
+            <div class="col">
+                <p class="form-control text-center">{{ opcion.porcentaje_cuantia_basica }}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">Incrementos</div>
+            <div class="col">
+                <p class="form-control text-center">{{ opcion.porcentaje_incremento_anual }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6 align-bottom">
+        <div class="row">
+            <div class="col text-right">
+                Semanas Reconocidas
+            </div>
+            <div class="col">
+                <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.semanas_cotizadas }}</strong></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">
+                Salario Promedio Diario
+            </div>
+            <div class="col">
+                <p class="form-control text-center border-dark text-dark"><strong>$ {{ opcion.salario_promedio | money2display }}</strong></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 text-center">
+        Mensual
+        <p class="form-control text-center border-dark text-dark"><strong>$ {{ opcion.salario_promedio_mensual | money2display }}</strong></p>
+    </div>
+    <div class="col-sm-3 text-center">
+        % de Salario Promedio
+        <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_de_salario_promedio }} %</strong></p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="row">
+            <div class="col text-right">CUANTIA BASICA + INCREMENTOS</div>
+            <div class="col">
+                <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_cuantia_basica_incremento }}</strong></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">FACTOR DE EDAD</div>
+            <div class="col">
+                <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_factor_edad }}</strong></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="row">
+            <div class="col text-right">FACTOR DE ACTUALIZACIÓN</div>
+            <div class="col">
+                <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.factor_actualizacion }}</strong></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-right">ASIGNACIONES FAMILIARES</div>
+            <div class="col">
+                <p class="form-control text-center border-dark text-dark"><strong>{{ opcion.porcentaje_asignaciones_familiares }}</strong></p>
+            </div>
+        </div>        
+    </div>
+    <div class="col-sm-4 text-center text-{%if opcion.seleccionada %}success{% else %}primary{% endif %}">
+        <strong>PENSION MENSUAL</strong>
+        <p class="form-control text-center border-{%if opcion.seleccionada %}success{% else %}primary{% endif %} text-{%if opcion.seleccionada %}success{% else %}primary{% endif %}"><strong>$ {{ opcion.pension_mensual_calculada | money2display }}</strong></p>
+    </div>
+</div>
