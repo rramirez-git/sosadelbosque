@@ -148,8 +148,7 @@ def update(request, pk):
     gpo = Group.objects.get(pk=pk)
     alerta = []
     if "POST" == request.method:
-        print(gpo.name, request.POST.get('nombre'), gpo.name != request.POST.get('nombre'))
-        if(gpo.name != request.POST.get('nombre') and 
+        if(gpo.name != request.POST.get('nombre') and
             Group.objects.filter(
                 name=request.POST.get('nombre')).exists()):
             alerta.append(

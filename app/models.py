@@ -500,7 +500,8 @@ class HistoriaLaboral(models.Model):
                 'fecha_maxima': Date,
                 'salario_df': pandas.DataFrame(
                     columns=[
-                        'f_ini', 'f_fin', 'n', 'salario', 'salario_topado', 'suma_salario'
+                        'f_ini', 'f_fin', 'n',
+                        'salario', 'salario_topado', 'suma_salario'
                     ]),
             }
 
@@ -509,12 +510,12 @@ class HistoriaLaboral(models.Model):
         """
         if dias_calculo is None:
             dias_calculo = self.dias_salario_promedio
-        if not self.df_agg_salario is None:
+        if self.df_agg_salario is not None:
             return self.df_agg_salario
         df = df_load_HLRDDay_agg(self.cliente.pk).head(dias_calculo)
         tope_uma = 25 * self.uma.valor
         df['salario_topado'] = df.salario
-        df.loc[df.salario > tope_uma, 'salario_topado' ] = tope_uma
+        df.loc[df.salario > tope_uma, 'salario_topado'] = tope_uma
         df["salario_topado"] = pd.to_numeric(df["salario_topado"])
         ss = df.agg(['sum', 'min', 'max'])
         periodos = []
@@ -553,8 +554,9 @@ class HistoriaLaboral(models.Model):
             'salario_topado': salario_topado,
             'suma_salario': dias * salario_topado})
         salary_df = pd.DataFrame(periodos, columns=[
-            'f_ini','f_fin','n','salario','salario_topado','suma_salario'
-            ]).sort_values(['f_ini','f_fin'], ascending=[False,False])
+            'f_ini', 'f_fin', 'n',
+            'salario', 'salario_topado', 'suma_salario'
+            ]).sort_values(['f_ini', 'f_fin'], ascending=[False, False])
         self.df_agg_salario = {
             'suma_salario': ss['salario_topado']['sum'],
             'salario_promedio': ss['salario_topado']['sum'] / dias_calculo,
@@ -607,7 +609,8 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def dias_cotizados(self):
-        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers = df_load_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk)
         df_pers = df_pers[df_pers.historialaboralregistro_pk == self.pk]
         res = df_pers.agg(['sum'])['dias_cotiz']['sum']
         if res is None:
@@ -616,7 +619,8 @@ class HistoriaLaboralRegistro(models.Model):
 
     @property
     def semanas_cotizadas(self):
-        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
+        df_pers = df_load_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk)
         df_pers = df_pers[df_pers.historialaboralregistro_pk == self.pk]
         res = df_pers.agg(['sum'])['semanas_cotiz']['sum']
         if res is None:
@@ -687,12 +691,17 @@ class HistoriaLaboralRegistro(models.Model):
         self.createPeriodos()
 
     def createPeriodos(self):
-        df_pers = df_load_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
-        df_pers_new = df_generate_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, self)
-        df_pers = df_update(df_pers, df_pers_new, reg = self.pk)
-        df_save_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, df_pers)
-        df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk)
-        df_save_HLRD_periodo_continuo_laborado(self.historia_laboral.cliente.pk, df_pers)
+        df_pers = df_load_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk)
+        df_pers_new = df_generate_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk, self)
+        df_pers = df_update(df_pers, df_pers_new, reg=self.pk)
+        df_save_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk, df_pers)
+        df_pers = df_generate_data_cotiz_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk)
+        df_save_HLRD_periodo_continuo_laborado(
+            self.historia_laboral.cliente.pk, df_pers)
 
     class Meta:
         ordering = ["historia_laboral", "-fecha_de_alta", "-fecha_de_baja"]

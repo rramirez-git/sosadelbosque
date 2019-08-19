@@ -8,7 +8,10 @@ from initsys.models import Usr
 from .models import Cliente, HistoriaLaboralRegistro
 from app.data_utils import df_load_HLRD_periodo_continuo_laborado
 
-@valida_acceso(['permission.mis_documentos_permiso', 'permission.mis_documentos_permission'])
+
+@valida_acceso([
+    'permission.mis_documentos_permiso',
+    'permission.mis_documentos_permission'])
 def mis_documentos(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     cte = None
@@ -16,13 +19,16 @@ def mis_documentos(request):
         cte = Cliente.objects.get(idusuario=usuario.pk)
     return render(
         request,
-        'app/me_as_cte/mis_documentos.html',{
+        'app/me_as_cte/mis_documentos.html', {
             'menu_main': usuario.main_menu_struct(),
             'titulo': 'Mis Documentos',
             'cte': cte,
         })
 
-@valida_acceso(['permission.mi_salario_promedio_permiso', 'permission.mi_salario_promedio_permission'])
+
+@valida_acceso([
+    'permission.mi_salario_promedio_permiso',
+    'permission.mi_salario_promedio_permission'])
 def mi_salario_promedio(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     cte = None
@@ -30,13 +36,16 @@ def mi_salario_promedio(request):
         cte = Cliente.objects.get(idusuario=usuario.pk)
     return render(
         request,
-        'app/me_as_cte/mi_salario_promedio.html',{
+        'app/me_as_cte/mi_salario_promedio.html', {
             'menu_main': usuario.main_menu_struct(),
             'titulo': 'Mi Salario Promedio',
             'cte': cte,
         })
 
-@valida_acceso(['permission.mi_historial_laboral_permiso', 'permission.mi_historial_laboral_permission'])
+
+@valida_acceso([
+    'permission.mi_historial_laboral_permiso',
+    'permission.mi_historial_laboral_permission'])
 def mi_historial_laboral(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     cte = None
@@ -48,7 +57,8 @@ def mi_historial_laboral(request):
         df_pers[
             'historialaboralregistro'
             ] = df_pers.historialaboralregistro_pk.apply(
-                lambda x: HistoriaLaboralRegistro.objects.get(pk=x).__str__()
+                lambda x: HistoriaLaboralRegistro.objects.get(
+                    pk=x).__str__()
                 )
         df_pers_agg = df_pers.agg(['min', 'max', 'sum'])
         f_max = df_pers_agg.fecha_fin['max']
@@ -65,12 +75,14 @@ def mi_historial_laboral(request):
             'sem_transc': round(dias_t / 7),
             'anios_transc': round(dias_t / 7) / 52,
         }
-        aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc'] - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
+        aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc']\
+            - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
         aggr_per_lab['sem_dif'] = round(aggr_per_lab['dias_dif'] / 7)
-        aggr_per_lab['anios_dif'] = round(aggr_per_lab['dias_dif'] / 7) / 52
+        aggr_per_lab['anios_dif'] = round(aggr_per_lab['dias_dif'] / 7)\
+            / 52
     return render(
         request,
-        'app/me_as_cte/mi_historial_laboral.html',{
+        'app/me_as_cte/mi_historial_laboral.html', {
             'menu_main': usuario.main_menu_struct(),
             'titulo': 'Mi Historial Laboral',
             'cte': cte,
@@ -78,7 +90,10 @@ def mi_historial_laboral(request):
             'peridodos_laborados': df_pers,
         })
 
-@valida_acceso(['permission.mis_opciones_de_pension_permiso', 'permission.mis_opciones_de_pension_permission'])
+
+@valida_acceso([
+    'permission.mis_opciones_de_pension_permiso',
+    'permission.mis_opciones_de_pension_permission'])
 def mis_opciones_pension(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     cte = None
@@ -86,7 +101,7 @@ def mis_opciones_pension(request):
         cte = Cliente.objects.get(idusuario=usuario.pk)
     return render(
         request,
-        'app/me_as_cte/mis_opciones_pension.html',{
+        'app/me_as_cte/mis_opciones_pension.html', {
             'menu_main': usuario.main_menu_struct(),
             'titulo': 'Mis Opciones de Pensión',
             'cte': cte,

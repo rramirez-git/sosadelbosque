@@ -30,7 +30,7 @@ from app.data_utils import (
 from routines.utils import hipernormalize
 
 
-def add_nota(cte, nota, fecha_notificacion, usr, lstusrs = None):
+def add_nota(cte, nota, fecha_notificacion, usr, lstusrs=None):
     if "" != nota.strip():
         nota = Nota.objects.create(
             usuario=cte,
@@ -45,11 +45,11 @@ def add_nota(cte, nota, fecha_notificacion, usr, lstusrs = None):
             if lstusrs:
                 for usr2 in lstusrs:
                     add_alert(
-                    "En referencia al cliente {}:\n\n{}".format(
-                        link, nota),
-                    fecha_notificacion,
-                    Usr.objects.get(pk=usr2),
-                    usr)
+                        "En referencia al cliente {}:\n\n{}".format(
+                            link, nota),
+                        fecha_notificacion,
+                        Usr.objects.get(pk=usr2),
+                        usr)
             else:
                 add_alert(
                     "En referencia al cliente {}:\n\n{}".format(
@@ -87,7 +87,7 @@ def index(request):
             search_value = hipernormalize(request.POST.get('valor'))
             data = [reg
                     for reg in data if (search_value in hipernormalize(
-                        reg.first_name) 
+                        reg.first_name)
                         or search_value in hipernormalize(reg.last_name)
                         or search_value in hipernormalize(
                             reg.apellido_materno)
@@ -205,13 +205,15 @@ def see(request, pk):
             'label': '<i class="far fa-bell"></i> Alerta',
             'onclick': 'Cte.showAlertsSglCte()',
         })
-    if usuario.has_perm_or_has_perm_child('doctogral.agregar_documentos_docto gral'):
+    if usuario.has_perm_or_has_perm_child(
+            'doctogral.agregar_documentos_docto gral'):
         toolbar.append({
             'type': 'button',
             'label': '<i class="fas fa-file-upload"></i> Adjuntar',
             'onclick': 'Cte.showFrmDoctoGral()'
         })
-    if usuario.has_perm_or_has_perm_child('actividad.agregar_actividad_actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'actividad.agregar_actividad_actividad'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'actividad_new',
@@ -233,12 +235,20 @@ def see(request, pk):
             'label': '<i class="far fa-trash-alt"></i> Eliminar',
             'pk': pk})
     cperms = {
-        'ver_doctogral': usuario.has_perm_or_has_perm_child('doctogral.documentos_docto gral'),
-        'del_doctogral': usuario.has_perm_or_has_perm_child('doctogral.eliminar_documentos_docto gral'),
-        'ver_actividad': usuario.has_perm_or_has_perm_child('actividad.actividad_actividad'),
-        'del_actividad': usuario.has_perm_or_has_perm_child('actividad.eliminar_actividad_actividad'),
-        'ver_hl': usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'),
-        'ver_opcpen': usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.opciones_de_pension_opcionpension'),
+        'ver_doctogral': usuario.has_perm_or_has_perm_child(
+            'doctogral.documentos_docto gral'),
+        'del_doctogral': usuario.has_perm_or_has_perm_child(
+            'doctogral.eliminar_documentos_docto gral'),
+        'ver_actividad': usuario.has_perm_or_has_perm_child(
+            'actividad.actividad_actividad'),
+        'del_actividad': usuario.has_perm_or_has_perm_child(
+            'actividad.eliminar_actividad_actividad'),
+        'ver_hl': usuario.has_perm_or_has_perm_child(
+            'historialaboral.historia_laboral_historia laboral'),
+        'ver_opcpen': usuario.has_perm_or_has_perm_child(
+            'opcionpension.opciones_de_pension_opcion pension') or
+        usuario.has_perm_or_has_perm_child(
+            'opcionpension.opciones_de_pension_opcionpension'),
     }
     lstNotCtesUsr = Usr.objects.exclude(
         idusuario__in=Cliente.objects.all().values('idusuario'))
@@ -367,31 +377,35 @@ def historia_laboral(request, pk):
             cliente=cte, created_by=usuario, updated_by=usuario)
         historia.save()
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):        
+    if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'cliente_see',
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': cte.pk})
-    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_manual_historia laboral'):        
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.hacer_captura_manual_historia laboral'):
         toolbar.append({
             'type': 'button',
             'label': '<i class="far fa-hand-paper"></i> C. Manual',
             'onclick': 'openCaptManual()',
         })
-    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_desde_excel_historia laboral'):        
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.hacer_captura_desde_excel_historia laboral'):
         toolbar.append({
             'type': 'button',
             'label': '<i class="far fa-file-excel"></i> C. Excel',
             'onclick': 'openCaptExcel()',
         })
-    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_desde_word_historia laboral'):        
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.hacer_captura_desde_word_historia laboral'):
         toolbar.append({
             'type': 'button',
             'label': '<i class="far fa-file-word"></i> C. Word',
             'onclick': 'openCaptWord()',
         })
-    if usuario.has_perm_or_has_perm_child('historialaboral.hacer_captura_desde_pdf_historia laboral'):        
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.hacer_captura_desde_pdf_historia laboral'):
         toolbar.append({
             'type': 'button',
             'label': '<i class="far fa-file-pdf"></i> C. PDF',
@@ -655,13 +669,24 @@ def historia_laboral(request, pk):
         return HttpResponseRedirect(reverse(
             'cliente_historia_laboral', kwargs={'pk': pk}))
     cperms = {
-        'ver_dt': usuario.has_perm_or_has_perm_child('historialaboral.ver_detalle_tabular_historia laboral'),
-        'ver_dg': usuario.has_perm_or_has_perm_child('historialaboral.ver_detalle_grafico_historia laboral'),
-        'upd_hl': usuario.has_perm_or_has_perm_child('historialaboral.actualizar_historia_laboral_historia laboral'),
-        'upd_reg': usuario.has_perm_or_has_perm_child('historialaboralregistro.actualizar_registro_historia laboral registro'),
-        'del_reg': usuario.has_perm_or_has_perm_child('historialaboralregistro.eliminar_registro_historia laboral registro'),
-        'upd_det': usuario.has_perm_or_has_perm_child('historialaboralregistrodetalle.actualizar_detalle_historia laboral registro detalle'),
-        'del_det': usuario.has_perm_or_has_perm_child('historialaboralregistrodetalle.eliminar_detalle_historia laboral registro detalle'),
+        'ver_dt': usuario.has_perm_or_has_perm_child(
+            'historialaboral.ver_detalle_tabular_historia laboral'),
+        'ver_dg': usuario.has_perm_or_has_perm_child(
+            'historialaboral.ver_detalle_grafico_historia laboral'),
+        'upd_hl': usuario.has_perm_or_has_perm_child(
+            'historialaboral.actualizar_historia_laboral_historia laboral'),
+        'upd_reg': usuario.has_perm_or_has_perm_child(
+            'historialaboralregistro.'
+            'actualizar_registro_historia laboral registro'),
+        'del_reg': usuario.has_perm_or_has_perm_child(
+            'historialaboralregistro.'
+            'eliminar_registro_historia laboral registro'),
+        'upd_det': usuario.has_perm_or_has_perm_child(
+            'historialaboralregistrodetalle.'
+            'actualizar_detalle_historia laboral registro detalle'),
+        'del_det': usuario.has_perm_or_has_perm_child(
+            'historialaboralregistrodetalle.'
+            'eliminar_detalle_historia laboral registro detalle'),
     }
     return render(request, 'app/cliente/historial.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -721,14 +746,16 @@ def historia_laboral_vista_tabular(request, pk):
             'view': 'cliente_see',
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': historia_laboral.cliente.pk})
-    if usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'):
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.historia_laboral_historia laboral'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'cliente_historia_laboral',
             'label': '<i class="fas fa-file-medical-alt"></i>'
             ' Ver Historia Laboral',
             'pk': historia_laboral.cliente.pk})
-    df_pers = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
+    df_pers = df_load_HLRD_periodo_continuo_laborado(
+        historia_laboral.cliente.pk)
     df_pers[
         'historialaboralregistro'
         ] = df_pers.historialaboralregistro_pk.apply(
@@ -749,7 +776,8 @@ def historia_laboral_vista_tabular(request, pk):
         'sem_transc': round(dias_t / 7),
         'anios_transc': round(dias_t / 7) / 52,
     }
-    aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc'] - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
+    aggr_per_lab['dias_dif'] = aggr_per_lab['dias_transc']\
+        - aggr_per_lab['dias_rec'] - aggr_per_lab['dias_inac']
     aggr_per_lab['sem_dif'] = round(aggr_per_lab['dias_dif'] / 7)
     aggr_per_lab['anios_dif'] = round(aggr_per_lab['dias_dif'] / 7) / 52
 
@@ -777,7 +805,8 @@ def historia_laboral_vista_grafica(request, pk):
             'view': 'cliente_see',
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': historia_laboral.cliente.pk})
-    if usuario.has_perm_or_has_perm_child('historialaboral.historia_laboral_historia laboral'):
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.historia_laboral_historia laboral'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'cliente_historia_laboral',
@@ -786,8 +815,9 @@ def historia_laboral_vista_grafica(request, pk):
             'pk': historia_laboral.cliente.pk})
     periodos = []
     dtotal = (historia_laboral.fin - historia_laboral.inicio).days
-    df_periodos = df_load_HLRD_periodo_continuo_laborado(historia_laboral.cliente.pk)
-    df_periodos.sort_index(ascending=False,inplace=True)
+    df_periodos = df_load_HLRD_periodo_continuo_laborado(
+        historia_laboral.cliente.pk)
+    df_periodos.sort_index(ascending=False, inplace=True)
     print(df_periodos)
     for reg in historia_laboral.registros.all():
         r = {'empresa': '{}'.format(reg), 'periodos': []}
@@ -921,7 +951,9 @@ def update_all_salarios_complete(request):
     return render(request, "global/html.html", {})
 
 
-@valida_acceso(['opcionpension.opciones_de_pension_opcion pension', 'opcionpension.opciones_de_pension_opcionpension'])
+@valida_acceso([
+    'opcionpension.opciones_de_pension_opcion pension',
+    'opcionpension.opciones_de_pension_opcionpension'])
 def pensiones_list(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Cliente.objects.filter(pk=pk).exists():
@@ -934,7 +966,10 @@ def pensiones_list(request, pk):
             cliente=cte, created_by=usuario, updated_by=usuario)
         historia.save()
     toolbar = []
-    if usuario.has_perm_or_has_perm_child('opcionpension.agregar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.agregar_opcion_de_pension_opcionpension'):
+    if usuario.has_perm_or_has_perm_child(
+            'opcionpension.agregar_opcion_de_pension_opcion pension') or\
+            usuario.has_perm_or_has_perm_child(
+                'opcionpension.agregar_opcion_de_pension_opcionpension'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'cliente_pension_new',
@@ -947,9 +982,20 @@ def pensiones_list(request, pk):
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': pk})
     cperms = {
-        'del_opc': usuario.has_perm_or_has_perm_child('opcionpension.eliminar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.eliminar_opcion_de_pension_opcionpension'),
-        'set_opc': usuario.has_perm_or_has_perm_child('opcionpension.seleccionar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.seleccionar_opcion_de_pension_opcionpension'),
-        'ust_opc': usuario.has_perm_or_has_perm_child('opcionpension.deseleccionar_opcion_de_pension_opcion pension') or usuario.has_perm_or_has_perm_child('opcionpension.deseleccionar_opcion_de_pension_opcionpension'),
+        'del_opc': usuario.has_perm_or_has_perm_child(
+            'opcionpension.eliminar_opcion_de_pension_opcion pension')
+        or usuario.has_perm_or_has_perm_child(
+            'opcionpension.eliminar_opcion_de_pension_opcionpension'),
+        'set_opc': usuario.has_perm_or_has_perm_child(
+            'opcionpension.seleccionar_opcion_de_pension_opcion pension')
+        or usuario.has_perm_or_has_perm_child(
+            'opcionpension.'
+            'seleccionar_opcion_de_pension_opcionpension'),
+        'ust_opc': usuario.has_perm_or_has_perm_child(
+            'opcionpension.deseleccionar_opcion_de_pension_opcion pension')
+        or usuario.has_perm_or_has_perm_child(
+            'opcionpension.'
+            'deseleccionar_opcion_de_pension_opcionpension'),
     }
     return render(request, 'app/cliente/pension_index.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -966,7 +1012,9 @@ def pensiones_list(request, pk):
     })
 
 
-@valida_acceso(['opcionpension.agregar_opcion_de_pension_opcion pension', 'opcionpension.agregar_opcion_de_pension_opcionpension'])
+@valida_acceso([
+    'opcionpension.agregar_opcion_de_pension_opcion pension',
+    'opcionpension.agregar_opcion_de_pension_opcionpension'])
 def pensiones_new(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not Cliente.objects.filter(pk=pk).exists():
@@ -996,20 +1044,28 @@ def pensiones_new(request, pk):
             uma_anio=request.POST.get('uma_anio'),
             uma_valor=request.POST.get('uma_valor'),
             salario_promedio=request.POST.get('salario_promedio'),
-            salario_promedio_mensual=request.POST.get('salario_promedio_mensual'),
+            salario_promedio_mensual=request.POST.get(
+                'salario_promedio_mensual'),
             dias_calculo_saldo_promedio=historia.dias_salario_promedio,
             semanas_cotizadas=request.POST.get('semanas_cotizadas'),
-            porcentaje_cuantia_basica=request.POST.get('porcentaje_cuantia_basica'),
-            porcentaje_incremento_anual=request.POST.get('porcentaje_incremento_anual'),
+            porcentaje_cuantia_basica=request.POST.get(
+                'porcentaje_cuantia_basica'),
+            porcentaje_incremento_anual=request.POST.get(
+                'porcentaje_incremento_anual'),
             edad=request.POST.get('edad'),
-            porcentaje_factor_edad=request.POST.get('porcentaje_factor_edad'),
-            porcentaje_cuantia_basica_incremento=request.POST.get('porcentaje_cuantia_basica_incremento'),
+            porcentaje_factor_edad=request.POST.get(
+                'porcentaje_factor_edad'),
+            porcentaje_cuantia_basica_incremento=request.POST.get(
+                'porcentaje_cuantia_basica_incremento'),
             factor_actualizacion=request.POST.get('factor_actualizacion'),
             porcentaje_esposa=request.POST.get('porcentaje_esposa'),
             porcentaje_hijos=request.POST.get('porcentaje_hijos'),
-            porcentaje_asignaciones_familiares=request.POST.get('porcentaje_asignaciones_familiares'),
-            pension_mensual_calculada=request.POST.get('pension_mensual_calculada'),
-            porcentaje_de_salario_promedio=request.POST.get('porcentaje_de_salario_promedio'),
+            porcentaje_asignaciones_familiares=request.POST.get(
+                'porcentaje_asignaciones_familiares'),
+            pension_mensual_calculada=request.POST.get(
+                'pension_mensual_calculada'),
+            porcentaje_de_salario_promedio=request.POST.get(
+                'porcentaje_de_salario_promedio'),
             comentarios=request.POST.get('comentarios'),
             created_by=usuario,
             updated_by=usuario,
@@ -1049,7 +1105,9 @@ def pensiones_new(request, pk):
     })
 
 
-@valida_acceso(['opcionpension.eliminar_opcion_de_pension_opcion pension', 'opcionpension.eliminar_opcion_de_pension_opcionpension'])
+@valida_acceso([
+    'opcionpension.eliminar_opcion_de_pension_opcion pension',
+    'opcionpension.eliminar_opcion_de_pension_opcionpension'])
 def pensiones_delete(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not OpcionPension.objects.filter(pk=pk).exists():
@@ -1064,7 +1122,9 @@ def pensiones_delete(request, pk):
         return HttpResponseRedirect(reverse('item_con_relaciones'))
 
 
-@valida_acceso(['opcionpension.seleccionar_opcion_de_pension_opcion pension', 'opcionpension.seleccionar_opcion_de_pension_opcionpension'])
+@valida_acceso([
+    'opcionpension.seleccionar_opcion_de_pension_opcion pension',
+    'opcionpension.seleccionar_opcion_de_pension_opcionpension'])
 def pensiones_select(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not OpcionPension.objects.filter(pk=pk).exists():
@@ -1078,7 +1138,9 @@ def pensiones_select(request, pk):
         'cliente_pension_index', kwargs={'pk': pk_cliente}))
 
 
-@valida_acceso(['opcionpension.deseleccionar_opcion_de_pension_opcion pension', 'opcionpension.deseleccionar_opcion_de_pension_opcionpension'])
+@valida_acceso([
+    'opcionpension.deseleccionar_opcion_de_pension_opcion pension',
+    'opcionpension.deseleccionar_opcion_de_pension_opcionpension'])
 def pensiones_unselect(request, pk):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     if not OpcionPension.objects.filter(pk=pk).exists():

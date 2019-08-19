@@ -64,6 +64,7 @@ def keyvalue(dict, key):
 def ifNone(value, default=""):
     return value or default
 
+
 @register.filter
 def division(num, div):
     if div == 0:
