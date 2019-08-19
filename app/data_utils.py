@@ -8,7 +8,7 @@ from django.conf import settings
 
 from routines.utils import inter_periods_days, free_days
 
-BASE_PATH = path.join(settings.BASE_DIR,'managed/files')
+BASE_PATH = path.join(settings.BASE_DIR, 'managed/files')
 
 
 def get_directory(usr_pk):
@@ -91,7 +91,7 @@ def df_data_generate_HLRDDay(histLabRegDet):
 
 
 def df_load_HLRDDay(cte_pk):
-    file = path.join(get_directory(cte_pk),'hldr_day.csv')
+    file = path.join(get_directory(cte_pk), 'hldr_day.csv')
     zfile = file + ".zip"
     if path.exists(zfile):
         with zf.ZipFile(zfile, 'r') as zipf:
@@ -105,11 +105,11 @@ def df_load_HLRDDay(cte_pk):
 
 
 def df_save_HLRDDay(cte_pk, df):
-    file = path.join(get_directory(cte_pk),'hldr_day.csv')
+    file = path.join(get_directory(cte_pk), 'hldr_day.csv')
     df.sort_values(by='fecha', inplace=True)
     df.to_csv(path_or_buf=file, encoding='utf_8', index=False)
     with zf.ZipFile(file + ".zip", "w") as zipf:
-        zipf.write(file,path.basename(file), zf.ZIP_BZIP2)
+        zipf.write(file, path.basename(file), zf.ZIP_BZIP2)
     remove(file)
     df_save_HLRDDay_agg(cte_pk)
     return True
@@ -117,22 +117,22 @@ def df_save_HLRDDay(cte_pk, df):
 
 def df_save_HLRDDay_agg(cte_pk):
     df = df_load_HLRDDay(cte_pk)
-    file = path.join(get_directory(cte_pk),'hldr_day_agg.csv')
+    file = path.join(get_directory(cte_pk), 'hldr_day_agg.csv')
     df_agg = df.groupby('fecha').agg(['sum']).salario_base
-    df_agg.index.names=['f']
+    df_agg.index.names = ['f']
     df_agg['fecha'] = df_agg.index
-    df_agg.columns = ['salario','fecha']
-    df_agg = df_agg[['fecha','salario']]
+    df_agg.columns = ['salario', 'fecha']
+    df_agg = df_agg[['fecha', 'salario']]
     df_agg.sort_index(ascending=False, inplace=True)
     df_agg.to_csv(path_or_buf=file, encoding='utf_8', index=False)
     with zf.ZipFile(file + ".zip", "w") as zipf:
-        zipf.write(file,path.basename(file), zf.ZIP_BZIP2)
+        zipf.write(file, path.basename(file), zf.ZIP_BZIP2)
     remove(file)
     return True
 
 
 def df_load_HLRDDay_agg(cte_pk):
-    file = path.join(get_directory(cte_pk),'hldr_day_agg.csv')
+    file = path.join(get_directory(cte_pk), 'hldr_day_agg.csv')
     zfile = file + ".zip"
     if path.exists(zfile):
         with zf.ZipFile(zfile, 'r') as zipf:
@@ -146,18 +146,18 @@ def df_load_HLRDDay_agg(cte_pk):
 
 
 def df_update(df, df2, hl=None, reg=None, det=None):
-    if not hl is None:
+    if hl is not None:
         df = df[df.historialaboral_pk != hl]
-    if not reg is None:
+    if reg is not None:
         df = df[df.historialaboralregistro_pk != reg]
-    if not det is None:
+    if det is not None:
         df = df[df.historialaboralregistrodetalle_pk != det]
     df = df.append(df2, ignore_index=True)
     return df
 
 
 def df_load_HLRD_periodo_continuo_laborado(cte_pk):
-    file = path.join(get_directory(cte_pk),'hldr_per_cont_lab.csv')
+    file = path.join(get_directory(cte_pk), 'hldr_per_cont_lab.csv')
     zfile = file + ".zip"
     if path.exists(zfile):
         with zf.ZipFile(zfile, 'r') as zipf:
@@ -168,6 +168,7 @@ def df_load_HLRD_periodo_continuo_laborado(cte_pk):
                     parse_dates=['fecha_inicio', 'fecha_fin'],
                     encoding='utf_8')
     return df_struct_HLRD_periodo_continuo_laborado()
+
 
 def df_generate_HLRD_periodo_continuo_laborado(cte_pk, histLabReg):
     df_day = df_load_HLRDDay(cte_pk)
@@ -227,7 +228,9 @@ def df_generate_HLRD_periodo_continuo_laborado(cte_pk, histLabReg):
     }, ignore_index=True)
     return df_per
 
-def df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers=None):
+
+def df_generate_data_cotiz_HLRD_periodo_continuo_laborado(
+        cte_pk, df_pers=None):
     if df_pers is None:
         df_pers = df_load_HLRD_periodo_continuo_laborado(cte_pk)
     for x in range(len(df_pers)):
@@ -261,15 +264,15 @@ def df_generate_data_cotiz_HLRD_periodo_continuo_laborado(cte_pk, df_pers=None):
         df_pers.at[x, 'dias_inact'] = dias_inactivos
         df_pers.at[x, 'semanas_inact'] = si
         df_pers.at[x, 'anios_inact'] = si / 52
-        # print(x,df_pers['fecha_inicio'][x],df_pers['fecha_fin'][x],dias_cotizados,dias_inactivos)
     return df_pers
 
+
 def df_save_HLRD_periodo_continuo_laborado(cte_pk, df):
-    file = path.join(get_directory(cte_pk),'hldr_per_cont_lab.csv')
+    file = path.join(get_directory(cte_pk), 'hldr_per_cont_lab.csv')
     df.sort_values(by=['fecha_inicio', 'fecha_fin'], inplace=True)
     df.to_csv(path_or_buf=file, encoding='utf_8', index=False)
     with zf.ZipFile(file + ".zip", "w") as zipf:
-        zipf.write(file,path.basename(file), zf.ZIP_BZIP2)
+        zipf.write(file, path.basename(file), zf.ZIP_BZIP2)
     remove(file)
     return True
 

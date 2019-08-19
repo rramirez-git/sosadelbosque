@@ -313,9 +313,10 @@ def free_days(p1_inicio, p1_fin, p2_inicio, p2_fin):
 
 def create_date_range(inicio, fin):
     result = []
-    for x in pd.date_range(inicio,fin):
+    for x in pd.date_range(inicio, fin):
         result.append(date(x.year, x.month, x.day))
     return result
+
 
 BootstrapColors = (
     ('', 'Ninguno'),

@@ -8,6 +8,7 @@ from app.models import (
     Cliente, TaxonomiaExpediente, HistoriaLaboralRegistro)
 from .utils import clean_name
 
+
 def initsys_fn_upd():
     Permiso.objects.all().delete()
     Group.objects.all().delete()
@@ -294,8 +295,6 @@ def app_fn_upd():
         "Eliminar Taxonomia", "app", 'taxonomiaexpediente', 3,
         "Eliminar Tipo de Expediente", '', True, p_tax, gpos)
 
-    
-
     p_tipodocto = Permiso.create(
         "Tipos de Documento", "app", "tipodocumento", 4, None,
         "tipodocumento_index", False, p_admon, gpos)
@@ -401,6 +400,7 @@ def app_fn_upd():
         es_operacion=True, permiso_padre=p_fe, groups=gpos)
 
     print("Perms done")
+
 
 initsys_fn_upd()
 app_fn_upd()

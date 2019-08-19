@@ -90,18 +90,22 @@ def see(request, pk):
             'view': 'cliente_see',
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': obj.cliente.pk})
-    if usuario.has_perm_or_has_perm_child('actividad.actualizar_estado_actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'actividad.actualizar_estado_actividad'):
         toolbar.append({
             'type': 'button',
             'onclick': 'ActividadHistoria.showFrmNew()',
-            'label': '<i class="fas fa-map-marker-alt"></i> Actualizar Estado'})
-    if usuario.has_perm_or_has_perm_child('actividad.actualizar_actividad_actividad'):
+            'label':
+                '<i class="fas fa-map-marker-alt"></i> Actualizar Estado'})
+    if usuario.has_perm_or_has_perm_child(
+            'actividad.actualizar_actividad_actividad'):
         toolbar.append({
             'type': 'link_pk',
             'view': 'actividad_update',
             'label': '<i class="far fa-edit"></i> Actualizar',
             'pk': pk})
-    if usuario.has_perm_or_has_perm_child('actividad.eliminar_actividad_actividad'):
+    if usuario.has_perm_or_has_perm_child(
+            'actividad.eliminar_actividad_actividad'):
         toolbar.append({
             'type': 'link_pk_del',
             'view': 'actividad_delete',
