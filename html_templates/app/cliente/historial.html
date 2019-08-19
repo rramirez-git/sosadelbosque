@@ -135,7 +135,6 @@
     let openCommentsFrm = () => {
         App.openPanel( $( "#comentarios-template" ).html(), "Actualizar comentarios" );
     }
-    
     let openCaptManual = () => {
         App.openPanel( $( "#frm-captura-manual-template" ).html(), "Captura Manual" );
     }
@@ -257,6 +256,14 @@
             } else if( "MODIFICACION DE SALARIO" == currentRow.mov && "MODIFICACION DE SALARIO" == nextRow.mov ) {
                 nextDate = nextRow.fecha.addDays( -1 );
             } else if( "MODIFICACION DE SALARIO" == currentRow.mov && "BAJA" == nextRow.mov ) {
+                nextDate = nextRow.fecha;
+            } else if( "ALTA" == currentRow.mov && "MODIFICACION DE SALARIO" == nextRow.mov ) {
+                nextDate = nextRow.fecha.addDays( -1 );
+            } else if( "ALTA" == currentRow.mov && "BAJA" == nextRow.mov ) {
+                nextDate = nextRow.fecha;
+            } else if( "ALTA" == currentRow.mov && "MODIFICACION DE SALARIO" == nextRow.mov ) {
+                nextDate = nextRow.fecha.addDays( -1 );
+            } else if( "ALTA" == currentRow.mov && "BAJA" == nextRow.mov ) {
                 nextDate = nextRow.fecha;
             }
         }
