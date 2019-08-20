@@ -432,7 +432,7 @@ class HistoriaLaboral(models.Model):
         verbose_name="Cantidad de Días para calculo de salario promedio")
     factor_de_actualizacion = models.DecimalField(
         max_digits=5, decimal_places=2,
-        default=11, verbose_name="Factor de Actualización")
+        default=1.11, verbose_name="Factor de Actualización")
     tiene_esposa = models.BooleanField(
         default=True, verbose_name="Asignacion Familiar (15%)")
     numero_de_hijos = models.PositiveSmallIntegerField(

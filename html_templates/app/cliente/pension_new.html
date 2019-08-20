@@ -70,7 +70,7 @@
         let p_factor_edad = parseFloat( $( "#porcentaje_factor_edad" ).val() );
         let p_factor_actualizacion = parseFloat( $( "#factor_actualizacion" ).val() );
         let p_asignaciones_familiares = parseFloat( $( "#porcentaje_asignaciones_familiares" ).val() );
-        let pension = ( p_cbi / 100 ) * ( p_factor_edad / 100 ) * ( 1 + p_factor_actualizacion / 100 ) * ( 1 + p_asignaciones_familiares / 100 ) * ( salario_promedio_diario * 365 / 12 );
+        let pension = ( p_cbi / 100 ) * ( p_factor_edad / 100 ) * ( p_factor_actualizacion ) * ( 1 + p_asignaciones_familiares / 100 ) * ( salario_promedio_diario * 365 / 12 );
         let p_pension = pension * 100 / salario_promedio_mensual;
         $( "#salario_promedio_mensual" )[ 0 ].value = salario_promedio_mensual.asMoney();
         $( "#porcentaje_cuantia_basica" )[ 0 ].value = p_cb;

@@ -384,6 +384,15 @@ def historia_laboral(request, pk):
             'label': '<i class="far fa-eye"></i> Ver Cliente',
             'pk': cte.pk})
     if usuario.has_perm_or_has_perm_child(
+            'opcionpension.opciones_de_pension_opcion pension')\
+                or usuario.has_perm_or_has_perm_child(
+                    'opcionpension.opciones_de_pension_opcionpension'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_pension_index',
+            'label': '<i class="fas fa-file-medical-alt"></i> Opciones de Pension',
+            'pk': cte.pk})
+    if usuario.has_perm_or_has_perm_child(
             'historialaboral.hacer_captura_manual_historia laboral'):
         toolbar.append({
             'type': 'button',
@@ -980,6 +989,13 @@ def pensiones_list(request, pk):
             'type': 'link_pk',
             'view': 'cliente_see',
             'label': '<i class="far fa-eye"></i> Ver Cliente',
+            'pk': pk})
+    if usuario.has_perm_or_has_perm_child(
+            'historialaboral.historia_laboral_historia laboral'):
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_historia_laboral',
+            'label': '<i class="fas fa-file-medical-alt"></i> Historia Laboral',
             'pk': pk})
     cperms = {
         'del_opc': usuario.has_perm_or_has_perm_child(
