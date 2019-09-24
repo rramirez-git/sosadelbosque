@@ -15,39 +15,50 @@
     </div>
 </div>
 
-<form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
-    <h5>Opciones de Pensión</h5>
-    {% for opcion in historia.opciones.all %}
-        <div class="card border-{%if opcion.seleccionada %}success{% else %}primary{% endif %}">
-            <div class="card-header">
-                <div class="btn-toolbar float-right">
-                    <div class="btn-group" role="group">
-                        {% if opcion.seleccionada %}
-                        {% if cperms.ust_opc %}
-                        <a href="{% url 'cliente_pension_unselect' pk=opcion.pk %}" class="btn btn-outline-secondary">
-                            <i class="far fa-square"></i> Negar Opción
-                        </a>
-                        {% endif %}
-                        {% else %}
-                        {% if cperms.set_opc %}
-                        <a href="{% url 'cliente_pension_select' pk=opcion.pk %}" class="btn btn-outline-secondary">
-                            <i class="far fa-check-square"></i> Elegir Opción
-                        </a>
-                        {% endif %}
-                        {% endif %}
-                        {% if cperms.del_opc %}
-                        <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_pension_delete' pk=opcion.pk %}`)" class="btn btn-outline-secondary">
-                            <i class="far fa-trash-alt"></i> Eliminar
-                        </a>
-                        {% endif %}
-                    </div>
+<style type="text/css">
+    hr.divider {
+        border-width: 5px; 
+        height: 25px; 
+        background-color: #007bff; 
+        border-color: #007bff;
+    }
+    div.divider:nth-child(2n) {
+        page-break-after: always;
+    }
+</style>
+
+<h5>Opciones de Pensión</h5>
+{% for opcion in historia.opciones.all %}
+    <div class="card border-{%if opcion.seleccionada %}success{% else %}primary{% endif %}">
+        <div class="card-header">
+            <div class="btn-toolbar float-right">
+                <div class="btn-group" role="group">
+                    {% if opcion.seleccionada %}
+                    {% if cperms.ust_opc %}
+                    <a href="{% url 'cliente_pension_unselect' pk=opcion.pk %}" class="btn btn-outline-secondary">
+                        <i class="far fa-square"></i> Negar Opción
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    {% if cperms.set_opc %}
+                    <a href="{% url 'cliente_pension_select' pk=opcion.pk %}" class="btn btn-outline-secondary">
+                        <i class="far fa-check-square"></i> Elegir Opción
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                    {% if cperms.del_opc %}
+                    <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_pension_delete' pk=opcion.pk %}`)" class="btn btn-outline-secondary">
+                        <i class="far fa-trash-alt"></i> Eliminar
+                    </a>
+                    {% endif %}
                 </div>
             </div>
-            <div class="card-body">
-                {% include "app/cliente/opcion_pension_view.html" %}
-            </div>
         </div>
-        <hr style="border-width: 5px; height: 25px; background-color: #007bff; border-color: #007bff;" />
-    {% endfor %}
-</form>
+        <div class="card-body">
+            {% include "app/cliente/opcion_pension_view.html" %}
+        </div>
+    </div>
+    <hr class="divider" />
+    <div class="divider"></div>
+{% endfor %}
 {% endblock %}

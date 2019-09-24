@@ -1,0 +1,91 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% block content %}
+
+<button class="btn btn-outline-secondary d-none" type="button" data-toggle="collapse" data-target="#div_filter_form" aria-expanded="false" aria-controls="div_filter_form">
+    <i class="fas fa-filter"></i> Mostrar/Ocultar Filtros
+</button>
+
+<!--<div class="collapse" id="div_filter_form">-->
+    <div class="card card-body">
+        <form method="post" autocomplete="off" enctype="multipart/form-data" id="filter-form" action="">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="ftr_fecha_creacion_inicio">Fecha de Creación:</label>
+                        <input value="{{ filters.ftr_fecha_creacion_inicio }}" type="date" class="form-control" id="ftr_fecha_creacion_inicio" name="ftr_fecha_creacion_inicio" />
+                        <input value="{{ filters.ftr_fecha_creacion_fin }}" type="date" class="form-control" id="ftr_fecha_creacion_fin" name="ftr_fecha_creacion_fin" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="ftr_fecha_mostrar_inicio">Fecha de Alerta:</label>
+                        <input value="{{ filters.ftr_fecha_mostrar_inicio }}" type="date" class="form-control" id="ftr_fecha_mostrar_inicio" name="ftr_fecha_mostrar_inicio" />
+                        <input value="{{ filters.ftr_fecha_mostrar_fin }}" type="date" class="form-control" id="ftr_fecha_mostrar_fin" name="ftr_fecha_mostrar_fin" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="ftr_usuario_alertado">Usuario Alertado:</label>
+                        <input value="{{ filters.ftr_usuario_alertado }}" type="text" class="form-control" id="ftr_usuario_alertado" name="ftr_usuario_alertado" />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="ftr_usuario_creador">Usuario Creador:</label>
+                        <input value="{{ filters.ftr_usuario_creador }}" type="text" class="form-control" id="ftr_usuario_creador" name="ftr_usuario_creador" />
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Procesar</button>
+        </form>
+    </div>
+<!--</div>-->
+
+{% if regs %}
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Usuario Alertado</th>
+            <th>Mensaje</th>
+            <th>Mostrada</th>
+            <th>Fecha de Creación</th>
+            <th>Fecha de Alerta</th>
+            <th>Fecha en se Mostró</th>
+            <th>Fecha de Borrado</th>
+            <th>Creado por</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Usuario Alertado</th>
+            <th>Mensaje</th>
+            <th>Mostrada</th>
+            <th>Fecha de Creación</th>
+            <th>Fecha de Alerta</th>
+            <th>Fecha en se Mostró</th>
+            <th>Fecha de Borrado</th>
+            <th>Creado por</th>
+        </tr>
+    </tfoot>
+    <tbody id="data-tbl">
+        {% for reg in regs %}
+        <tr>
+            <td>{{ reg.usuario }}</td>
+            <td>{{ reg.nota | safe }}</td>
+            <td>{% if reg.alertado %}Sí{% else %}No{% endif %}</td>
+            <td>{{ reg.created_at | date:'d/M/Y' }}</td>
+            <td>{{ reg.fecha_alerta | date:'d/M/Y' }}</td>
+            <td>{{ reg.fecha_alertado | date:'d/M/Y' }}</td>
+            <td>{{ reg.fecha_no_mostrar | date:'d/M/Y' }}</td>
+            <td>{{ reg.created_by }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

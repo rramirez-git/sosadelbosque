@@ -55,6 +55,68 @@
 </div>
 {% endif %}
 
+{% for reg in historia.registros_supuesto.all %}
+<div class="card" style="margin-top: 10px;">
+    <div class="card-header">
+        <div class="btn-toolbar float-right" role="toolbar">
+            <div class="btn-group" role="group">
+                {% if cperms.del_reg %}
+                <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_registro_supuesto' pk=reg.pk %}`, 'registro del patron seleccionado y su detalle de periodos')" title="Eliminar" class="btn btn-outline-secondary">
+                    <i class="far fa-trash-alt"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {{ reg }}
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Vigente</th>
+                    <th>Dias</th>
+                    <th>Semanas</th>
+                    <th>Salario</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for det in reg.detalle.all %}
+                    <tr>
+                        <td>{{ det.fecha_inicial|date:'d/M/Y' }}</td>
+                        <td>{{ det.fecha_final|date:'d/M/Y' }}</td>
+                        <td><input type="checkbox" disabled="disabled" {% if det.vigente %}checked="checked"{% endif %} /></td>
+                        <td class="text-right">{{ det.dias_cotizados }}</td>
+                        <td class="text-right">{{ det.semanas_cotizadas|money2display }}</td>
+                        <td class="text-right">$ {{ det.salario_base|money2display }}</td>
+                        <td class="text-center">
+                            {% if cperms.del_det %}
+                            <a href="#" onclick="App.showDeletingConfirmation(`{% url 'cliente_delete_detalle_supuesto' pk=det.pk %}`, 'periodo seleccionado')" title="Eliminar" class="btn btn-outline-secondary">
+                                <i class="far fa-trash-alt"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>{{ reg.fecha_de_alta|date:'d/M/Y' }}</th>
+                    <th>{{ reg.fecha_de_baja|date:'d/M/Y' }}</th>
+                    <th></th>
+                    <th class="text-right">{{ reg.dias_cotizados }} | {{ reg.dias_inactivos }}</th>
+                    <th class="text-right">{{ reg.semanas_cotizadas|money2display }} | {{ reg.semanas_inactivos|money2display }}</th>
+                    <th class="text-right">$ {{ reg.salario_base|money2display }}</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endfor %}
+
 {% for reg in historia.registros.all %}
 <div class="card" style="margin-top: 10px;">
     <div class="card-header">
@@ -135,6 +197,9 @@
     let openCommentsFrm = () => {
         App.openPanel( $( "#comentarios-template" ).html(), "Actualizar comentarios" );
     }
+    let openCaptSupuesto = () => {
+        App.openPanel( $( "#frm-captura-supuesto-template" ).html(), "Captura Supuesto" );
+    }
     let openCaptManual = () => {
         App.openPanel( $( "#frm-captura-manual-template" ).html(), "Captura Manual" );
     }
@@ -148,6 +213,13 @@
         App.openPanel( $( "#frm-captura-pdf-template" ).html(), "Captura PDF" );
     }
 
+    let addRowCaptSupuesto = () => {
+        let template = Handlebars.compile( $( "#frm-captura-supuesto-add-template" ).html() );
+        rowc = $( "#tbl-captura-supuesto" )[0].rows.length + 1;
+        $( "#rows" )[0].value = rowc;
+        let html = template( { fila: rowc} );
+        $( "#tbl-captura-supuesto" ).append( $( html ) );
+    }
     let addRowCaptManual = () => {
         let template = Handlebars.compile( $( "#frm-captura-manual-add-template" ).html() );
         rowc = $( "#tbl-captura-manual" )[0].rows.length + 1;
@@ -316,6 +388,67 @@
 </script>
 
 {% verbatim %}
+<script type="text/x-handlebars-template" id="frm-captura-supuesto-add-template">
+    <tr>
+        <td>
+            <input name="inicio_{{fila}}" id="inicio_{{fila}}" type="date" required="required" class="form-control" />
+        </td>
+        <td>
+            <input name="fin_{{fila}}" id="fin_{{fila}}" type="date"class="form-control" />
+        </td>
+        <td>
+            <input name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" pattern="[0-9]+(\.[0-9]{1,2})?" />
+        </td>
+        <td>
+            <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="hidden" title="vigente" />
+        </td>
+    </tr>
+</script>
+{% endverbatim %}
+
+<script type="text/x-handlebars-template" id="frm-captura-supuesto-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="captura-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="action" value="captura-supuesto" />
+        <input type="hidden" name="rows" id="rows" value="1" />
+        <input type="hidden" id="empresa" name="empresa" value="Supuesto" />
+        <input type="hidden" id="registro_patronal" name="registro_patronal" value="" />
+        <table class="table table-striped table-sm table-responsive-md">
+            <thead>
+                <tr>
+                    <th colspan="2">Periodo</th>
+                    <th class="align-bottom">
+                        Salario
+                    </th>
+                    <th>
+                        <button onclick="addRowCaptSupuesto()" type="button" class="btn btn-outline-secondary float-right btn-sm" title="Agregar Período">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tbl-captura-supuesto">
+                <tr>
+                    <td>
+                        <input name="inicio_1" id="inicio_1" type="date" required="required" class="form-control" />
+                    </td>
+                    <td>
+                        <input name="fin_1" id="fin_1" type="date" class="form-control" />
+                    </td>
+                    <td>
+                        <input name="salario_1" id="salario_1" type="text" required="required" class="form-control" pattern="[0-9]+(\.[0-9]{1,2})?" />
+                    </td>
+                    <td>
+                        <input name="vigente_1" id="vigente_1" type="hidden" title="vigente" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-outline-primary" id="btn-save" >Guardar</button>
+    </form>
+</script>
+
+{% verbatim %}
 <script type="text/x-handlebars-template" id="frm-captura-manual-add-template">
     <tr>
         <td>
@@ -325,7 +458,7 @@
             <input name="fin_{{fila}}" id="fin_{{fila}}" type="date"class="form-control" />
         </td>
         <td>
-            <input name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" />
+            <input name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" pattern="[0-9]+(\.[0-9]{1,2})?" />
         </td>
         <td>
             <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="checkbox" title="vigente" />
@@ -376,7 +509,7 @@
                         <input name="fin_1" id="fin_1" type="date" class="form-control" />
                     </td>
                     <td>
-                        <input name="salario_1" id="salario_1" type="text" required="required" class="form-control" />
+                        <input name="salario_1" id="salario_1" type="text" required="required" class="form-control" pattern="[0-9]+(\.[0-9]{1,2})?" />
                     </td>
                     <td>
                         <input name="vigente_1" id="vigente_1" type="checkbox" title="vigente" />
@@ -404,7 +537,7 @@
             <input value="{{fin}}" name="fin_{{fila}}" id="fin_{{fila}}" type="date" class="form-control" style="width: 170px;" />
         </td>
         <td>
-            <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
+            <input pattern="[0-9]+(\.[0-9]{1,2})?" value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
         </td>
         <td>
             <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="checkbox" title="vigente" />
@@ -456,7 +589,7 @@
             <input value="{{fin}}" name="fin_{{fila}}" id="fin_{{fila}}" type="date" class="form-control" style="width: 170px;" />
         </td>
         <td>
-            <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
+            <input pattern="[0-9]+(\.[0-9]{1,2})?" value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" style="width: 100px;" />
         </td>
         <td>
             <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="checkbox" title="vigente" {{#if fin}}{{else}}checked="checked"{{/if}} />
@@ -502,7 +635,7 @@
             <input value="{{fin}}" name="fin_{{fila}}" id="fin_{{fila}}" type="date" class="form-control" />
         </td>
         <td>
-            <input value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" />
+            <input pattern="[0-9]+(\.[0-9]{1,2})?" value="{{salario}}" name="salario_{{fila}}" id="salario_{{fila}}" type="text" required="required" class="form-control" />
         </td>
         <td>
             <input name="vigente_{{fila}}" id="vigente_{{fila}}" type="checkbox" title="vigente" {{#if fin}}{{else}}checked="checked"{{/if}} />
@@ -599,7 +732,7 @@
             <div class="col-sm-4">
                 <div class="form-group">
                     <label for="salario">Salario:</label>
-                    <input value="{{salario}}" id="salario" name="salario" class="form-control" />
+                    <input pattern="[0-9]+(\.[0-9]{1,2})?" required="required" value="{{salario}}" id="salario" name="salario" class="form-control" />
                 </div>
             </div>
         </div>

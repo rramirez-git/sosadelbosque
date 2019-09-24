@@ -16,7 +16,8 @@ from routines.mkitsafe import valida_acceso
 from .models import (
     Cliente, TaxonomiaExpediente, HistoriaLaboral,
     HistoriaLaboralRegistro, HistoriaLaboralRegistroDetalle, UMA,
-    DoctoGral, OpcionPension, Factoredad, Cuantiabasica)
+    DoctoGral, OpcionPension, Factoredad, Cuantiabasica,
+    HistoriaLaboralRegistroDetalleSupuesto, HistoriaLaboralRegistroSupuesto)
 from .forms import (
     frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
     frmClienteObservaciones)
@@ -299,6 +300,7 @@ def update(request, pk):
         obj.save()
         obj.groups.add(Group.objects.get(name='Cliente'))
         obj.save()
+        frmCteDir.save()
         return HttpResponseRedirect(reverse(
             'cliente_see', kwargs={'pk': obj.pk}
         ))
@@ -396,6 +398,11 @@ def historia_laboral(request, pk):
             'historialaboral.hacer_captura_manual_historia laboral'):
         toolbar.append({
             'type': 'button',
+            'label': '<i class="far fa-hand-paper"></i> C. Supuestos',
+            'onclick': 'openCaptSupuesto()',
+        })
+        toolbar.append({
+            'type': 'button',
             'label': '<i class="far fa-hand-paper"></i> C. Manual',
             'onclick': 'openCaptManual()',
         })
@@ -429,6 +436,59 @@ def historia_laboral(request, pk):
             historia.numero_de_hijos = request.POST.get('numero_de_hijos')
             historia.updated_by = usuario
             historia.save()
+        elif "captura-supuesto" == request.POST.get('action'):
+            registro_patronal = request.POST.get('registro_patronal')
+            empresa = request.POST.get('empresa')
+            if historia.registros_supuesto.filter(
+                    registro_patronal=registro_patronal, empresa=empresa
+                    ).exists():
+                reg = historia.registros_supuesto.filter(
+                    registro_patronal=registro_patronal,
+                    empresa=empresa)[0]
+            else:
+                reg = HistoriaLaboralRegistroSupuesto.objects.create(
+                    registro_patronal=registro_patronal,
+                    empresa=empresa,
+                    historia_laboral=historia,
+                    created_by=usuario,
+                    updated_by=usuario)
+                reg.save()
+            for x in range(int(request.POST.get('rows'))):
+                inicio = request.POST.get('inicio_{}'.format(x + 1))
+                fin = request.POST.get('fin_{}'.format(x + 1))
+                salario = request.POST.get('salario_{}'.format(x + 1))
+                vigente = request.POST.get('vigente_{}'.format(x + 1))
+                if '' == inicio:
+                    inicio = None
+                if '' == fin:
+                    fin = None
+                if '' == salario:
+                    salario = None
+                else:
+                    salario = Decimal(salario)
+                if 'on' == vigente:
+                    vigente = True
+                else:
+                    vigente = False
+                if inicio and salario and (fin or vigente):
+                    if fin:
+                        HistoriaLaboralRegistroDetalleSupuesto.objects.create(
+                            historia_laboral_registro_supuesto=reg,
+                            fecha_inicial=inicio,
+                            fecha_final=fin,
+                            vigente=vigente,
+                            salario_base=salario
+                        ).save()
+                    else:
+                        HistoriaLaboralRegistroDetalleSupuesto.objects.create(
+                            historia_laboral_registro_supuesto=reg,
+                            fecha_inicial=inicio,
+                            vigente=vigente,
+                            salario_base=salario,
+                            created_by=usuario,
+                            updated_by=usuario
+                        ).save()
+            reg.setFechasIniFin()
         elif "captura-manual" == request.POST.get('action'):
             registro_patronal = request.POST.get('registro_patronal')
             empresa = request.POST.get('empresa')
@@ -763,6 +823,12 @@ def historia_laboral_vista_tabular(request, pk):
             'label': '<i class="fas fa-file-medical-alt"></i>'
             ' Ver Historia Laboral',
             'pk': historia_laboral.cliente.pk})
+    toolbar.append({
+        'type': 'link_pk',
+        'view': 'cliente_pension_index',
+        'label': '<i class="fas fa-file-medical-alt"></i>'
+        ' Ver Opciones de Pensión',
+        'pk': historia_laboral.cliente.pk})
     df_pers = df_load_HLRD_periodo_continuo_laborado(
         historia_laboral.cliente.pk)
     df_pers[
@@ -770,6 +836,26 @@ def historia_laboral_vista_tabular(request, pk):
         ] = df_pers.historialaboralregistro_pk.apply(
             lambda x: HistoriaLaboralRegistro.objects.get(pk=x).__str__()
             )
+    for reg in historia_laboral.registros_supuesto.all():
+        for det in reg.detalle.all().order_by('fecha_inicial'):
+            df_pers = df_pers.append([{
+                'historialaboralregistro_pk': -reg.pk,
+                'historialaboral_pk': historia_laboral.pk,
+                'fecha_inicio': det.inicio,
+                'fecha_fin': det.fin,
+                'dias': det.dias_cotizados,
+                'semanas': det.semanas_cotizadas,
+                'anios': det.anios_cotizados,
+                'dias_cotiz': det.dias_cotizados,
+                'semanas_cotiz': det.semanas_cotizadas,
+                'anios_cotiz': det.anios_cotizados,
+                'dias_inact': 0,
+                'semanas_inact': 0,
+                'anios_inact': 0,
+                'historialaboralregistro': "Supuesto"
+            }], ignore_index=True)
+    df_pers["fecha_inicio"] = pd.to_datetime(df_pers["fecha_inicio"])
+    df_pers["fecha_fin"] = pd.to_datetime(df_pers["fecha_fin"])
     df_pers_agg = df_pers.agg(['min', 'max', 'sum'])
     f_max = df_pers_agg.fecha_fin['max']
     f_min = df_pers_agg.fecha_inicio['min']
@@ -827,12 +913,11 @@ def historia_laboral_vista_grafica(request, pk):
     df_periodos = df_load_HLRD_periodo_continuo_laborado(
         historia_laboral.cliente.pk)
     df_periodos.sort_index(ascending=False, inplace=True)
-    print(df_periodos)
     for reg in historia_laboral.registros.all():
         r = {'empresa': '{}'.format(reg), 'periodos': []}
         df_pers = df_periodos[df_periodos.historialaboralregistro_pk == reg.pk]
         for p in df_pers.itertuples():
-            d = (p[3] - historia_laboral.inicio).days
+            d = (p[3].date() - historia_laboral.inicio).days
             r['periodos'].append({
                 'dias': p[5],
                 'fin': p[4].strftime('%d/%m/%Y'),
@@ -997,6 +1082,11 @@ def pensiones_list(request, pk):
             'view': 'cliente_historia_laboral',
             'label': '<i class="fas fa-file-medical-alt"></i> Historia Laboral',
             'pk': pk})
+        toolbar.append({
+            'type': 'link_pk',
+            'view': 'cliente_vista_tabular',
+            'label': '<i class="fas fa-table"></i> Vista Tabular',
+            'pk': historia.pk})
     cperms = {
         'del_opc': usuario.has_perm_or_has_perm_child(
             'opcionpension.eliminar_opcion_de_pension_opcion pension')
@@ -1168,3 +1258,99 @@ def pensiones_unselect(request, pk):
     obj.save()
     return HttpResponseRedirect(reverse(
         'cliente_pension_index', kwargs={'pk': pk_cliente}))
+
+
+@valida_acceso()
+def delete_registro_supuesto(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not HistoriaLaboralRegistroSupuesto.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = HistoriaLaboralRegistroSupuesto.objects.get(pk=pk)
+    hl = obj.historia_laboral
+    pk_cliente = hl.cliente.pk
+    try:
+        obj.delete()
+        return HttpResponseRedirect(reverse(
+            'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
+    except ProtectedError:
+        return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+
+@valida_acceso()
+def delete_detalle_supuesto(request, pk):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    if not HistoriaLaboralRegistroDetalleSupuesto.objects.filter(pk=pk).exists():
+        return HttpResponseRedirect(reverse('item_no_encontrado'))
+    obj = HistoriaLaboralRegistroDetalleSupuesto.objects.get(pk=pk)
+    pk_cliente = obj.historia_laboral_registro_supuesto.historia_laboral.cliente.pk
+    reg = obj.historia_laboral_registro_supuesto
+    try:
+        obj.delete()
+        reg.setFechasIniFin()
+        return HttpResponseRedirect(reverse(
+            'cliente_historia_laboral', kwargs={'pk': pk_cliente}))
+    except ProtectedError:
+        return HttpResponseRedirect(reverse('item_con_relaciones'))
+
+@valida_acceso([
+    'permission.maestro_de_alertas_permiso',
+    'permission.maestro_de_alertas_permission'])
+def reporte_maestro_alertas(request):
+    usuario = Usr.objects.filter(id=request.user.pk)[0]
+    data = []
+    ftr = {
+        'ftr_fecha_creacion_inicio': request.POST.get('ftr_fecha_creacion_inicio', ''),
+        'ftr_fecha_creacion_fin': request.POST.get('ftr_fecha_creacion_fin', ''),
+        'ftr_fecha_mostrar_inicio': request.POST.get('ftr_fecha_mostrar_inicio', ''),
+        'ftr_fecha_mostrar_fin': request.POST.get('ftr_fecha_mostrar_fin', ''),
+        'ftr_usuario_alertado': hipernormalize(request.POST.get('ftr_usuario_alertado', '')),
+        'ftr_usuario_creador': hipernormalize(request.POST.get('ftr_usuario_creador', '')),
+    }
+    if "POST" == request.method:
+        print(ftr)
+        data = Alerta.objects.all().order_by('created_at')
+        print(len(data))
+        if ftr['ftr_fecha_creacion_inicio']:
+            data = data.filter(created_at__gte=ftr['ftr_fecha_creacion_inicio'] + ' 00:00:00')
+        print(len(data))
+        if ftr['ftr_fecha_creacion_fin']:
+            data = data.filter(created_at__lte=ftr['ftr_fecha_creacion_fin'] + ' 23:59:59')
+        print(len(data))
+        if ftr['ftr_fecha_mostrar_inicio']:
+            data = data.filter(fecha_alerta__gte=ftr['ftr_fecha_mostrar_inicio'])
+        print(len(data))
+        if ftr['ftr_fecha_mostrar_fin']:
+            data = data.filter(fecha_alerta__lte=ftr['ftr_fecha_mostrar_fin'])
+        print(len(data))
+        data = list(data)
+        if ftr['ftr_usuario_alertado']:
+            data = [
+                elem for elem in data 
+                if ("{} {} {}".format(
+                    hipernormalize(elem.usuario.first_name),
+                    hipernormalize(elem.usuario.last_name),
+                    hipernormalize(elem.usuario.apellido_materno)
+                    )).find(ftr['ftr_usuario_alertado']) >= 0
+                ]
+        print(len(data))
+        if ftr['ftr_usuario_creador']:
+            data = [
+                elem for elem in data 
+                if ("{} {} {}".format(
+                    hipernormalize(elem.created_by.first_name),
+                    hipernormalize(elem.created_by.last_name),
+                    hipernormalize(elem.created_by.apellido_materno)
+                    )).find(ftr['ftr_usuario_creador']) >= 0
+                ]
+        print(len(data))
+    return render(request, 'app/cliente/reporte_maestro_alertas.html', {
+        'menu_main': usuario.main_menu_struct(),
+        'titulo': 'Alertas',
+        'titulo_descripcion': "Reporte Maestro",
+        'req_ui': requires_jquery_ui(request),
+        'combo_options': {
+            'tipo_expediente': list(TaxonomiaExpediente.objects.all()),
+        },
+        'filters': ftr,
+        'regs': data,
+    })

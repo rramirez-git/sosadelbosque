@@ -44,4 +44,10 @@ urlpatterns = [
           name="{}_pension_select".format(object_name)),
      path('pension/unselect/<pk>/', views.pensiones_unselect,
           name="{}_pension_unselect".format(object_name)),
+     path('eliminar_registro_supuesto/<pk>/', views.delete_registro_supuesto,
+          name="{}_delete_registro_supuesto".format(object_name)),
+     path('eliminar_detalle_surupuesto/<pk>/', views.delete_detalle_supuesto,
+          name="{}_delete_detalle_supuesto".format(object_name)),
+     path('reporte/alertas/', views.reporte_maestro_alertas,
+          name="{}_reporte_maestro_alertas".format(object_name)),
 ]
