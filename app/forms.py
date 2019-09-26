@@ -47,6 +47,9 @@ class frmCliente(forms.ModelForm):
             'clinica',
             'subdelegacion',
             'observaciones',
+            'obs_semanas_cotizadas',
+            'obs_homonimia',
+            'obs_duplicidad',
         ]
         labels = {
             'first_name': 'Nombre',
@@ -126,6 +129,17 @@ class frmClienteObservaciones(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = ['observaciones']
+
+
+class frmClienteObservacionesExtra(forms.ModelForm):
+
+    class Meta:
+        model = Cliente
+        fields = [
+            'obs_semanas_cotizadas',
+            'obs_homonimia',
+            'obs_duplicidad',
+        ]
 
 
 class frmDocument(forms.ModelForm):

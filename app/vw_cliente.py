@@ -20,7 +20,7 @@ from .models import (
     HistoriaLaboralRegistroDetalleSupuesto, HistoriaLaboralRegistroSupuesto)
 from .forms import (
     frmCliente, frmClienteContacto, frmClienteUsuario, frmDocument,
-    frmClienteObservaciones)
+    frmClienteObservaciones, frmClienteObservacionesExtra)
 from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
 from routines.utils import (
@@ -116,6 +116,7 @@ def new(request):
     frmCteUsr = frmClienteUsuario(request.POST or None)
     frmCteDir = FrmDireccion(request.POST or None)
     frmCteObs = frmClienteObservaciones(request.POST or None)
+    frmCteObsE = frmClienteObservacionesExtra(request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -133,7 +134,7 @@ def new(request):
         return HttpResponseRedirect(reverse(
             'cliente_see', kwargs={'pk': obj.pk}
         ))
-    return render(request, 'global/form2.html', {
+    return render(request, 'app/cliente/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
         'titulo_descripcion': 'Nuevo',
@@ -144,6 +145,8 @@ def new(request):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'titulo_frm_6': 'Otros',
+        'frm6': frmCteObsE,
         'frm7': frmCteObs,
     })
 
@@ -158,6 +161,7 @@ def see(request, pk):
     frmCteUsr = frmClienteUsuario(instance=obj)
     frmCteDir = FrmDireccion(instance=obj.domicilicio)
     frmCteObs = frmClienteObservaciones(instance=obj)
+    frmCteObsE = frmClienteObservacionesExtra(instance=obj)
     if 'POST' == request.method:
         if "add-note" == request.POST.get('action'):
             add_nota(
@@ -167,12 +171,13 @@ def see(request, pk):
                 usuario,
                 request.POST.getlist('usrs[]'))
         elif "add-alert" == request.POST.get("action"):
-            add_alert(
-                request.POST.get('nota').strip(),
-                request.POST.get('fecha_notificacion'),
-                obj,
-                usuario
-            )
+            if "yes" == request.POST.get("confirm_cte"):
+                add_alert(
+                    request.POST.get('nota').strip(),
+                    request.POST.get('fecha_notificacion'),
+                    obj,
+                    usuario
+                )
             for usr2 in request.POST.getlist('usrs[]'):
                 add_alert(
                     request.POST.get('nota').strip(),
@@ -266,6 +271,8 @@ def see(request, pk):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'titulo_frm_6': 'Otros',
+        'frm6': frmCteObsE,
         'cte': obj,
         'frmDocto': frmDocument(),
         'frmObs': frmCteObs,
@@ -289,6 +296,8 @@ def update(request, pk):
         instance=obj.domicilicio, data=request.POST or None)
     frmCteObs = frmClienteObservaciones(
         instance=obj, data=request.POST or None)
+    frmCteObsE = frmClienteObservacionesExtra(
+        instance=obj, data=request.POST or None)
     if 'POST' == request.method and frm.is_valid():
         obj = frm.save(commit=False)
         obj.username = obj.usuario
@@ -304,7 +313,7 @@ def update(request, pk):
         return HttpResponseRedirect(reverse(
             'cliente_see', kwargs={'pk': obj.pk}
         ))
-    return render(request, 'global/form2.html', {
+    return render(request, 'app/cliente/form.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
         'titulo_descripcion': obj,
@@ -315,6 +324,8 @@ def update(request, pk):
         'frm4': frmCteCont,
         'titulo_frm_5': 'Dirección',
         'frm5': frmCteDir,
+        'titulo_frm_6': 'Otros',
+        'frm6': frmCteObsE,
         'frm7': frmCteObs,
     })
 

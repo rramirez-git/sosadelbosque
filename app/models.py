@@ -190,6 +190,12 @@ class Cliente(Usr):
         on_delete=models.PROTECT,
         related_name='clientes')
     observaciones = models.TextField(blank=True)
+    obs_semanas_cotizadas = models.TextField(
+        blank=True, verbose_name="Semanas Cotizadas")
+    obs_homonimia = models.TextField(
+        blank=True, verbose_name="Homonimia")
+    obs_duplicidad = models.TextField(
+        blank=True, verbose_name="Duplicidad")
 
     @property
     def edad(self):
