@@ -22,7 +22,7 @@
         background-color: #007bff; 
         border-color: #007bff;
     }
-    div.divider:nth-child(2n) {
+    div.divider:nth-child(2n+1) {
         page-break-after: always;
     }
 </style>
@@ -61,4 +61,12 @@
     <hr class="divider" />
     <div class="divider"></div>
 {% endfor %}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        let divs = $("div.divider");
+        $(divs[divs.length - 1]).remove();
+    });
+</script>
+
 {% endblock %}
