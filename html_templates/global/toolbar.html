@@ -2,7 +2,11 @@
 <div id="main-toolbar" class="btn-toolbar float-right" role="toolbar">
     <div class="btn-group" role="group">
     {% for item in toolbar %}
-        {% if 'link' == item.type %}
+        {% if 'rlink' == item.type %}
+            <a href="{{ item.url }}" class="btn btn-outline-secondary">
+                {{ item.label | safe }}
+            </a>
+        {% elif 'link' == item.type %}
             <a href="{% url item.view %}" class="btn btn-outline-secondary">
                 {{ item.label | safe }}
             </a>

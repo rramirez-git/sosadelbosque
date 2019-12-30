@@ -350,6 +350,10 @@ class Usr(User):
                 self.groups.filter(
                     name__icontains="Super-Administrador").exists())
 
+    @property
+    def iniciales(self):
+        return self.first_name.upper()[0] + self.last_name.upper()[0]
+
     class Meta:
         ordering = ['first_name', 'last_name', 'apellido_materno']
 

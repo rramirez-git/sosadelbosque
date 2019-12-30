@@ -57,6 +57,11 @@ class clsApp {
         $( document.body ).append( $( html ) );
         $( "#modal-panel-message" ).modal();
     }
+    closePanel() {
+        $("#modal-panel-message").remove();
+        $('.modal-backdrop').remove();
+        $(document.body).removeClass("modal-open");
+    }
     setUIControls() {
         if( req_ui ) {
             $.datepicker.setDefaults( $.datepicker.regional[ "es" ] );
@@ -97,6 +102,24 @@ class clsApp {
     }
     isEmpty( valor ) {
         return "" == valor || 0.0 == parseFloat( valor );
+    }
+    validate_required_fields( container ) {
+        let elements = $(`${container} [required="required"]`);
+        for( let idx = 0; idx <= elements.length; idx++){
+            let element = $(elements[idx]);
+            if(element.val() == "") {
+                let lbl = element.parent().find('label');
+                let msg = "El elemento ";
+                if(lbl.length > 0) {
+                    msg += lbl.text() + " ";
+                }
+                msg += "no puede estar vacío";
+                alert(msg);
+                element.focus();
+                return false;
+            }
+        }
+        return true;
     }
 }
 

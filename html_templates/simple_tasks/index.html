@@ -1,0 +1,166 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% block content %}
+
+<style type="text/css">
+    tr.weekheader th, td.day {
+        width: 14%;
+        text-align: center;
+        border: 1px solid silver;
+    }
+    tr.weekheader th {
+        text-transform: capitalize;
+    }
+    table.month {
+        width: 100%;
+        font-size: smaller;
+        border-collapse: collapse;
+        border: 1px silver solid;
+    }
+    td.day {
+        height: 55px;
+        vertical-align: text-top;
+    }
+    div.day-lbl {
+        font-weight: bold;
+    }
+    .filterbar {
+        margin-bottom: 10px;
+        height: 100px; 
+        border: 1px solid red;
+    }
+    div.task-list {
+        font-size: small;
+        text-align: left;
+        padding: 2px;
+    }
+    div.task-list div.task {
+        padding: 2px;
+        border: solid 1px transparent;
+        border-radius: 3px;
+    }
+    div.task-list div.task:hover {
+        border-color: silver;
+    }
+    div.task-list div.task + div.task {
+        /*margin-top: 5px;*/
+    }
+    table.month * {
+        cursor: default;
+    }
+</style>
+
+<div class="filterbar">ToolBar</div>
+
+{{ calendario | safe }}
+
+<script type="text/x-handlebars-template" id="data-task-form-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="data-task-form" action="">
+        {% csrf_token %}
+        {% include "simple_tasks/form.html" %}
+        <button type="button" class="btn btn-outline-primary" id="btn-save" onclick="create_new_task()">Guardar</button>
+    </form>
+</script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="data-task-list-template">
+    <div class="task" data-id="{{idtarea}}" data-estado="{{estado_actual}}" data-responsable="{{responsable.id}}">
+        <span class="badge badge-{{color}}" data-toggle="tooltip" title="{{responsable.nombre}}">{{responsable.iniciales}}</span>
+        {{titulo}}
+    </div>
+</script>
+{% endverbatim %}
+
+<script type="text/javascript">
+    let responsables = {
+        {% for persona in responsables %}
+        "{{persona.pk}}": {
+            "nombre": "{{persona.first_name}}",
+            "apellido": "{{persona.last_name}}"
+        },
+        {% endfor %}
+    };
+    let openNewTaskFrm = () => {
+        App.openPanel($("#data-task-form-template").html(), "Nueva Tarea");
+    }
+    let create_new_task = () => {
+        if(App.validate_required_fields("#data-task-form")) {
+            $.post(
+                '{% url "tarea_new"%}',
+                $('#data-task-form').serialize(),
+                function(data, textStatus, jqXHR) {
+                    App.closePanel();
+                    if('ok' == data.status) {
+                        getall_tasks();
+                    } else {
+                        alert("Ha ocurrido un error creando la tarea\n\n" + data.reason);
+                    }
+                },
+                'json').fail(function(jqXHR, textStatus, errorThrown) {
+                    alert("Ha ocurrido un error creando la tarea\n\n" + textStatus + ":\n" + errorThrown);
+                });
+        }
+    }
+    let getall_tasks = () => {
+        $.get(
+            '{% url "tarea_getall" anio=anio mes=mes %}',
+            function(data) {
+                $("td.day div.task").remove();
+                for(idx in data) {
+                    tarea = data[idx];
+                    add_task(tarea);
+                }
+                $('[data-toggle="tooltip"]').tooltip(); 
+            },
+            'json').fail(function(jqXHR, textStatus, errorThrown) {
+                    alert("Ha ocurrido un error creando la tarea\n\n" + textStatus + ":\n" + errorThrown);
+                });
+    }
+    let add_task = (task) => {
+        task.fecha_limite = new Date(task.fecha_limite + "T23:59:59");
+        let container = $(`td.day[data-day="${task.fecha_limite.getDate()}"] div.task-list`);
+        let template = Handlebars.compile(
+            $("#data-task-list-template").html());
+        if('REALIZADO' == task.estado_actual) {
+            task.color = 'success';
+        } else if('CANCELADO' == task.estado_actual) {
+            task.color = 'light';
+        } else if('OTRO' == task.estado_actual) {
+            task.color = 'light';
+        } else if('EN REVISION' == task.estado_actual) {
+            task.color = 'secondary';
+        } else {
+            let hoy = new Date();
+            if(hoy > task.fecha_limite) {
+                task.color= "danger";
+            } else if(hoy.addDays(3) > task.fecha_limite) {
+                task.color = 'warning';
+            } else {
+                task.color = 'primary';
+            }
+        }
+        tarea.responsable = {
+            "id": tarea.responsable,
+            "nombre": (responsables[tarea.responsable].nombre + " " + 
+                responsables[tarea.responsable].apellido).trim(),
+            "iniciales": 
+                (responsables[tarea.responsable].nombre.length ? 
+                    responsables[tarea.responsable].nombre[0] 
+                    : '') + 
+                (responsables[tarea.responsable].apellido.length ? 
+                    responsables[tarea.responsable].apellido[0] 
+                    : '')
+        }
+        let html = template(tarea);
+        container.append(html);
+    }
+    $(document).ready(function(){
+        getall_tasks();
+        let hoy = new Date();
+        if({{anio}} == hoy.getFullYear() && {{mes}} == hoy.getMonth() + 1) {
+            $(`td.day[data-day="${hoy.getDate()}"]`).css('border-width', '3px');
+        }
+    });
+</script>
+
+{% endblock %}
