@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from datetime import date
+from datetime import date, timedelta
 
 # Create your models here.
 
@@ -19,7 +19,7 @@ class Tarea(models.Model):
     titulo = models.CharField(max_length=250)
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     responsable = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name='+',
+        User, on_delete=models.SET_NULL, related_name='tareas_asignadas',
         null=True, blank=True)
     fecha_limite = models.DateField(
         default=date.today, verbose_name="Fecha límite")
@@ -37,7 +37,8 @@ class Tarea(models.Model):
     
     class Meta:
         ordering = [
-            'idtarea',
+            'fecha_limite',
+            'titulo',
         ]
 
     def __str__(self):
@@ -45,6 +46,23 @@ class Tarea(models.Model):
 
     def __unicode__(self):
         return self.__str__()
+
+    @property
+    def color(self):
+        if "REALIZADO" == self.estado_actual:
+            return "success"
+        elif "CANCELADO" == self.estado_actual:
+            return "light"
+        elif "OTRO" == self.estado_actual:
+            return "light"
+        elif "EN REVISION" == self.estado_actual:
+            return "secondary"
+        else:
+            if date.today() > self.fecha_limite:
+                return "danger"
+            if date.today() + timedelta(3) > self.fecha_limite:
+                return "warning"
+        return "primary"
 
 class Vinculo(models.Model):
     idvinculo = models.AutoField(primary_key=True)

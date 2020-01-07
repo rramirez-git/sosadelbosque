@@ -61,6 +61,7 @@ class clsApp {
         $("#modal-panel-message").remove();
         $('.modal-backdrop').remove();
         $(document.body).removeClass("modal-open");
+        $(document.body).css("padding-right", "0px")
     }
     setUIControls() {
         if( req_ui ) {

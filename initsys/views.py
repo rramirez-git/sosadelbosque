@@ -12,10 +12,11 @@ import os
 import json
 
 from .forms import AccUsr
-from .models import Usr
+from .models import Usr, User
 from routines.mkitsafe import valida_acceso
 from routines.utils import is_mobile
-from app.models import Cliente
+from app.models import Cliente, HistoriaLaboral, Actividad
+from simple_tasks.models import Tarea, STATUS_TAREA, Vinculo, Comentario, Historia
 
 from app.models import TaxonomiaExpediente, EstatusActividad
 
@@ -93,6 +94,13 @@ def panel(request):
     if usuario.has_perm_or_has_perm_child('cliente.clientes_cliente'):
         estatus_actividad = list(EstatusActividad.objects.filter(
             mostrar_en_panel=True))
+    responsables = list(User.objects.exclude(id__in = Cliente.objects.all().values('id')))
+    clientes = list(Cliente.objects.all())
+    historias = list(HistoriaLaboral.objects.all())
+    actividades = list(Actividad.objects.all())
+    responsables.sort(key=lambda usr: f'{usr.first_name} {usr.last_name}'.upper())
+    historias.sort(key=lambda obj: f'{obj}')
+    actividades.sort(key=lambda obj: f'{obj.cliente} {obj}')
     return render(
         request,
         'my_panel.html', {
@@ -103,6 +111,13 @@ def panel(request):
             'taxonomias': taxonomias,
             'estatus_actividad': estatus_actividad,
             'me_as_cte': me_as_cte,
+            'tareas': list(usuario.tareas_asignadas.filter(estado_actual__in = ["PENDIENTE", "EN PROGRESO", "EN REVISION"]).order_by(
+                'fecha_limite', 'titulo')),
+            'responsables': responsables,
+            'status_tareas': STATUS_TAREA,
+            'clientes': clientes,
+            'historias_laborales': historias,
+            'actividades': actividades,
         })
 
 

@@ -1318,21 +1318,16 @@ def reporte_maestro_alertas(request):
         'ftr_usuario_creador': hipernormalize(request.POST.get('ftr_usuario_creador', '')),
     }
     if "POST" == request.method:
-        print(ftr)
         data = Alerta.objects.all().order_by('created_at')
-        print(len(data))
         if ftr['ftr_fecha_creacion_inicio']:
             data = data.filter(created_at__gte=ftr['ftr_fecha_creacion_inicio'] + ' 00:00:00')
-        print(len(data))
         if ftr['ftr_fecha_creacion_fin']:
             data = data.filter(created_at__lte=ftr['ftr_fecha_creacion_fin'] + ' 23:59:59')
         print(len(data))
         if ftr['ftr_fecha_mostrar_inicio']:
             data = data.filter(fecha_alerta__gte=ftr['ftr_fecha_mostrar_inicio'])
-        print(len(data))
         if ftr['ftr_fecha_mostrar_fin']:
             data = data.filter(fecha_alerta__lte=ftr['ftr_fecha_mostrar_fin'])
-        print(len(data))
         data = list(data)
         if ftr['ftr_usuario_alertado']:
             data = [
@@ -1343,7 +1338,6 @@ def reporte_maestro_alertas(request):
                     hipernormalize(elem.usuario.apellido_materno)
                     )).find(ftr['ftr_usuario_alertado']) >= 0
                 ]
-        print(len(data))
         if ftr['ftr_usuario_creador']:
             data = [
                 elem for elem in data 
@@ -1353,7 +1347,6 @@ def reporte_maestro_alertas(request):
                     hipernormalize(elem.created_by.apellido_materno)
                     )).find(ftr['ftr_usuario_creador']) >= 0
                 ]
-        print(len(data))
     return render(request, 'app/cliente/reporte_maestro_alertas.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Alertas',
@@ -1365,3 +1358,4 @@ def reporte_maestro_alertas(request):
         'filters': ftr,
         'regs': data,
     })
+    

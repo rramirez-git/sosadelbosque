@@ -1,0 +1,142 @@
+{% load util_filters %}
+
+<div class="clearfix">
+    <div class="btn-toolbar float-right" role="toolbar">
+        <div class="btn-group" role="group">
+            {% if perms.simple_tasks.actualizar_tareas_tarea %}
+            <button type="button" class="btn btn-outline-secondary" onclick="update_task({% verbatim %}{{pk}}{% endverbatim %})">
+                <i class="far fa-edit"></i> Actualizar
+            </button>
+            {% endif %}
+            {% if perms.simple_tasks.eliminar_tareas_tarea %}
+            <button type="button" class="btn btn-outline-secondary" onclick="delete_task({% verbatim %}{{pk}}{% endverbatim %})">
+                <i class="far fa-trash-alt"></i> Eliminar
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<p></p>
+
+{% verbatim %}
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-control tarea_descripcion">
+            {{{descripcion}}}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="responsable">Responsable:</label>
+            <p class="form-control">{{ responsable.first_name }} {{ responsable.last_name }}</p>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="fecha_limite">Fecha Límite:</label>
+            <p class="form-control">{{ fecha_limite }}</p>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="estado_actual">Estado:</label>
+            <p class="form-control">{{ estado_actual }}</p>
+        </div>
+    </div>
+</div>
+{{#if vinculos}}
+<h5>Vínculos</h5>
+{{#each vinculos}}
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <p>{{tipo}}: <a href="{{url}}" target="_blank">{{texto}}</a></p>
+        </div>
+    </div>
+</div>
+{{/each}}
+{{/if}}
+<ul class="nav nav-tabs" id="extra-data-tab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="comentarios-tab" data-toggle="tab" href="#comentarios-content" role="tab" aria-controls="comentarios-content" aria-selected="true">Comentarios</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="historia-tab" data-toggle="tab" href="#historia-content" role="tab" aria-controls="historia-content" aria-selected="false">Historia</a>
+    </li>
+</ul>
+<div class="tab-content" id="extra-data-tab-content">
+    {% endverbatim %}
+    {% if perms.simple_task.comentarios_comentario %}
+    {% verbatim %}
+    <div class="tab-pane fade show active" id="comentarios-content" role="tabpanel" aria-labelledby="comentarios-tab">
+        {{#each comentarios}}
+            <div class="card comentario">
+                <div class="card-header">
+                    <div class="btn-group float-right" role="group">
+                        {{#if editable}}
+                        <button type="button" class="btn btn-outline-secondary" onclick="update_comment({{pk}})"><i class="far fa-edit"></i></button>
+                        {{/if}}
+                        {{#if eliminable}}
+                        <button type="button" class="btn btn-outline-secondary" onclick="delete_comment({{pk}})"><i class="far fa-trash-alt"></i></button>
+                        {{/if}}
+                    </div>
+                    {{by}}, {{at}}
+                </div>
+                <div class="card-body">
+                    <div class="comment-display" data-idcomment="{{pk}}">
+                        {{{comentario}}}
+                    </div>
+                    <div class="comment-frm-upd d-none" data-idcomment="{{pk}}">
+                        <textarea class="form-control" rows="4" id="comentario-{{pk}}">{{{comentario_raw}}}</textarea>
+                        <button type="button" class="btn btn-outline-primary" id="btn-save-comment" onclick="save_updated_comment({{pk}})">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+        {% endverbatim %}
+        {% if perms.simple_task.agregar_comentarios_comentario %}
+        {% verbatim %}
+        <form method="post" autocomplete="off" enctype="multipart/form-data" id="comment-task-form" action="">
+            {% endverbatim %}
+            {% csrf_token %}
+            {% verbatim %}
+            <input type="hidden" name="id" id="id" value="{{pk}}" />
+            <div class="form-group">
+                <textarea class="form-control" rows="4" name="comentario" id="comentario" required="required"></textarea>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="btn-save" onclick="create_new_comment()">Comentar</button>
+        </form>
+        {% endverbatim %}
+        {% endif %}
+        {% verbatim %}
+    </div>
+    {% endverbatim %}
+    {% endif %}
+    {% verbatim %}
+    <div class="tab-pane fade" id="historia-content" role="tabpanel" aria-labelledby="historia-tab">
+        {% endverbatim %}
+        {% if perms.simple_task.ver_historial_de_tareas_historia %}
+        {% verbatim %}
+        {{#each historia}}
+        <div class="row">
+            <div class="col-sm-4 text-left">{{cambio}}</div>
+            <div class="col-sm-4 text-center">{{at}}</div>
+            <div class="col-sm-4 text-right">{{by}}</div>
+        </div>
+        <div class="row">
+            <div class="col-sm-5 align-top">{{valor_anterior}}</div>
+            <div class="col-sm-2 align-top text-center">&rarr;</div>
+            <div class="col-sm-5 align-top">{{valor_nuevo}}</div>
+        </div>
+        <hr />
+        {{/each}}
+        {% endverbatim %}
+        {% endif %}
+        {% verbatim %}
+    </div>
+</div>
+
+{% endverbatim %}

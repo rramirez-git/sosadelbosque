@@ -22,6 +22,47 @@
 
 <h3>{{usuario}}</h3>
 
+<h4>Tareas Pendientes</h4>
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Tarea</th>
+            <th>Estado</th>
+            <th>Fecha Límite</th>
+            <th>Vínculos</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Tarea</th>
+            <th>Estado</th>
+            <th>Fecha Límite</th>
+            <th>Vínculos</th>
+            <th>Detalle</th>
+        </tr>
+    </tfoot>
+    <tbody id="data-task">
+        {% for tarea in tareas %}
+        <tr class="text-{{tarea.color}} table-{{tarea.color}}">
+            <td>{{tarea}}</td>
+            <td>{{tarea.estado_actual}}</td>
+            <td>{{tarea.fecha_limite | date:'d/M/Y'}}</td>
+            <td>
+                {% for lnk in tarea.vinclulos.all %}
+                <a href="{{lnk.url}}">{{lnk.texto}}</a><br />
+                {% endfor %}
+            </td>
+            <td>
+                <button type="button" onclick="see_task({{tarea.pk}})" class="btn btn-outline-secondary">
+                    <i class="far fa-eye"></i> Ver
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% if taxonomias %}
 <h4>Clientes</h4>
 <div class="card-columns">
@@ -145,5 +186,51 @@
 {% endfor %}
 
 {% endif %}
+
+<link rel="stylesheet" href="{% static 'css/simple_tasks.css' %}" />
+<script type="text/x-handlebars-template" id="data-task-form-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="data-task-form" action="">
+        {% csrf_token %}
+        {% include "simple_tasks/form.html" %}
+        <input type="hidden" name="pk" id="pk" value="" />
+        <button type="button" class="btn btn-outline-primary" id="btn-save" onclick="create_new_task()">Guardar</button>
+    </form>
+</script>
+
+<script type="text/x-handlebars-template" id="data-task-readonly-template">
+    <input type="hidden" name="pk" id="pk" value="" />
+    {% include "simple_tasks/form_readonly.html" %}
+</script>
+
+{% verbatim %}
+<script type="text/x-handlebars-template" id="data-task-list-template">
+    <div class="task" data-id="{{idtarea}}" data-estado="{{estado_actual}}" data-responsable="{{responsable.id}}" ondblclick="see_task({{idtarea}})">
+        <span class="badge badge-{{color}}" data-toggle="tooltip" title="{{responsable.nombre}}">{{responsable.iniciales}}</span>
+        {{idtarea}} - {{titulo}}
+    </div>
+</script>
+{% endverbatim %}
+
+<script type="text/javascript" src="{% static 'js/simple_tasks.js' %}"></script>
+<script type="text/javascript">
+    let simple_task_reloading = true;
+    let responsables = {
+        {% for persona in responsables %}
+        "{{persona.pk}}": {
+            "nombre": "{{persona.first_name}}",
+            "apellido": "{{persona.last_name}}"
+        },
+        {% endfor %}
+    };
+    let url_tarea_new = '{% url "tarea_new"%}';
+    let url_tarea_see = '{% url "tarea_see" %}';
+    let url_tarea_update = '{% url "tarea_update" %}';
+    let url_tarea_delete = '{% url "tarea_delete" %}';
+    let url_tarea_add_comment = '{% url "tarea_add_comment"%}';
+    let url_tarea_delete_comment = '{% url "tarea_delete_comment" %}';
+    let url_tarea_update_comment = '{% url "tarea_update_comment" %}';
+    let url_tarea_new_link = '{% url "tarea_new_link" %}';
+    let url_tarea_delete_link = '{% url "tarea_delete_link" %}';
+</script>
 
 {% endblock %}
