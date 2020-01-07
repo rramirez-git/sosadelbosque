@@ -1,0 +1,79 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="titulo">Tarea</label>
+            <input type="text" class="form-control" name="titulo" id="titulo" required="required" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea class="form-control" rows="7" name="descripcion" id="descripcion" required="required"></textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="responsable">Responsable:</label>
+            <select id="responsable" name="responsable" class="form-control" required="required">
+                {% for opt in responsables %}
+                    <option value="{{ opt.pk }}">{{ opt.first_name }} {{ opt.last_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="fecha_limite">Fecha Límite:</label>
+            <input type="date" id="fecha_limite" name="fecha_limite" class="form-control"  required="required"/>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="estado_actual">Estado:</label>
+            <select id="estado_actual" name="estado_actual" class="form-control" required="required">
+                {% for opt in status_tareas %}
+                    <option value="{{ opt.0 }}">{{ opt.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="lnk_cte">Cliente</label>
+            <select name="lnk_cte" id="lnk_cte" class="form-control">
+                <option value=""></option>
+                {% for opt in clientes %}
+                    <option value="{{ opt.pk }}">{{ opt }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="lnk_hl">Historia Laboral</label>
+            <select name="lnk_hl" id="lnk_hl" class="form-control">
+                <option value=""></option>
+                {% for opt in historias_laborales %}
+                    <option value="{{ opt.pk }}">{{ opt.cliente }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="form-group">
+            <label for="lnk_act">Actividad</label>
+            <select name="lnk_act" id="lnk_act" class="form-control">
+                <option value=""></option>
+                {% for opt in actividades %}
+                    <option value="{{ opt.pk }}">{{ opt.cliente }} - {{ opt }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>

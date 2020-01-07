@@ -35,6 +35,10 @@ def money2display(num):
         return "{:0,.2f}".format(num)
     except ValueError:
         return num
+    except TypeError:
+        if num is None:
+            return ""
+        return num
 
 
 @register.filter

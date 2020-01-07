@@ -160,6 +160,7 @@ urlpatterns = [
     path('cuantia_basica/', include('app.url_cuantiabasica')),
     path('factor_de_edad/', include('app.url_factoredad')),
     path('info/', include('app.url_as_cte')),
+    path('tareas/', include('simple_tasks.url_simple_tasks'))
 ]
 
 urlpatterns += static(

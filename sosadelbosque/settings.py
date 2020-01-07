@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
     'initsys',
     'app',
+    'simple_tasks',
 
 ]
 

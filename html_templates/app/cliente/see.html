@@ -154,9 +154,17 @@
             </div>
         </div>
         <div class="row">
-                <div class="col form-group">
-                    <label>Notificando también a:</label>
-                </div>
+            <div class="col">
+                <label for="confirm_cte">
+                    <input checked="checked" value="yes" type="checkbox" name="confirm_cte" id="confirm_cte" />
+                    Confirmar al cliente
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col form-group">
+                <label>Notificando también a:</label>
+            </div>
             </div>
             <div class="row">
                 {% for usr in usrs %}
@@ -181,4 +189,11 @@
     </form>
 </script>
 
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#id_obs_semanas_cotizadas").attr('rows', 3);
+        $("#id_obs_homonimia").attr('rows', 3);
+        $("#id_obs_duplicidad").attr('rows', 3);
+    });
+</script>
 {% endblock %}

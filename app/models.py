@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 
 from initsys.models import Usr, Direccion
+from simple_tasks.models import Tarea
 from routines.utils import BootstrapColors, inter_periods_days, free_days
 from app.data_utils import (
     df_data_generate_HLRDDay, df_load_HLRDDay, df_load_HLRDDay_agg,
@@ -190,6 +191,12 @@ class Cliente(Usr):
         on_delete=models.PROTECT,
         related_name='clientes')
     observaciones = models.TextField(blank=True)
+    obs_semanas_cotizadas = models.TextField(
+        blank=True, verbose_name="Semanas Cotizadas")
+    obs_homonimia = models.TextField(
+        blank=True, verbose_name="Homonimia")
+    obs_duplicidad = models.TextField(
+        blank=True, verbose_name="Duplicidad")
 
     @property
     def edad(self):
@@ -432,7 +439,7 @@ class HistoriaLaboral(models.Model):
         verbose_name="Cantidad de Días para calculo de salario promedio")
     factor_de_actualizacion = models.DecimalField(
         max_digits=5, decimal_places=2,
-        default=11, verbose_name="Factor de Actualización")
+        default=1.11, verbose_name="Factor de Actualización")
     tiene_esposa = models.BooleanField(
         default=True, verbose_name="Asignacion Familiar (15%)")
     numero_de_hijos = models.PositiveSmallIntegerField(
@@ -453,7 +460,9 @@ class HistoriaLaboral(models.Model):
         df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
         res = df_pers.agg(['sum'])['dias_cotiz']['sum']
         if res is None:
-            return 0
+            res = 0
+        for reg in self.registros_supuesto.all():
+            res += reg.dias_cotizados
         return res
 
     @property
@@ -461,19 +470,27 @@ class HistoriaLaboral(models.Model):
         df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
         res = df_pers.agg(['sum'])['semanas_cotiz']['sum']
         if res is None:
-            return 0
+            res = 0
+        for reg in self.registros_supuesto.all():
+            res += reg.semanas_cotizadas
         return res
 
     @property
     def inicio(self):
         df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
-        res = df_pers.agg(['min'])['fecha_inicio']['min']
+        res = df_pers.agg(['min'])['fecha_inicio']['min'].date()
+        for reg in self.registros_supuesto.all():
+            if reg.fecha_de_alta < res:
+                res = reg.fecha_de_alta
         return res
 
     @property
     def fin(self):
         df_pers = df_load_HLRD_periodo_continuo_laborado(self.cliente.pk)
-        res = df_pers.agg(['max'])['fecha_fin']['max']
+        res = df_pers.agg(['max'])['fecha_fin']['max'].date()
+        for reg in self.registros_supuesto.all():
+            if reg.fecha_de_baja > res:
+                res = reg.fecha_de_baja
         return res
 
     def agg_salario(self, dias_calculo=None):
@@ -513,6 +530,12 @@ class HistoriaLaboral(models.Model):
         if self.df_agg_salario is not None:
             return self.df_agg_salario
         df = df_load_HLRDDay_agg(self.cliente.pk).head(dias_calculo)
+        for reg in self.registros_supuesto.all():
+            for det in reg.detalle.all():
+                for dt in pd.date_range(det.inicio, det.fin):
+                    df = df.append([{'fecha': dt, 'salario': det.salario_base}], ignore_index=True)
+        df.sort_values(by='fecha', ascending=False, inplace=True)
+        df = df.head(dias_calculo)
         tope_uma = 25 * self.uma.valor
         df['salario_topado'] = df.salario
         df.loc[df.salario > tope_uma, 'salario_topado'] = tope_uma
@@ -523,7 +546,7 @@ class HistoriaLaboral(models.Model):
         fin = None
         salario = None
         salario_topado = None
-        for reg in df.sort_index(ascending=False).itertuples():
+        for reg in df.sort_values(by='fecha', ascending=True).itertuples():
             if inicio is None:
                 inicio = reg[1]
             if fin is None:
@@ -915,10 +938,278 @@ class OpcionPension(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-seleccionada', '-created_at']
+        ordering = ['-seleccionada', 'created_at']
 
     def __str__(self):
         return "{} ({})".format(self.historia_laboral.cliente, self.created_at)
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class HistoriaLaboralRegistroSupuesto(models.Model):
+    idhistorialaboralregistrosupuesto = models.AutoField(primary_key=True)
+    historia_laboral = models.ForeignKey(
+        HistoriaLaboral, on_delete=models.CASCADE,
+        related_name='registros_supuesto')
+    registro_patronal = models.CharField(blank=True, max_length=15, default="")
+    empresa = models.CharField(blank=True, max_length=200, default="Supuesto")
+    fecha_de_alta = models.DateField(null=True, blank=True)
+    fecha_de_baja = models.DateField(null=True, blank=True)
+    vigente = models.BooleanField(default=False, blank=True)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def salario_base(self):
+        try:
+            return self.detalle.all()[0].salario_base
+        except IndexError:
+            return 0.0
+
+    @property
+    def dias_cotizados(self):
+        res = 0
+        for det in self.detalle.all():
+            res += det.dias_cotizados
+        return res
+
+    @property
+    def semanas_cotizadas(self):
+        res = 0
+        for det in self.detalle.all():
+            res += det.semanas_cotizadas
+        return res
+
+    @property
+    def anios_cotizados(self):
+        return round(self.semanas_cotizadas / 52, 2)
+
+    @property
+    def dias_inactivos(self):
+        dias = (self.fin - self.inicio).days
+        dc = dias - self.dias_cotizados
+        if dc < 0:
+            dc = 0
+        return dc
+
+    @property
+    def semanas_inactivos(self):
+        return round(self.dias_inactivos / 7)
+
+    @property
+    def anios_inactivos(self):
+        return self.dias_inactivos / 365
+
+    @property
+    def inicio(self):
+        try:
+            return date(
+                self.fecha_de_alta.year,
+                self.fecha_de_alta.month,
+                self.fecha_de_alta.day)
+        except AttributeError:
+            return date.today()
+
+    @property
+    def fin(self):
+        if self.vigente:
+            return date.today()
+        else:
+            try:
+                return date(
+                    self.fecha_de_baja.year,
+                    self.fecha_de_baja.month,
+                    self.fecha_de_baja.day)
+            except AttributeError:
+                return date.today()
+
+    def setFechasIniFin(self):
+        vigente = False
+        fecha_inicial = self.detalle.all().aggregate(Min('fecha_inicial'))
+        fecha_final = self.detalle.all().aggregate(Max('fecha_final'))
+        for det in self.detalle.all():
+            vigente = vigente or det.vigente
+        self.vigente = vigente
+        self.fecha_de_alta = fecha_inicial['fecha_inicial__min']
+        if not vigente:
+            self.fecha_de_baja = fecha_final['fecha_final__max']
+        else:
+            self.fecha_de_baja = None
+        self.save()
+
+    def setDates(self):
+        self.setFechasIniFin()
+
+    class Meta:
+        ordering = ["historia_laboral", "-fecha_de_alta", "-fecha_de_baja"]
+
+    def __str__(self):
+        res = ""
+        if self.empresa and self.registro_patronal:
+            res = "{} ({})".format(
+                self.empresa.strip(), self.registro_patronal.strip())
+        elif self.empresa:
+            res = "{}".format(self.empresa.strip())
+        elif self.registro_patronal:
+            res = "{}".format(self.registro_patronal.strip())
+        return res.strip()
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class HistoriaLaboralRegistroDetalleSupuesto(models.Model):
+    idhistorialaboralregistrodetalle = models.AutoField(primary_key=True)
+    historia_laboral_registro_supuesto = models.ForeignKey(
+        HistoriaLaboralRegistroSupuesto, on_delete=models.CASCADE,
+        related_name='detalle')
+    fecha_inicial = models.DateField(null=True)
+    fecha_final = models.DateField(null=True, blank=True)
+    vigente = models.BooleanField(default=False, blank=True)
+    # Salario base es diario
+    salario_base = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0.0)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def inicio(self):
+        return date(
+            self.fecha_inicial.year,
+            self.fecha_inicial.month,
+            self.fecha_inicial.day)
+
+    @property
+    def fin(self):
+        if self.vigente:
+            return date.today()
+        else:
+            return date(
+                self.fecha_final.year,
+                self.fecha_final.month,
+                self.fecha_final.day)
+
+    @property
+    def dias_cotizados(self):
+        return (self.fin - self.inicio).days + 1
+
+    @property
+    def semanas_cotizadas(self):
+        return round(self.dias_cotizados / 7)
+
+    @property
+    def anios_cotizados(self):
+        return round(self.semanas_cotizadas / 52, 2)
+
+    class Meta:
+        ordering = [
+            "historia_laboral_registro_supuesto",
+            "-fecha_inicial",
+            "-fecha_final"
+        ]
+
+    def __str__(self):
+        return "{}-{}".format(self.fecha_inicial, self.fecha_final)
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class AssocCteTarea(models.Model):
+    idassocCteTarea = models.AutoField(primary_key=True)
+    cte = models.ForeignKey(
+        Cliente, on_delete=models.CASCADE, related_name="tareas")
+    tarea = models.ForeignKey(
+        Tarea, on_delete=models.CASCADE, related_name="clientes")
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = [
+            'cte',
+            'tarea',
+            'created_at',
+        ]
+
+    def __str__(self):
+        return "{}-{}".format(self.cte, self.tarea)
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class AssocActTarea(models.Model):
+    idassocActTarea = models.AutoField(primary_key=True)
+    actividad = models.ForeignKey(
+        Actividad, on_delete=models.CASCADE, related_name="tareas")
+    tarea = models.ForeignKey(
+        Tarea, on_delete=models.CASCADE, related_name="actividades")
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = [
+            'actividad',
+            'tarea',
+            'created_at',
+        ]
+        
+    def __str__(self):
+        return "{}-{}".format(self.actividad, self.tarea)
+
+    def __unicode__(self):
+        return self.__str__()
+
+
+class AssocHistLabTarea(models.Model):
+    idassocHistLabTarea = models.AutoField(primary_key=True)
+    historial = models.ForeignKey(
+        HistoriaLaboral, on_delete=models.CASCADE, related_name="tareas")
+    tarea = models.ForeignKey(
+        Tarea, on_delete=models.CASCADE, related_name="historiales")
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = [
+            'historial',
+            'tarea',
+            'created_at',
+        ]
+
+    def __str__(self):
+        return "{}-{}".format(self.historial, self.tarea)
 
     def __unicode__(self):
         return self.__str__()
