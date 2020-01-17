@@ -25,7 +25,7 @@
 
 {% verbatim %}
 <script type="text/x-handlebars-template" id="data-task-list-template">
-    <div class="task" data-id="{{idtarea}}" data-estado="{{estado_actual}}" data-responsable="{{responsable.id}}" ondblclick="see_task({{idtarea}})">
+    <div class="task" data-id="{{idtarea}}" data-estado="{{estado_actual}}" data-responsable="{{responsable.id}}" ondblclick="see_task({{idtarea}})" >
         <span class="badge badge-{{color}}" data-toggle="tooltip" title="{{responsable.nombre}}">{{responsable.iniciales}}</span>
         {{idtarea}} - {{titulo}}
     </div>

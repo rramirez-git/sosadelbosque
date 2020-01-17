@@ -3,7 +3,9 @@ from django import forms
 from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
                      TipoActividad, TipoDocumento, EstatusActividad,
                      Actividad, ActividadHistoria, Externo, UMA,
-                     Cuantiabasica, Factoredad)
+                     Cuantiabasica, Factoredad, UsrResponsables)
+
+from initsys.models import Usr
 
 
 class frmTaxonomia(forms.ModelForm):
@@ -50,6 +52,7 @@ class frmCliente(forms.ModelForm):
             'obs_semanas_cotizadas',
             'obs_homonimia',
             'obs_duplicidad',
+            'responsable'
         ]
         labels = {
             'first_name': 'Nombre',
@@ -130,8 +133,8 @@ class frmClienteObservaciones(forms.ModelForm):
         model = Cliente
         fields = ['observaciones']
 
-
 class frmClienteObservacionesExtra(forms.ModelForm):
+    responsable = forms.ChoiceField(required=False, choices=UsrResponsables)
 
     class Meta:
         model = Cliente

@@ -159,6 +159,15 @@ class TaxonomiaExpediente(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+def UsuarioCliente():
+    return list(item['idusuario'] for item in Cliente.objects.all().values('idusuario'))
+
+def UsuarioNoCliente():
+    return list(item['idusuario'] for item in Usr.objects.exclude(idusuario__in=UsuarioCliente()).values('idusuario'))
+
+def UsrResponsables():
+    return [(item.pk, f"{item}") 
+        for item in Usr.objects.filter(idusuario__in=UsuarioNoCliente())]
 
 class Cliente(Usr):
     idcliente = models.AutoField(primary_key=True)
@@ -197,6 +206,14 @@ class Cliente(Usr):
         blank=True, verbose_name="Homonimia")
     obs_duplicidad = models.TextField(
         blank=True, verbose_name="Duplicidad")
+    responsable = models.ForeignKey(
+        Usr,
+        on_delete=models.SET_NULL,
+        related_name="clientes_asignados",
+        blank=True,
+        null=True,
+        #limit_choices_to={'idusuario__in':UsuarioNoCliente}
+        )
 
     @property
     def edad(self):
