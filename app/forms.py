@@ -197,9 +197,13 @@ class frmActividad(forms.ModelForm):
             'tipo_de_actividad',
             'titulo',
             'estado',
+            'fecha',
             'responsable',
             'comentarios',
         ]
+        widgets = {
+            'fecha': forms.TextInput(attrs={'type': 'date'}),
+        }
 
 
 class frmActividadUpd(forms.ModelForm):
@@ -209,9 +213,13 @@ class frmActividadUpd(forms.ModelForm):
         fields = [
             'tipo_de_actividad',
             'titulo',
+            'fecha',
             'responsable',
             'comentarios',
         ]
+        widgets = {
+            'fecha': forms.TextInput(attrs={'type': 'date'}),
+        }
 
 
 class frmActividadHistoria(forms.ModelForm):
@@ -222,6 +230,9 @@ class frmActividadHistoria(forms.ModelForm):
             'estado_nuevo',
             'observaciones'
         ]
+        widgets = {
+            'fecha': forms.TextInput(attrs={'type': 'date'}),
+        }
 
 
 class frmExterno(forms.ModelForm):

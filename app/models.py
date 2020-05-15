@@ -392,6 +392,7 @@ class Actividad(models.Model):
     responsable = models.ForeignKey(
         Externo, on_delete=models.PROTECT,
         related_name='resp_actividades')
+    fecha = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")

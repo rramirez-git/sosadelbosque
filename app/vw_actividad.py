@@ -170,6 +170,8 @@ def reporte_maestro(request):
     ftr_estatus_actividad = int(
         "0" + request.POST.get('ftr_estatus_actividad', ''))
     ftr_responsable = int("0" + request.POST.get('ftr_responsable', ''))
+    ftr_fecha_inicio = request.POST.get('ftr_fecha_inicio', None)
+    ftr_fecha_fin = request.POST.get('ftr_fecha_fin', None)
     if "POST" == request.method:
         data = Actividad.objects.all()
         if ftr_tipo_actividad:
@@ -178,6 +180,10 @@ def reporte_maestro(request):
             data = data.filter(estado__pk=ftr_estatus_actividad)
         if ftr_responsable:
             data = data.filter(responsable__pk=ftr_responsable)
+        if ftr_fecha_inicio:
+            data = data.filter(fecha__gte=ftr_fecha_inicio)
+        if ftr_fecha_fin:
+            data = data.filter(fecha__lte=ftr_fecha_fin)
         data = list(data)
     return render(request, 'app/actividad/reporte_maestro.html', {
         'menu_main': usuario.main_menu_struct(),
@@ -193,6 +199,8 @@ def reporte_maestro(request):
             'ftr_tipo_actividad': ftr_tipo_actividad,
             'ftr_estatus_actividad': ftr_estatus_actividad,
             'ftr_responsable': ftr_responsable,
+            'ftr_fecha_inicio': ftr_fecha_inicio,
+            'ftr_fecha_fin': ftr_fecha_fin,
         },
         'regs': data,
     })
