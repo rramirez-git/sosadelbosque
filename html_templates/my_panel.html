@@ -94,6 +94,7 @@
                 <tr>
                     <th>Cliente</th>
                     <th>Actividad</th>
+                    <th>Fecha</th>
                     <th>Actualizado en</th>
                     <th>Responsable</th>
                 </tr>
@@ -108,6 +109,9 @@
                             <a href="{% url 'actividad_see' pk=actividad.pk %}">
                                 {{ actividad.titulo }}
                             </a>
+                        </td>
+                        <td>
+                            {% if actividad.fecha %}{{ actividad.fecha|date:"d/M/Y" }}{% endif %}
                         </td>
                         <td>
                             {{ actividad.updated_at|date:"d/M/Y" }}
