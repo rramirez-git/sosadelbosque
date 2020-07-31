@@ -229,7 +229,8 @@ class Cliente(Usr):
         ordering = ["last_name", "apellido_materno", "first_name"]
 
     def __str__(self):
-        return "{} {} {}".format(
+        return "{} - {} {} {}".format(
+            self.pk,
             self.last_name,
             self.apellido_materno,
             self.first_name,
