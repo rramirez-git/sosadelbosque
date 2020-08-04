@@ -229,11 +229,11 @@ class Cliente(Usr):
         ordering = ["last_name", "apellido_materno", "first_name"]
 
     def __str__(self):
-        return "{} - {} {} {}".format(
-            self.pk,
+        return "{} {} {} - {}".format(
             self.last_name,
             self.apellido_materno,
             self.first_name,
+            self.pk,
             ).strip()
 
     def __unicode__(self):
