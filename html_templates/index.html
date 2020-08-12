@@ -1,11 +1,12 @@
 {% extends "global/html_struct.html" %}
 
+{% load crispy_forms_tags %}
 {% load static %}
 {% load util_filters %}
 
 {% block extraaftermain %}
 
-<nav class="navbar navbar-dark bg-primary justify-content-between">
+<!--<nav class="navbar navbar-dark bg-primary justify-content-between">
     <a class="navbar-brand" href="{% url 'index' %}">
         Sosa Del Bosque Asociados S. C.
     </a>
@@ -27,7 +28,54 @@
         $("#btn_open_login_frm").addClass("d-none");
         $("#frm_access").removeClass("d-none");
     }
-</script>
+</script> -->
+
+<style type="text/css">
+    .text-center {
+    text-align: center;
+}
+
+.form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: -20px auto 0;
+    text-align: center;
+}
+
+.form-signin img {
+    margin: 50px auto; width: 50%;
+}
+</style>
+
+<form class="form-signin" method="post" autocomplete="off">
+    {% csrf_token %}
+    <img src="{{ MEDIA_URL }}{{ '02_PaginaPrincipal_Barra_Divisora.bs_img_01' | get_setting }}" />
+    <div id="div_id_usr" class="form-group"> 
+        <label for="id_usr" class="col-form-label  requiredField">Usuario<span class="asteriskField">*</span> </label> 
+        <div class=""> 
+            <input type="text" name="usr" class="form-control textinput textInput form-control" autocomplete="off" placeholder="Usuario" autofocus="autofocus" maxlength="50" required="" id="id_usr" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAAAXNSR0IArs4c6QAAAYdJREFUOBGVVLuKwkAUPTErioVgY5WF2AhpFKz8AC0W0vgTK9injvkMt7HyB6zWSuy1s1WRXUJQ0cJCxSLOnSSzcYmaDGTmPs45M3fuEMmyrA/XdXvse0eMIUnSD4N9drvdb4KnkpCJ4G/0RTYNEoi1swf35jAnFU68snO5HMrl8h0skYCqqmg0GtEC2WxWJDKZDNhlCT+cE0HfeKNV13XUajUMBgPs93t0Oh3Yto1+v3+X+08mP1EJUQKSaZouJeiY5/OZY6iEy+UShRcxVuIvc9riBAGZEK/IhGGtVNjS43dAgWej2WyiUqlAlmWs12sMh0OcTicuIk7wTOBwOGA+n2O5XELTNJRKJQFP+W9bBKKM6XSK4/GIfD4Px3G4UIAjgXYckXq9DkVRsN1ukU6nAz7+XosIeUbQHfKIcL1eUa1W0Wq1MB6PMZlMODDWJRqGgd1uh0KhwEmbzYavND0UoD77rcJoNEKxWOS1LxYLrFYrLkCYhwIMQXdDPxplNptxQngiMmFuABiQmENn7wkAAAAASUVORK5CYII=&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;"/> 
+        </div> 
+    </div>
+    <div id="div_id_pwd" class="form-group"> 
+        <label for="id_pwd" class="col-form-label  requiredField">Contraseña<span class="asteriskField">*</span> </label> 
+        <div class=""> 
+            <input type="password" name="pwd" class="form-control textinput textInput form-control" autocomplete="off" placeholder="Contraseña" maxlength="250" required="" id="id_pwd" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAAAXNSR0IArs4c6QAAAYdJREFUOBGVVLuKwkAUPTErioVgY5WF2AhpFKz8AC0W0vgTK9injvkMt7HyB6zWSuy1s1WRXUJQ0cJCxSLOnSSzcYmaDGTmPs45M3fuEMmyrA/XdXvse0eMIUnSD4N9drvdb4KnkpCJ4G/0RTYNEoi1swf35jAnFU68snO5HMrl8h0skYCqqmg0GtEC2WxWJDKZDNhlCT+cE0HfeKNV13XUajUMBgPs93t0Oh3Yto1+v3+X+08mP1EJUQKSaZouJeiY5/OZY6iEy+UShRcxVuIvc9riBAGZEK/IhGGtVNjS43dAgWej2WyiUqlAlmWs12sMh0OcTicuIk7wTOBwOGA+n2O5XELTNJRKJQFP+W9bBKKM6XSK4/GIfD4Px3G4UIAjgXYckXq9DkVRsN1ukU6nAz7+XosIeUbQHfKIcL1eUa1W0Wq1MB6PMZlMODDWJRqGgd1uh0KhwEmbzYavND0UoD77rcJoNEKxWOS1LxYLrFYrLkCYhwIMQXdDPxplNptxQngiMmFuABiQmENn7wkAAAAASUVORK5CYII=&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%; cursor: auto;"/> 
+        </div> 
+    </div>    
+    {% if msgs %}
+        {% for msg in msgs }
+            <div class="alert alert-danger" role="alert">
+                {{ msg }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor }
+    {% endif %}
+    <button type="submit" class="btn btn-lg btn-primary btn-block">Entrar</button>
+</form>
+<!--
 
 <style type="text/css">
     .splah_block_1 {
@@ -249,5 +297,7 @@
         </p>
     </div>
 </div>
+
+-->
 
 {% endblock %}
