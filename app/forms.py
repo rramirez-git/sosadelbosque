@@ -3,7 +3,8 @@ from django import forms
 from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
                      TipoActividad, TipoDocumento, EstatusActividad,
                      Actividad, ActividadHistoria, Externo, UMA,
-                     Cuantiabasica, Factoredad, UsrResponsables)
+                     Cuantiabasica, Factoredad, UsrResponsables,
+                     MedioActividad)
 
 from initsys.models import Usr
 
@@ -165,6 +166,15 @@ class frmTipoActividad(forms.ModelForm):
         model = TipoActividad
         fields = [
             'nombre',
+        ]
+
+
+class frmMedioActividad(forms.ModelForm):
+
+    class Meta:
+        model = MedioActividad
+        fields = [
+            'medio',
         ]
 
 

@@ -350,6 +350,29 @@ class TipoActividad(models.Model):
         return self.__str__()
 
 
+class MedioActividad(models.Model):
+    idmedioctividad = models.AutoField(primary_key=True)
+    medio = models.CharField(max_length=50)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["medio"]
+
+    def __str__(self):
+        res = "{}".format(self.medio)
+        return res
+
+    def __unicode__(self):
+        return self.__str__()
+
+
 class Externo(models.Model):
     idexterno = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
@@ -394,6 +417,10 @@ class Actividad(models.Model):
         Externo, on_delete=models.PROTECT,
         related_name='resp_actividades')
     fecha = models.DateField(blank=True, null=True)
+    # medio = models.ForeignKey(
+    #     MedioActividad, on_delete=models.PROTECT,
+    #     related_name='actividades_con_medio')
+    fecha_liquidado = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")

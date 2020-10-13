@@ -9,7 +9,13 @@ let create_new_task = () => {
             function(data, textStatus, jqXHR) {
                 App.closePanel();
                 if('ok' == data.status) {
-                    getall_tasks();
+                    try {
+                        getall_tasks();
+                    } catch(error){
+                        if(error.message.indexOf('url_tarea_getall') >= 0) {
+                            App.openPanel(`Tarea creada con éxito`, "Nueva Tarea");
+                        }
+                    }
                 } else {
                     alert("Ha ocurrido un error creando la tarea\n\n" + data.reason);
                 }

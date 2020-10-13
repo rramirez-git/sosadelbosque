@@ -1,0 +1,38 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% block content %}
+
+<table class="table table-striped table-sm table-responsive-md">
+    <thead>
+        <tr>
+            <th>Medios de Actividad</th>
+            <th class="text-right" colspan="3"></th>
+        </tr>
+    </thead>
+    <tbody id="data-tbl">
+        {% for reg in data %}
+            <tr>
+                <td>{{ reg.medio }}</td>
+                <td class="text-center">
+                    {% if cperms.see %}
+                    <a href="{% url 'medioactividad_see' pk=reg.pk %}" class="btn btn-outline-secondary" title="Ver"><i class="far fa-eye"></i></a>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if cperms.update %}
+                    <a href="{% url 'medioactividad_update' pk=reg.pk %}" class="btn btn-outline-secondary" title="Actualizar"><i class="far fa-edit"></i></a>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if cperms.delete %}
+                    <a href="#" onclick="App.showDeletingConfirmation(`{% url 'medioactividad_delete' pk=reg.pk %}`)" title="Eliminar" class="btn btn-outline-secondary">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

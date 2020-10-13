@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from django.db.models import ProtectedError, Max, Min, Sum
 from datetime import timedelta, date, datetime
 from decimal import Decimal
+from django.contrib.auth.models import User
 import pandas as pd
 import json
 import os
@@ -30,6 +31,7 @@ from routines.utils import (
 from app.data_utils import (
     df_load_HLRD_periodo_continuo_laborado, df_load_HLRDDay)
 from routines.utils import hipernormalize
+from simple_tasks.models import STATUS_TAREA
 
 
 def add_nota(cte, nota, fecha_notificacion, usr, lstusrs=None):
@@ -236,6 +238,12 @@ def see(request, pk):
             'label': '<i class="fas fa-paperclip"></i> Actividad',
             'pk': obj.pk
         })
+    if usuario.has_perm_or_has_perm_child('tarea.agregar_tareas_tarea'):
+        toolbar.append({
+            'type': 'button',
+            'onclick': "newTask()",
+            'label': '<i class="fas fa-thumbtack"></i> Tarea'
+        })
     if usuario.has_perm_or_has_perm_child(
             'cliente.actualizar_clientes_cliente'):
         toolbar.append({
@@ -265,9 +273,14 @@ def see(request, pk):
             'opcionpension.opciones_de_pension_opcion pension') or
         usuario.has_perm_or_has_perm_child(
             'opcionpension.opciones_de_pension_opcionpension'),
+        'ver_dt': usuario.has_perm_or_has_perm_child(
+            'historialaboral.ver_detalle_tabular_historia laboral'),
     }
     lstNotCtesUsr = Usr.objects.exclude(
         idusuario__in=Cliente.objects.all().values('idusuario'))
+    responsables = list(User.objects.exclude(id__in = Cliente.objects.all().values('id')))
+    clientes = list(Cliente.objects.all())
+    responsables.sort(key=lambda usr: f'{usr.first_name} {usr.last_name}'.upper())
     return render(request, 'app/cliente/see.html', {
         'menu_main': usuario.main_menu_struct(),
         'titulo': 'Clientes',
@@ -288,6 +301,9 @@ def see(request, pk):
         'frmObs': frmCteObs,
         'cperms': cperms,
         'usrs': lstNotCtesUsr,
+        'responsables': responsables,
+        'status_tareas': STATUS_TAREA,
+        'clientes': clientes,
     })
 
 
