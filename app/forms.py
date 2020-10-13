@@ -210,9 +210,12 @@ class frmActividad(forms.ModelForm):
             'fecha',
             'responsable',
             'comentarios',
+            'medio',
+            'fecha_liquidado',
         ]
         widgets = {
             'fecha': forms.TextInput(attrs={'type': 'date'}),
+            'fecha_liquidado': forms.TextInput(attrs={'type': 'date'}),
         }
 
 
@@ -226,9 +229,12 @@ class frmActividadUpd(forms.ModelForm):
             'fecha',
             'responsable',
             'comentarios',
+            'medio',
+            'fecha_liquidado',
         ]
         widgets = {
             'fecha': forms.TextInput(attrs={'type': 'date'}),
+            'fecha_liquidado': forms.TextInput(attrs={'type': 'date'}),
         }
 
 

@@ -417,9 +417,9 @@ class Actividad(models.Model):
         Externo, on_delete=models.PROTECT,
         related_name='resp_actividades')
     fecha = models.DateField(blank=True, null=True)
-    # medio = models.ForeignKey(
-    #     MedioActividad, on_delete=models.PROTECT,
-    #     related_name='actividades_con_medio')
+    medio = models.ForeignKey(
+        MedioActividad, on_delete=models.PROTECT,
+        related_name='actividades_con_medio')
     fecha_liquidado = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
