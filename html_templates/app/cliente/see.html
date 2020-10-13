@@ -1,4 +1,5 @@
 {% extends "global/html_struct.html" %}
+{% load static %}
 {% load crispy_forms_tags %}
 {% load util_filters %}
 
@@ -25,7 +26,7 @@
                     </div>
                     {% endif %}
                     <a href="{{ docto.anverso.url}}" 
-                        target="_blank">
+                        target="_blank" download>
                         {{ docto }}
                     </a>
                 </li>
@@ -54,6 +55,13 @@
             <a href="{% url 'cliente_historia_laboral' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
                 <i class="fas fa-file-medical-alt"></i>
                 Historia Laboral
+            </a>
+            <p></p>
+            {% endif %}
+            {% if cperms.ver_dt %}
+            <a href="{% url 'cliente_vista_tabular' pk=cte.historia.all.0.pk %}" class="btn btn-outline-primary btn-block">
+                <i class="fas fa-table"></i>
+                Detalle Tab.
             </a>
             <p></p>
             {% endif %}
@@ -196,4 +204,45 @@
         $("#id_obs_duplicidad").attr('rows', 3);
     });
 </script>
+
+<!-- Simple tasks -->
+
+<script type="text/x-handlebars-template" id="data-task-form-template">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="data-task-form" action="">
+        {% csrf_token %}
+        {% include "simple_tasks/form.html" %}
+        <input type="hidden" name="pk" id="pk" value="" />
+        <button type="button" class="btn btn-outline-primary" id="btn-save" onclick="create_new_task()">Guardar</button>
+    </form>
+</script>
+
+<script type="text/javascript" src="{% static 'js/simple_tasks.js' %}"></script>
+<script type="text/javascript">
+    let simple_task_reloading = false;
+    let responsables = {
+        {% for persona in responsables %}
+        "{{persona.pk}}": {
+            "nombre": "{{persona.first_name}}",
+            "apellido": "{{persona.last_name}}"
+        },
+        {% endfor %}
+    };
+    let url_tarea_new = '{% url "tarea_new"%}';
+    let url_tarea_see = '{% url "tarea_see" %}';
+    let url_tarea_update = '{% url "tarea_update" %}';
+    let url_tarea_delete = '{% url "tarea_delete" %}';
+    let url_tarea_add_comment = '{% url "tarea_add_comment"%}';
+    let url_tarea_delete_comment = '{% url "tarea_delete_comment" %}';
+    let url_tarea_update_comment = '{% url "tarea_update_comment" %}';
+    let url_tarea_new_link = '{% url "tarea_new_link" %}';
+    let url_tarea_delete_link = '{% url "tarea_delete_link" %}';
+
+    let newTask = () => {
+        openNewTaskFrm();
+        $(`#lnk_hl`).attr('disabled', true);
+        $(`#lnk_act`).attr('disabled', true);
+        $(`#lnk_cte option[value="{{ cte.pk }}"]`).attr('selected', true);
+    }
+</script>
+
 {% endblock %}

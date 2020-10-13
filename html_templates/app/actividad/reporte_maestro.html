@@ -45,6 +45,20 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="ftr_fecha_inicio">Fecha Inicial</label>
+                        <input class="form-control" type="date" id="ftr_fecha_inicio" name="ftr_fecha_inicio" value="{{ filters.ftr_fecha_inicio }}">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="ftr_fecha_fin">Fecha Final</label>
+                        <input class="form-control" type="date" id="ftr_fecha_fin" name="ftr_fecha_fin" value="{{ filters.ftr_fecha_fin }}">
+                    </div>
+                </div>
+            </div>
             <button type="submit" class="btn btn-outline-primary" id="btn-save" >Procesar</button>
         </form>
     </div>
@@ -56,9 +70,11 @@
         <tr>
             <th>Cliente</th>
             <th>Actividad</th>
-            <th>Tipo de Actividad</th>
+            <th>Medio</th>
+            <th>Fecha Liquidado</th>
             <th>Estado</th>
             <th>Responsable</th>
+            <th>Fecha</th>
             <th>Fecha de Creación</th>
             <th>Fecha de Actualización</th>
         </tr>
@@ -67,9 +83,11 @@
         <tr>
             <th>Cliente</th>
             <th>Actividad</th>
-            <th>Tipo de Actividad</th>
+            <th>Medio</th>
+            <th>Fecha Liquidado</th>
             <th>Estado</th>
             <th>Responsable</th>
+            <th>Fecha</th>
             <th>Fecha de Creación</th>
             <th>Fecha de Actualización</th>
         </tr>
@@ -87,9 +105,11 @@
                     {{ reg.titulo }}
                 </a>
             </td>
-            <td>{{ reg.tipo_de_actividad }}</td>
+            <td>{{ reg.medio }}</td>
+            <td>{% if reg.fecha_liquidado %}{{ reg.fecha_liquidado|date:"d/M/Y" }}{% endif %}</td>
             <td>{{ reg.estado }}</td>
             <td>{{ reg.responsable }}</td>
+            <td>{% if reg.fecha %}{{ reg.fecha|date:"d/M/Y" }}{% endif %}</td>
             <td>{{ reg.created_at|date:"d/M/Y" }}</td>
             <td>{{ reg.updated_at|date:"d/M/Y" }}</td>
         </tr>

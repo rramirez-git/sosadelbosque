@@ -11,7 +11,7 @@
         <form method="post" autocomplete="off" enctype="multipart/form-data" id="filter-form" action="">
             {% csrf_token %}
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="ftr_tipo_expediente">Tipo de Expediente</label>
                         <select class="form-control" id="ftr_tipo_expediente" name="ftr_tipo_expediente">
@@ -22,13 +22,24 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="ftr_responsable">Responsable</label>
+                        <select class="form-control" id="ftr_responsable" name="ftr_responsable">
+                            <option value=""></option>
+                            {% for opt in combo_options.responsables %}
+                                <option value="{{ opt.0 }}" {% if opt.0 == filters.ftr_responsable %}selected="select"{% endif %}>{{ opt.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="ftr_edad_inicio">Edad (Inicio)</label>
                         <input value="{{ filters.ftr_edad_inicio }}" type="number" class="form-control" id="ftr_edad_inicio" name="ftr_edad_inicio" min="0" max="99" maxlength="2" />
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="ftr_edad_fin">Edad (Fin)</label>
                         <input value="{{ filters.ftr_edad_fin }}" type="number" class="form-control" id="ftr_edad_fin" name="ftr_edad_fin" min="0" max="99" maxlength="2" />
@@ -49,7 +60,7 @@
             <th>Tipo de Expediente</th>
             <th>Datos de Identificación</th>
             <th>Teléfono</th>
-            <th>Ubicación</th>
+            <th>Responsable</th>
         </tr>
     </thead>
     <tfoot>
@@ -59,7 +70,7 @@
             <th>Tipo de Expediente</th>
             <th>Datos de Identificación</th>
             <th>Teléfono</th>
-            <th>Ubicación</th>
+            <th>Responsable</th>
         </tr>
     </tfoot>
     <tbody id="data-tbl">
@@ -82,7 +93,7 @@
                 Móvil: {{ reg.celular }}<br />
                 Oficina: {{ reg.telefono_oficina }}
             </td>
-            <td>{{ reg.domicilicio.municipio }}, {{ reg.domicilicio.estado }}</td>
+            <td>{% if reg.responsable %}{{ reg.responsable }}{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>

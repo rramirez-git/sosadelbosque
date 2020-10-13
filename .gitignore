@@ -112,3 +112,4 @@ managed/
 *.imgx
 managed/managed.imgx
 *.imgx
+.vscode/launch.json

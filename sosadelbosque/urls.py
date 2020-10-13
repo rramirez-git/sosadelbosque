@@ -154,6 +154,7 @@ urlpatterns = [
     path('tiposdocumento/', include('app.url_tipodocumento')),
     path('estatusactividad/', include('app.url_estatusactividad')),
     path('tiposactividad/', include('app.url_tipoactividad')),
+    path('mediosactividad/', include('app.url_medioactividad')),
     path('actividad/', include('app.url_actividad')),
     path('personas_externas/', include('app.url_externo')),
     path('uma/', include('app.url_uma')),

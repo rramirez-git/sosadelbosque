@@ -3,7 +3,10 @@ from django import forms
 from .models import (TaxonomiaExpediente, Cliente, DoctoGral,
                      TipoActividad, TipoDocumento, EstatusActividad,
                      Actividad, ActividadHistoria, Externo, UMA,
-                     Cuantiabasica, Factoredad)
+                     Cuantiabasica, Factoredad, UsrResponsables,
+                     MedioActividad)
+
+from initsys.models import Usr
 
 
 class frmTaxonomia(forms.ModelForm):
@@ -50,6 +53,7 @@ class frmCliente(forms.ModelForm):
             'obs_semanas_cotizadas',
             'obs_homonimia',
             'obs_duplicidad',
+            'responsable'
         ]
         labels = {
             'first_name': 'Nombre',
@@ -130,8 +134,8 @@ class frmClienteObservaciones(forms.ModelForm):
         model = Cliente
         fields = ['observaciones']
 
-
 class frmClienteObservacionesExtra(forms.ModelForm):
+    responsable = forms.ChoiceField(required=False, choices=UsrResponsables)
 
     class Meta:
         model = Cliente
@@ -165,6 +169,15 @@ class frmTipoActividad(forms.ModelForm):
         ]
 
 
+class frmMedioActividad(forms.ModelForm):
+
+    class Meta:
+        model = MedioActividad
+        fields = [
+            'medio',
+        ]
+
+
 class frmEstatusActividad(forms.ModelForm):
 
     class Meta:
@@ -194,9 +207,16 @@ class frmActividad(forms.ModelForm):
             'tipo_de_actividad',
             'titulo',
             'estado',
+            'fecha',
             'responsable',
             'comentarios',
+            'medio',
+            'fecha_liquidado',
         ]
+        widgets = {
+            'fecha': forms.TextInput(attrs={'type': 'date'}),
+            'fecha_liquidado': forms.TextInput(attrs={'type': 'date'}),
+        }
 
 
 class frmActividadUpd(forms.ModelForm):
@@ -206,9 +226,16 @@ class frmActividadUpd(forms.ModelForm):
         fields = [
             'tipo_de_actividad',
             'titulo',
+            'fecha',
             'responsable',
             'comentarios',
+            'medio',
+            'fecha_liquidado',
         ]
+        widgets = {
+            'fecha': forms.TextInput(attrs={'type': 'date'}),
+            'fecha_liquidado': forms.TextInput(attrs={'type': 'date'}),
+        }
 
 
 class frmActividadHistoria(forms.ModelForm):
@@ -219,6 +246,9 @@ class frmActividadHistoria(forms.ModelForm):
             'estado_nuevo',
             'observaciones'
         ]
+        widgets = {
+            'fecha': forms.TextInput(attrs={'type': 'date'}),
+        }
 
 
 class frmExterno(forms.ModelForm):

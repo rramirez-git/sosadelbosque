@@ -114,19 +114,36 @@ def get_tasks(request, anio, mes):
             fecha_limite__gte=f_ini,
             fecha_limite__lte=f_fin,
             responsable=usuario)
-    data =[{ 
-        'idtarea': item.idtarea,
-        'titulo': item.titulo,
-        'responsable': item.responsable.pk,
-        'fecha_limite': item.fecha_limite,
-        'estado_actual': item.estado_actual,
-        'color': item.color} for item in data]
-    return JsonResponse(data, safe=False)
+    data2 = []
+    for item in data:
+        try:
+            data2.append({ 
+                'idtarea': item.idtarea,
+                'titulo': item.titulo,
+                'responsable': item.responsable.pk,
+                'fecha_limite': item.fecha_limite,
+                'estado_actual': item.estado_actual,
+                'color': item.color})
+        except AttributeError as e:
+            data2.append({ 
+                'idtarea': item.idtarea,
+                'titulo': item.titulo,
+                'responsable': 10,
+                'fecha_limite': item.fecha_limite,
+                'estado_actual': item.estado_actual,
+                'color': item.color})
+    return JsonResponse(data2, safe=False)
 
 @valida_acceso(['tarea.tareas_tarea'])
 def get_task(request, pk=0):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
     obj = Tarea.objects.get(pk = pk)
+    if obj.responsable is None:
+        obj.responsable = User.objects.get(pk=10)
+    if obj.created_by is None:
+        obj.created_by = User.objects.get(pk=10)
+    if obj.updated_by is None:
+        obj.updated_by = User.objects.get(pk=10)
     data = {
         'pk': pk,
         'titulo': obj.titulo,
@@ -135,7 +152,7 @@ def get_task(request, pk=0):
         'responsable': {
             'pk': obj.responsable.pk,
             'first_name': obj.responsable.first_name,
-            'last_name': obj.responsable.last_name,
+            'last_name': obj.responsable.last_name
         },
         'fecha_limite': obj.fecha_limite.strftime("%d/%m/%Y"),
         'fecha_limite_en': obj.fecha_limite.strftime("%Y-%m-%d"),
@@ -330,8 +347,8 @@ def reporte_maestro(request):
     mes = date.today().month
     ftr = {
         'ftr_fecha_limite_inicio': request.POST.get(
-            'ftr_fecha_limite_inicio', date(anio, mes, monthrange(
-                anio, mes)[1]).strftime("%Y-%m-%d")),
+            'ftr_fecha_limite_inicio', date(
+                anio, mes, 1).strftime("%Y-%m-%d")),
         'ftr_fecha_limite_fin': request.POST.get(
             'ftr_fecha_limite_fin', date(anio, mes, monthrange(
                 anio, mes)[1]).strftime("%Y-%m-%d")),
@@ -340,7 +357,14 @@ def reporte_maestro(request):
         'ftr_estado_actual': hipernormalize(request.POST.get(
             'ftr_estado_actual', '')),
     }
+    print(ftr)
     if "POST" == request.method:
+        if ftr['ftr_fecha_limite_inicio'] == '':
+            ftr['ftr_fecha_limite_inicio'] = date(
+                anio, mes, 1).strftime("%Y-%m-%d")
+        if ftr['ftr_fecha_limite_fin'] == '':
+            ftr['ftr_fecha_limite_fin'] = date(
+                anio, mes, monthrange(anio, mes)[1]).strftime("%Y-%m-%d")
         data = Tarea.objects.filter(
             fecha_limite__gte=ftr['ftr_fecha_limite_inicio'],
             fecha_limite__lte=ftr['ftr_fecha_limite_fin'])

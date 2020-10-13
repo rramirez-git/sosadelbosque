@@ -159,6 +159,15 @@ class TaxonomiaExpediente(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+def UsuarioCliente():
+    return list(item['idusuario'] for item in Cliente.objects.all().values('idusuario'))
+
+def UsuarioNoCliente():
+    return list(item['idusuario'] for item in Usr.objects.exclude(idusuario__in=UsuarioCliente()).values('idusuario'))
+
+def UsrResponsables():
+    return [(item.pk, f"{item}") 
+        for item in Usr.objects.filter(idusuario__in=UsuarioNoCliente())]
 
 class Cliente(Usr):
     idcliente = models.AutoField(primary_key=True)
@@ -197,6 +206,14 @@ class Cliente(Usr):
         blank=True, verbose_name="Homonimia")
     obs_duplicidad = models.TextField(
         blank=True, verbose_name="Duplicidad")
+    responsable = models.ForeignKey(
+        Usr,
+        on_delete=models.SET_NULL,
+        related_name="clientes_asignados",
+        blank=True,
+        null=True,
+        #limit_choices_to={'idusuario__in':UsuarioNoCliente}
+        )
 
     @property
     def edad(self):
@@ -212,10 +229,11 @@ class Cliente(Usr):
         ordering = ["last_name", "apellido_materno", "first_name"]
 
     def __str__(self):
-        return "{} {} {}".format(
+        return "{} {} {} - {}".format(
             self.last_name,
             self.apellido_materno,
             self.first_name,
+            self.pk,
             ).strip()
 
     def __unicode__(self):
@@ -332,6 +350,29 @@ class TipoActividad(models.Model):
         return self.__str__()
 
 
+class MedioActividad(models.Model):
+    idmedioctividad = models.AutoField(primary_key=True)
+    medio = models.CharField(max_length=50)
+    created_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        Usr, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["medio"]
+
+    def __str__(self):
+        res = "{}".format(self.medio)
+        return res
+
+    def __unicode__(self):
+        return self.__str__()
+
+
 class Externo(models.Model):
     idexterno = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
@@ -375,6 +416,11 @@ class Actividad(models.Model):
     responsable = models.ForeignKey(
         Externo, on_delete=models.PROTECT,
         related_name='resp_actividades')
+    fecha = models.DateField(blank=True, null=True)
+    medio = models.ForeignKey(
+        MedioActividad, on_delete=models.PROTECT,
+        related_name='actividades_con_medio')
+    fecha_liquidado = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
