@@ -224,7 +224,7 @@
     </form>
 </script>
 
-<script type="text/javascript" src="{% static 'js/simple_tasks.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/simple_tasks.js' %}?rn={{ 1 | random_num:99999999 }}"></script>
 <script type="text/javascript">
     let simple_task_reloading = false;
     let responsables = {
