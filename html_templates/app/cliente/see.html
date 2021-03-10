@@ -59,11 +59,19 @@
             <p></p>
             {% endif %}
             {% if cperms.ver_dt %}
-            <a href="{% url 'cliente_vista_tabular' pk=cte.historia.all.0.pk %}" class="btn btn-outline-primary btn-block">
-                <i class="fas fa-table"></i>
-                Detalle Tab.
-            </a>
-            <p></p>
+                {% if cte.historia %}
+                    {% if cte.historia.all %}
+                        {% if cte.historia.all.0 %}
+                            {% if cte.historia.all.0.pk %}
+                                <a href="{% url 'cliente_vista_tabular' pk=cte.historia.all.0.pk %}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-table"></i>
+                                    Detalle Tab.
+                                </a>
+                                <p></p>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
             {% endif %}
             {% if cperms.ver_opcpen %}
             <a href="{% url 'cliente_pension_index' pk=cte.pk %}" class="btn btn-outline-primary btn-block">
@@ -216,7 +224,7 @@
     </form>
 </script>
 
-<script type="text/javascript" src="{% static 'js/simple_tasks.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/simple_tasks.js' %}?rn={{ 1 | random_num:99999999 }}"></script>
 <script type="text/javascript">
     let simple_task_reloading = false;
     let responsables = {

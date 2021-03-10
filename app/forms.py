@@ -53,7 +53,8 @@ class frmCliente(forms.ModelForm):
             'obs_semanas_cotizadas',
             'obs_homonimia',
             'obs_duplicidad',
-            'responsable'
+            'responsable',
+            'gestor',
         ]
         labels = {
             'first_name': 'Nombre',
@@ -135,7 +136,8 @@ class frmClienteObservaciones(forms.ModelForm):
         fields = ['observaciones']
 
 class frmClienteObservacionesExtra(forms.ModelForm):
-    responsable = forms.ChoiceField(required=False, choices=UsrResponsables)
+    responsable = forms.ChoiceField(required=False, choices=UsrResponsables, label="Ejecutivo")
+    gestor = forms.ChoiceField(required=False, choices=UsrResponsables, label="Gestor")
 
     class Meta:
         model = Cliente

@@ -1,0 +1,166 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% load util_filters %}
+{% block content %}
+
+<form method="post" action="">
+    {% csrf_token %}
+    <div class="form-row">
+        <div class="form-group col-sm-4">
+            <label for="anio_alta_imss_yr">Año de ingreso al IMSS:</label>
+            <input type="number" class="form-control text-right" id="anio_alta_imss_yr" name="anio_alta_imss_yr" min="1944" max="1997" required="required" value="{{ data.anio_alta_imss_yr }}" />
+        </div>
+        <div class="form-group col-sm-4">
+            <label for="edad_qty">Edad actual:</label>
+            <input type="number" class="form-control text-right" id="edad_qty" name="edad_qty" min="60" max="100" required="required" value="{{ data.edad_qty }}" />
+        </div>
+        <div class="form-group col-sm-4">
+            <label for="semanas_amt">Cantidad de Semanas Cotizadas</label>
+            <input type="number" class="form-control text-right" id="semanas_amt" name="semanas_amt" min="500" max="4500" required="required" value="{{ data.semanas_amt }}" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-6">
+            <input class="form-check-input" type="checkbox" id="concubino_flg" name="concubino_flg" class="form-control" value="yes" {% if data.concubino_flg %}checked="checked"{% endif %} />
+            <label class="form-check-label" for="concubino_flg">Esposa(o) o concubina(rio):</label>
+        </div>
+        <div class="form-group col-sm-6">
+            <label for="hijos_qty">Número de Hijos</label>
+            <input class="form-control text-right" type="number" id="hijos_qty" name="hijos_qty" class="form-control" min="0" max="10" value="{{ data.hijos_qty }}" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-12">
+            <label>Salario mensual promedio de los últimos 5 años cotizados:</label>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-4 text-right">Último Salario Cotizado</div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.anio_1 }}" name="anio_1" id="anio_1" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
+        </div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.salario_1 }}" name="salario_1" id="salario_1" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-4">&nbsp;</div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.anio_2 }}" name="anio_2" id="anio_2" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
+        </div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.salario_2 }}" name="salario_2" id="salario_2" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-4">&nbsp;</div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.anio_3 }}" name="anio_3" id="anio_3" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
+        </div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.salario_3 }}" name="salario_3" id="salario_3" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-4">&nbsp;</div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.anio_4 }}" name="anio_4" id="anio_4" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
+        </div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.salario_4 }}" name="salario_4" id="salario_4" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-4">&nbsp;</div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.anio_5 }}" name="anio_5" id="anio_5" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
+        </div>
+        <div class="form-group col-sm-4">
+            <input value="{{ data.salario_5 }}" name="salario_5" id="salario_5" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
+        </div>
+    </div>
+    <div class="form-row div form-group col-sm-12">
+        <button type="submit" class="btn btn-outline-primary" id="btn-calculate">Estimar Pensión</button>
+    </div>
+</form>
+<hr />
+
+{% if calculated %}
+
+<h3>Monto estimado de pensión</h3>
+
+<table class="table table-striped table-sm table-responsive-md">
+    <tr>
+        <th class="text-right">Semanas Cotizadas:</th>
+        <th class="text-left">{{ results.semanas_cotizadas }}</th>
+    </tr>
+    <tr>
+        <th class="text-right">Salario Promedio Mensual:</th>
+        <th class="text-left">$ {{ results.salario_promedio_mensual | money2display }}</th>
+    </tr>
+    <tr>
+        <th class="text-right">Porcentaje respecto a Cuantía de Vejez:</th>
+        <th class="text-left">{{ results.porcentaje_factor_edad | money2display }} %</th>
+    </tr>
+    <tr>
+        <th class="text-right">Asignaciones Familiares:</th>
+        <th class="text-left">{{ results.porcentaje_asignaciones_familiares | money2display }} %</th>
+    </tr>
+    <tr>
+        <th class="text-right">Porcentaje de Pensión:</th>
+        <th class="text-left">{{ results.porcentaje_pension | money2display }} %</th>
+    </tr>
+    <tr>
+        <th class="text-right">Pensión:</th>
+        <th class="text-left">$ {{ results.pension | money2display }}</th>
+    </tr>
+</table>
+
+{% endif %}
+
+<script type="text/javascript">
+
+let formatNumber = (n) => n.replace(
+    /\D/g, "").replace(
+        /\B(?=(\d{3})+(?!\d))/g, ",");
+
+
+function formatCurrency(input, blur) {
+  let input_val = input.val();
+  if (input_val === "") { return; }
+  var original_len = input_val.length;
+  var caret_pos = input.prop("selectionStart");
+  if (input_val.indexOf(".") >= 0) {
+    let decimal_pos = input_val.indexOf(".");
+    let left_side = input_val.substring(0, decimal_pos);
+    let right_side = input_val.substring(decimal_pos);
+    left_side = formatNumber(left_side);
+    right_side = formatNumber(right_side);
+    if (blur === "blur") {
+      right_side += "00";
+    }
+    right_side = right_side.substring(0, 2);
+    input_val = "$" + left_side + "." + right_side;
+  } else {
+    input_val = formatNumber(input_val);
+    input_val = "$" + input_val;
+    if (blur === "blur") {
+      input_val += ".00";
+    }
+  }
+  input.val(input_val);
+  let updated_len = input_val.length;
+  caret_pos = updated_len - original_len + caret_pos;
+  input[0].setSelectionRange(caret_pos, caret_pos);
+}
+
+function formatCurrencyAllFields() {
+    $(".salario").each(function(idx, input) {
+        formatCurrency($(input));
+    });
+    $(".salario").click(function(){$(this).select();});
+}
+
+window.setTimeout(formatCurrencyAllFields, 500);
+</script>
+{% endblock %}

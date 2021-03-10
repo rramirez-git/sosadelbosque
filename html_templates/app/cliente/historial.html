@@ -25,6 +25,7 @@
             <p>
                 <strong>UMA: </strong>{{ historia.uma }} ($ {{ historia.uma.valor|money2display }})<br />
                 <strong>{{ historia.dias_salario_promedio }}</strong> días para calculo de salario promedio diario.<br />
+                <strong>{{ historia.semanas_descontar }}</strong> semanas a descontar.<br />
                 <input type="checkbox" disabled="disabled" {% if historia.tiene_esposa %}checked="checked"{% endif %} /> Asignacion Familiar (15%).<br />
                 {{ historia.numero_de_hijos }} hijos.
             </p>
@@ -56,8 +57,8 @@
 {% endif %}
 
 {% for reg in historia.registros_supuesto.all %}
-<div class="card" style="margin-top: 10px;">
-    <div class="card-header">
+<div class="card border-{{reg.color}}" style="margin-top: 10px;">
+    <div class="card-header border-{{reg.color}} text-{{reg.color}}">
         <div class="btn-toolbar float-right" role="toolbar">
             <div class="btn-group" role="group">
                 {% if cperms.del_reg %}
@@ -84,7 +85,7 @@
             </thead>
             <tbody>
                 {% for det in reg.detalle.all %}
-                    <tr>
+                    <tr {% if det.vigente %}class="table-success"{% endif %}>
                         <td>{{ det.fecha_inicial|date:'d/M/Y' }}</td>
                         <td>{{ det.fecha_final|date:'d/M/Y' }}</td>
                         <td><input type="checkbox" disabled="disabled" {% if det.vigente %}checked="checked"{% endif %} /></td>
@@ -118,12 +119,12 @@
 {% endfor %}
 
 {% for reg in historia.registros.all %}
-<div class="card" style="margin-top: 10px;">
-    <div class="card-header">
+<div class="card border-{{reg.color}}" style="margin-top: 10px;">
+    <div class="card-header border-{{reg.color}} text-{{reg.color}}">
         <div class="btn-toolbar float-right" role="toolbar">
             <div class="btn-group" role="group">
                 {% if cperms.upd_reg %}
-                <button type="button" class="btn btn-outline-secondary" onclick="openUpdRegistro({{ reg.pk }}, '{{ reg.empresa }}', '{{ reg.registro_patronal }}')" title="Actualizar Empresa / Registro Patronal">
+                <button type="button" class="btn btn-outline-secondary" onclick="openUpdRegistro({{ reg.pk }}, '{{ reg.empresa }}', '{{ reg.registro_patronal }}', '{{ reg.color }}')" title="Actualizar Empresa / Registro Patronal">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
                 {% endif %}
@@ -152,7 +153,7 @@
             </thead>
             <tbody>
                 {% for det in reg.detalle.all %}
-                    <tr>
+                    <tr {% if det.vigente %}class="table-success"{% endif %}>
                         <td>{{ det.fecha_inicial|date:'d/M/Y' }}</td>
                         <td>{{ det.fecha_final|date:'d/M/Y' }}</td>
                         <td><input type="checkbox" disabled="disabled" {% if det.vigente %}checked="checked"{% endif %} /></td>
@@ -202,6 +203,7 @@
     }
     let openCaptManual = () => {
         App.openPanel( $( "#frm-captura-manual-template" ).html(), "Captura Manual" );
+        $("#color").val("secondary");
     }
     let openCaptExcel = () => {
         App.openPanel( $( "#frm-captura-excel-template" ).html(), "Captura Excel" );
@@ -211,6 +213,7 @@
     }
     let openCaptPDF = () => {
         App.openPanel( $( "#frm-captura-pdf-template" ).html(), "Captura PDF" );
+        $("#color").val("secondary");
     }
 
     let addRowCaptSupuesto = () => {
@@ -342,10 +345,11 @@
         return nextDate;
     }
 
-    let openUpdRegistro = ( id_data, empresa, registro_patronal ) => {
+    let openUpdRegistro = ( id_data, empresa, registro_patronal, color ) => {
         let template = Handlebars.compile( $( "#frm-upd-registro-template" ).html() );
         let html = template( { id_data, empresa, registro_patronal } );
-        App.openPanel( html, "Actualización de Registro")
+        App.openPanel( html, "Actualización de Registro");
+        $("#color").val(color);
     }
     let openUpdDetalle = ( id_data, inicio, fin, salario, vigente ) => {
         let template = Handlebars.compile( $( "#frm-upd-detalle-template" ).html() );
@@ -369,6 +373,10 @@
         <div class="form-group">
             <label for="dias">Días para cálculo de salario promedio:</label>
             <input type="number" name="dias" id="dias" value="{{ historia.dias_salario_promedio }}"class="form-control" required="required" min="1" max="15000" />
+        </div>
+        <div class="form-group">
+            <label for="semanas_descontar">Semanas a descontar:</label>
+            <input type="number" name="semanas_descontar" id="semanas_descontar" value="{{ historia.semanas_descontar }}"class="form-control" required="required" min="0" max="500" />
         </div>
         <div class="form-group">
             <label>
@@ -473,16 +481,26 @@
         <input type="hidden" name="action" id="action" value="captura-manual" />
         <input type="hidden" name="rows" id="rows" value="1" />
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="empresa">Empresa:</label>
                     <input id="empresa" name="empresa" class="form-control" />
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="registro_patronal">Registro Patronal:</label>
                     <input id="registro_patronal" name="registro_patronal" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="color">Color:</label>
+                    <select id="color" name="color" class="form-control">
+                        {% for color in bootstrap_colors %}
+                            <option value="{{ color.0 }}" class="text-white bg-{{ color.0 }}">{{ color.1 }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
         </div>
@@ -650,16 +668,26 @@
         <input type="hidden" name="action" id="action" value="captura-pdf" />
         <input type="hidden" name="rows" id="rows" value="1" />
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="empresa">Empresa:</label>
                     <input id="empresa" name="empresa" class="form-control" />
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="registro_patronal">Registro Patronal:</label>
                     <input id="registro_patronal" name="registro_patronal" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="color">Color:</label>
+                    <select id="color" name="color" class="form-control">
+                        {% for color in bootstrap_colors %}
+                            <option value="{{ color.0 }}" class="text-white bg-{{ color.0 }}">{{ color.1 }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
         </div>
@@ -692,16 +720,28 @@
         {% verbatim %}
         <input type="hidden" value="{{id_data}}" name="id_data" id="id_data" />
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="empresa">Empresa:</label>
                     <input value="{{empresa}}" id="empresa" name="empresa" class="form-control" />
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="registro_patronal">Registro Patronal:</label>
                     <input value="{{registro_patronal}}" id="registro_patronal" name="registro_patronal" class="form-control" />
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="color">Color:</label>
+                    <select id="color" name="color" class="form-control">
+                        {% endverbatim %}
+                        {% for color in bootstrap_colors %}
+                            <option value="{{ color.0 }}" class="text-white bg-{{ color.0 }}">{{ color.1 }}</option>
+                        {% endfor %}
+                        {% verbatim %}
+                    </select>
                 </div>
             </div>
         </div>
