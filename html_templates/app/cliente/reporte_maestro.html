@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-sm-3">
                     <div class="form-group">
-                        <label for="ftr_responsable">Responsable</label>
+                        <label for="ftr_responsable">Ejecutivo</label>
                         <select class="form-control" id="ftr_responsable" name="ftr_responsable">
                             <option value=""></option>
                             {% for opt in combo_options.responsables %}
@@ -60,7 +60,8 @@
             <th>Tipo de Expediente</th>
             <th>Datos de Identificación</th>
             <th>Teléfono</th>
-            <th>Responsable</th>
+            <th>Ejecutivo</th>
+            <th>Gestor</th>
         </tr>
     </thead>
     <tfoot>
@@ -70,7 +71,8 @@
             <th>Tipo de Expediente</th>
             <th>Datos de Identificación</th>
             <th>Teléfono</th>
-            <th>Responsable</th>
+            <th>Ejecutivo</th>
+            <th>Gestor</th>
         </tr>
     </tfoot>
     <tbody id="data-tbl">
@@ -94,6 +96,7 @@
                 Oficina: {{ reg.telefono_oficina }}
             </td>
             <td>{% if reg.responsable %}{{ reg.responsable }}{% endif %}</td>
+            <td>{% if reg.gestor %}{{ reg.gestor }}{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -27,7 +27,8 @@ from initsys.forms import FrmDireccion
 from initsys.models import Usr, Nota, Alerta, usr_upload_to
 from routines.utils import (
     requires_jquery_ui, move_uploaded_file,
-    inter_periods_days, free_days)
+    inter_periods_days, free_days,
+    BootstrapColors)
 from app.data_utils import (
     df_load_HLRD_periodo_continuo_laborado, df_load_HLRDDay)
 from routines.utils import hipernormalize
@@ -324,7 +325,10 @@ def update(request, pk):
         instance=obj, data=request.POST or None)
     if obj.responsable:
         frmCteObsE = frmClienteObservacionesExtra(
-            instance=obj, data=request.POST or None, initial={'responsable': obj.responsable.pk})
+            instance=obj, data=request.POST or None, initial={
+                'responsable': obj.responsable.pk if obj.responsable else 0,
+                'gestor': obj.gestor.pk if obj.gestor else 0
+                })
     else:
         frmCteObsE = frmClienteObservacionesExtra(
             instance=obj, data=request.POST or None)
@@ -481,6 +485,7 @@ def historia_laboral(request, pk):
             historia.dias_salario_promedio = request.POST.get('dias')
             historia.tiene_esposa = "on" == request.POST.get('tiene_esposa')
             historia.numero_de_hijos = request.POST.get('numero_de_hijos')
+            historia.semanas_descontar = request.POST.get('semanas_descontar')
             historia.updated_by = usuario
             historia.save()
         elif "captura-supuesto" == request.POST.get('action'):
@@ -539,6 +544,7 @@ def historia_laboral(request, pk):
         elif "captura-manual" == request.POST.get('action'):
             registro_patronal = request.POST.get('registro_patronal')
             empresa = request.POST.get('empresa')
+            color = request.POST.get('color')
             if historia.registros.filter(
                     registro_patronal=registro_patronal, empresa=empresa
                     ).exists():
@@ -550,6 +556,7 @@ def historia_laboral(request, pk):
                     registro_patronal=registro_patronal,
                     empresa=empresa,
                     historia_laboral=historia,
+                    color = color,
                     created_by=usuario,
                     updated_by=usuario)
                 reg.save()
@@ -705,6 +712,7 @@ def historia_laboral(request, pk):
         elif "captura-pdf" == request.POST.get('action'):
             registro_patronal = request.POST.get('registro_patronal')
             empresa = request.POST.get('empresa')
+            color = request.POST.get('color')
             if historia.registros.filter(
                     registro_patronal=registro_patronal, empresa=empresa
                     ).exists():
@@ -716,6 +724,7 @@ def historia_laboral(request, pk):
                     registro_patronal=registro_patronal,
                     empresa=empresa,
                     historia_laboral=historia,
+                    color=  color,
                     created_by=usuario,
                     updated_by=usuario)
                 reg.save()
@@ -761,10 +770,12 @@ def historia_laboral(request, pk):
             id_data = request.POST.get('id_data')
             registro_patronal = request.POST.get('registro_patronal')
             empresa = request.POST.get('empresa')
+            color = request.POST.get('color')
             reg = historia.registros.get(pk=id_data)
             reg.updated_by = usuario
             reg.registro_patronal = registro_patronal
             reg.empresa = empresa
+            reg.color = color
             reg.save()
         elif "update-detalle" == request.POST.get('action'):
             id_data = request.POST.get('id_data')
@@ -812,6 +823,7 @@ def historia_laboral(request, pk):
         'historia': historia,
         'umas': list(UMA.objects.all()),
         'cperms': cperms,
+        'bootstrap_colors': BootstrapColors,
     })
 
 
