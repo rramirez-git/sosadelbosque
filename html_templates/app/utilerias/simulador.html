@@ -7,10 +7,6 @@
     {% csrf_token %}
     <div class="form-row">
         <div class="form-group col-sm-4">
-            <label for="anio_alta_imss_yr">Año de ingreso al IMSS:</label>
-            <input type="number" class="form-control text-right" id="anio_alta_imss_yr" name="anio_alta_imss_yr" min="1944" max="1997" required="required" value="{{ data.anio_alta_imss_yr }}" />
-        </div>
-        <div class="form-group col-sm-4">
             <label for="edad_qty">Edad actual:</label>
             <input type="number" class="form-control text-right" id="edad_qty" name="edad_qty" min="60" max="100" required="required" value="{{ data.edad_qty }}" />
         </div>
@@ -18,63 +14,48 @@
             <label for="semanas_amt">Cantidad de Semanas Cotizadas</label>
             <input type="number" class="form-control text-right" id="semanas_amt" name="semanas_amt" min="500" max="4500" required="required" value="{{ data.semanas_amt }}" />
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-sm-6">
-            <input class="form-check-input" type="checkbox" id="concubino_flg" name="concubino_flg" class="form-control" value="yes" {% if data.concubino_flg %}checked="checked"{% endif %} />
-            <label class="form-check-label" for="concubino_flg">Esposa(o) o concubina(rio):</label>
-        </div>
-        <div class="form-group col-sm-6">
+        <div class="form-group col-sm-4">
             <label for="hijos_qty">Número de Hijos</label>
             <input class="form-control text-right" type="number" id="hijos_qty" name="hijos_qty" class="form-control" min="0" max="10" value="{{ data.hijos_qty }}" />
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-sm-12">
-            <label>Salario mensual promedio de los últimos 5 años cotizados:</label>
+        <div class="form-group col-sm-6">
+            <input class="form-check-input" type="checkbox" id="concubino_flg" name="concubino_flg" class="form-control" value="yes" checked="checked" disabled="disabled"/>
+            <label class="form-check-label" for="concubino_flg">Esposa(o) o concubina(o)</label>
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-sm-4 text-right">Último Salario Cotizado</div>
-        <div class="form-group col-sm-4">
-            <input value="{{ data.anio_1 }}" name="anio_1" id="anio_1" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
+        <div class="form-group text-right offset-8 col-sm-4">
+            <label>Captura el salario mensual de los últimos cinco años:</label>
         </div>
+    </div>
+    <div class="form-row">
+        <div class="col-sm-4 offset-sm-4 text-right">Año 1:</div>
         <div class="form-group col-sm-4">
             <input value="{{ data.salario_1 }}" name="salario_1" id="salario_1" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-sm-4">&nbsp;</div>
-        <div class="form-group col-sm-4">
-            <input value="{{ data.anio_2 }}" name="anio_2" id="anio_2" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
-        </div>
+        <div class="col-sm-4 offset-sm-4 text-right">Año 2:</div>
         <div class="form-group col-sm-4">
             <input value="{{ data.salario_2 }}" name="salario_2" id="salario_2" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-sm-4">&nbsp;</div>
-        <div class="form-group col-sm-4">
-            <input value="{{ data.anio_3 }}" name="anio_3" id="anio_3" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
-        </div>
+        <div class="col-sm-4 offset-sm-4 text-right">Año 3:</div>
         <div class="form-group col-sm-4">
             <input value="{{ data.salario_3 }}" name="salario_3" id="salario_3" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-sm-4">&nbsp;</div>
-        <div class="form-group col-sm-4">
-            <input value="{{ data.anio_4 }}" name="anio_4" id="anio_4" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
-        </div>
+        <div class="col-sm-4 offset-sm-4 text-right">Año 4:</div>
         <div class="form-group col-sm-4">
             <input value="{{ data.salario_4 }}" name="salario_4" id="salario_4" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-sm-4">&nbsp;</div>
-        <div class="form-group col-sm-4">
-            <input value="{{ data.anio_5 }}" name="anio_5" id="anio_5" type="number" class="form-control text-right" min="1990" max="2050" placeholder="Año" required="required" />
-        </div>
+        <div class="col-sm-4 offset-sm-4 text-right">Año 5:</div>
         <div class="form-group col-sm-4">
             <input value="{{ data.salario_5 }}" name="salario_5" id="salario_5" onblur="formatCurrency($(this))" onblur="formatCurrency($(this), 'blur')" type="currency" class="form-control text-right salario" min="1" max="50000" placeholder="Salario Promedio Mensual" required="required" />
         </div>
@@ -103,7 +84,7 @@
         <th class="text-left">{{ results.porcentaje_factor_edad | money2display }} %</th>
     </tr>
     <tr>
-        <th class="text-right">Asignaciones Familiares:</th>
+        <th class="text-right">Asignaciones Familiares - esposa(o), concubina(n) o ayuda asistencial:</th>
         <th class="text-left">{{ results.porcentaje_asignaciones_familiares | money2display }} %</th>
     </tr>
     <tr>
@@ -115,6 +96,13 @@
         <th class="text-left">$ {{ results.pension | money2display }}</th>
     </tr>
 </table>
+
+<div><strong>*Nota:</strong> La información mostrada es de caracter informativo y carece de validez oficial.</div>
+
+<div class="h5 text-dark">
+    Si quieres saber el monto preciso de tu pensión solicita una asesoria con nosotros en:
+    <a class="btn btn-info" href="https://grupo.sosadelbosque.mx/#contacto" target="_blank" a>https://grupo.sosadelbosque.mx</a>
+</div>
 
 {% endif %}
 

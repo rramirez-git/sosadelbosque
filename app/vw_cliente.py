@@ -891,10 +891,12 @@ def historia_laboral_vista_tabular(request, pk):
     df_pers = df_load_HLRD_periodo_continuo_laborado(
         historia_laboral.cliente.pk)
     df_pers[
-        'historialaboralregistro'
-        ] = df_pers.historialaboralregistro_pk.apply(
-            lambda x: HistoriaLaboralRegistro.objects.get(pk=x).__str__()
-            )
+        'historialaboralregistro'] = df_pers.historialaboralregistro_pk.apply(
+            lambda x: HistoriaLaboralRegistro.objects.get(pk=x).__str__())
+    df_pers['color'] = df_pers.historialaboralregistro_pk.apply(
+        lambda x: HistoriaLaboralRegistro.objects.get(pk=x).color)
+    df_pers['vigente'] = df_pers.historialaboralregistro_pk.apply(
+        lambda x: HistoriaLaboralRegistro.objects.get(pk=x).vigente)
     for reg in historia_laboral.registros_supuesto.all():
         for det in reg.detalle.all().order_by('fecha_inicial'):
             df_pers = df_pers.append([{
@@ -911,7 +913,9 @@ def historia_laboral_vista_tabular(request, pk):
                 'dias_inact': 0,
                 'semanas_inact': 0,
                 'anios_inact': 0,
-                'historialaboralregistro': "Supuesto"
+                'historialaboralregistro': "Supuesto",
+                'color': 'primary',
+                'vigente': False,
             }], ignore_index=True)
     df_pers["fecha_inicio"] = pd.to_datetime(df_pers["fecha_inicio"])
     df_pers["fecha_fin"] = pd.to_datetime(df_pers["fecha_fin"])
@@ -1379,7 +1383,7 @@ def reporte_maestro_alertas(request):
         data = list(data)
         if ftr['ftr_usuario_alertado']:
             data = [
-                elem for elem in data 
+                elem for elem in data
                 if ("{} {} {}".format(
                     hipernormalize(elem.usuario.first_name),
                     hipernormalize(elem.usuario.last_name),
@@ -1388,7 +1392,7 @@ def reporte_maestro_alertas(request):
                 ]
         if ftr['ftr_usuario_creador']:
             data = [
-                elem for elem in data 
+                elem for elem in data
                 if ("{} {} {}".format(
                     hipernormalize(elem.created_by.first_name),
                     hipernormalize(elem.created_by.last_name),
@@ -1406,4 +1410,3 @@ def reporte_maestro_alertas(request):
         'filters': ftr,
         'regs': data,
     })
-    

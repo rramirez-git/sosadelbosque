@@ -12,22 +12,17 @@ def str2pesos(cantidad):
 @xframe_options_exempt
 def simulador(request):
     data = {
-        'anio_alta_imss_yr': int(request.POST.get("anio_alta_imss_yr", 1990)),
-        'edad_qty': request.POST.get("edad_qty", 60),
+        'edad_qty': int(request.POST.get("edad_qty", 60)),
         'semanas_amt': int(request.POST.get("semanas_amt", 500)),
-        'concubino_flg': request.POST.get("concubino_flg", "no") == "yes",
+        'concubino_flg': request.POST.get("concubino_flg", "no") == "yes" or True,
         'hijos_qty': int(request.POST.get("hijos_qty", 0)),
-        'anio_1': int(request.POST.get('anio_1', 1990)),
         'salario_1': str2pesos(request.POST.get('salario_1', "0")),
-        'anio_2': int(request.POST.get('anio_2', 1990)),
         'salario_2': str2pesos(request.POST.get('salario_2', "0")),
-        'anio_3': int(request.POST.get('anio_3', 1990)),
         'salario_3': str2pesos(request.POST.get('salario_3', "0")),
-        'anio_4': int(request.POST.get('anio_4', 1990)),
         'salario_4': str2pesos(request.POST.get('salario_4', "0")),
-        'anio_5': int(request.POST.get('anio_5', 1990)),
         'salario_5': str2pesos(request.POST.get('salario_5', "0")),
     }
+    data['edad_qty'] = 65 if data['edad_qty'] > 65 else data['edad_qty']
     calculated = False
     results = {}
     if request.method == "POST":
@@ -76,20 +71,10 @@ def simulador(request):
             'porcentaje_asignaciones_familiares': porcentaje_asignaciones_familiares,
         }
         calculated = True
-        print(f"porcentaje_cuantia_basica = {results['porcentaje_cuantia_basica']}")
-        print(f"porcentaje_incremento_anual = {results['porcentaje_incremento_anual']}")
-        print(f"porcentaje_cuantia_basica_incremento = {results['porcentaje_cuantia_basica_incremento']}")
-        print(f"pension = {results['pension']}")
-        print(f"porcentaje_pension = {results['porcentaje_pension']}")
-        print(f"salario_promedio_mensual = {results['salario_promedio_mensual']}")
-        print(f"salario_promedio_diario = {results['salario_promedio_diario']}")
-        print(f"porcentaje_factor_edad = {results['porcentaje_factor_edad']}")
-        print(f"porcentaje_factor_actualizacion = {results['porcentaje_factor_actualizacion']}")
-        print(f"porcentaje_asignaciones_familiares = {results['porcentaje_asignaciones_familiares']}")
     return render(
         request,
         'app/utilerias/simulador.html', {
-            'menu_main': {'perms': None}, 
+            'menu_main': {'perms': None},
             'titulo': "Simulador de Pension",
             'req_ui': requires_jquery_ui(request),
             'data': data,
