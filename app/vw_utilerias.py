@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from routines.utils import requires_jquery_ui
 from .models_historialaboral import *
@@ -8,6 +9,7 @@ from .models_historialaboral import *
 def str2pesos(cantidad):
     return float(cantidad.replace('$', '').replace(',', ''))
 
+@xframe_options_exempt
 def simulador(request):
     data = {
         'anio_alta_imss_yr': int(request.POST.get("anio_alta_imss_yr", 1990)),
