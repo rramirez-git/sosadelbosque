@@ -20,6 +20,7 @@ from .functions import *
 from .forms import FrmTarea
 from .models import Tarea, STATUS_TAREA, Vinculo, Comentario, Historia
 
+
 @valida_acceso(['tarea.tareas_tarea'])
 def index(request, anio=None, mes=None):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
@@ -41,21 +42,23 @@ def index(request, anio=None, mes=None):
     toolbar.append({
         'type': 'rlink',
         'url': reverse('tarea_index', kwargs={
-            'anio': prev_month['year'], 'mes':prev_month['month']}),
+            'anio': prev_month['year'], 'mes': prev_month['month']}),
         'label': '<i class="fas fa-chevron-left"></i>'
     })
     toolbar.append({
         'type': 'rlink',
         'url': reverse('tarea_index', kwargs={
-            'anio': next_month['year'], 'mes':next_month['month']}),
+            'anio': next_month['year'], 'mes': next_month['month']}),
         'label': '<i class="fas fa-chevron-right"></i>'
     })
     cal = TaskCalendar()
-    responsables = list(User.objects.exclude(id__in = Cliente.objects.all().values('id')))
+    responsables = list(User.objects.exclude(
+        id__in=Cliente.objects.all().values('id')))
     clientes = list(Cliente.objects.all())
     historias = list(HistoriaLaboral.objects.all())
     actividades = list(Actividad.objects.all())
-    responsables.sort(key=lambda usr: f'{usr.first_name} {usr.last_name}'.upper())
+    responsables.sort(
+        key=lambda usr: f'{usr.first_name} {usr.last_name}'.upper())
     historias.sort(key=lambda obj: f'{obj}')
     actividades.sort(key=lambda obj: f'{obj.cliente} {obj}')
     return render(request, 'simple_tasks/index.html', {
@@ -72,6 +75,7 @@ def index(request, anio=None, mes=None):
         'anio': anio,
         'mes': mes,
     })
+
 
 @valida_acceso(['tarea.agregar_tareas_tarea'])
 def new(request):
@@ -100,6 +104,7 @@ def new(request):
         data = {'status': 'error', 'id':2, 'reason': 'Wrong Method'}
     return JsonResponse(data)
 
+
 @valida_acceso(['tarea.tareas_tarea'])
 def get_tasks(request, anio, mes):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
@@ -117,7 +122,7 @@ def get_tasks(request, anio, mes):
     data2 = []
     for item in data:
         try:
-            data2.append({ 
+            data2.append({
                 'idtarea': item.idtarea,
                 'titulo': item.titulo,
                 'responsable': item.responsable.pk,
@@ -125,7 +130,7 @@ def get_tasks(request, anio, mes):
                 'estado_actual': item.estado_actual,
                 'color': item.color})
         except AttributeError as e:
-            data2.append({ 
+            data2.append({
                 'idtarea': item.idtarea,
                 'titulo': item.titulo,
                 'responsable': 10,
@@ -133,6 +138,7 @@ def get_tasks(request, anio, mes):
                 'estado_actual': item.estado_actual,
                 'color': item.color})
     return JsonResponse(data2, safe=False)
+
 
 @valida_acceso(['tarea.tareas_tarea'])
 def get_task(request, pk=0):
@@ -189,7 +195,8 @@ def get_task(request, pk=0):
             'comentario': as_paragraph_fn(comentario.comentario),
             'comentario_raw': comentario.comentario,
             'at': comentario.updated_at.strftime("%d/%m/%Y %H:%M"),
-            'by': f"{comentario.created_by.first_name} {comentario.created_by.last_name}",
+            'by':
+                f"{comentario.created_by.first_name} {comentario.created_by.last_name}",
             'editable': (usuario.has_perm_or_has_perm_child(
                     'comentario.actualizar_comentarios_comentario'
                 ) and comentario.created_by.id == usuario.id),
@@ -199,6 +206,7 @@ def get_task(request, pk=0):
             } for comentario in obj.comentarios.all()]
     }
     return JsonResponse(data, safe=False)
+
 
 @valida_acceso(['tarea.tareas_tarea'])
 def add_coment(request):
@@ -221,17 +229,20 @@ def add_coment(request):
         data = {'status': 'error', 'id':2, 'reason': 'Wrong Method'}
     return JsonResponse(data)
 
+
 @valida_acceso(['tarea.eliminar_tareas_tarea'])
 def delete_tarea(request, pk=0):
     Tarea.objects.get(pk=pk).delete()
     data = {'status': 'ok', 'id': 'deleted'}
     return JsonResponse(data)
 
+
 @valida_acceso(['comentario.eliminar_comentarios_comentario'])
 def delete_comentario(request, pk=0):
     Comentario.objects.get(pk=pk).delete()
     data = {'status': 'ok', 'id': 'deleted'}
     return JsonResponse(data)
+
 
 @valida_acceso(['tarea.actualizar_tareas_tarea'])
 def update(request):
@@ -291,6 +302,7 @@ def update(request):
         data = {'status': 'error', 'id':2, 'reason': 'Wrong Method'}
     return JsonResponse(data)
 
+
 @valida_acceso(['comentario.actualizar_comentarios_comentario'])
 def update_comentario(request):
     usuario = Usr.objects.filter(id=request.user.pk)[0]
@@ -307,6 +319,7 @@ def update_comentario(request):
         data = {'status': 'error', 'id':2, 'reason': 'Wrong Method'}
     return JsonResponse(data)
 
+
 @valida_acceso(['tarea.actualizar_tareas_tarea'])
 def delete_link(request):
     pk = request.POST.get("pk")
@@ -320,6 +333,7 @@ def delete_link(request):
     obj.delete()
     data = {'status': 'ok'}
     return JsonResponse(data)
+
 
 @valida_acceso(['tarea.actualizar_tareas_tarea'])
 def new_link(request):
@@ -336,6 +350,7 @@ def new_link(request):
         )
     data = {'status': 'ok'}
     return JsonResponse(data)
+
 
 @valida_acceso([
     'permission.maestro_de_tareas_permiso',
@@ -402,6 +417,7 @@ def reporte_maestro(request):
         'historias_laborales': historias,
         'actividades': actividades,
     })
+
 
 def crearlink(id, tipo, tarea, usuario):
     if "Cliente" == tipo:

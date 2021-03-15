@@ -135,9 +135,12 @@ class frmClienteObservaciones(forms.ModelForm):
         model = Cliente
         fields = ['observaciones']
 
+
 class frmClienteObservacionesExtra(forms.ModelForm):
-    responsable = forms.ChoiceField(required=False, choices=UsrResponsables, label="Ejecutivo")
-    gestor = forms.ChoiceField(required=False, choices=UsrResponsables, label="Gestor")
+    responsable = forms.ChoiceField(
+        required=False, choices=UsrResponsables, label="Ejecutivo")
+    gestor = forms.ChoiceField(
+        required=False, choices=UsrResponsables, label="Gestor")
 
     class Meta:
         model = Cliente

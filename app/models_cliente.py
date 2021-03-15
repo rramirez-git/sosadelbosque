@@ -7,13 +7,17 @@ from .models_opcs import *
 
 
 def UsuarioCliente():
-    return list(item['idusuario'] for item in Cliente.objects.all().values('idusuario'))
+    return list(item['idusuario'] for item in Cliente.objects.all().values(
+        'idusuario'))
+
 
 def UsuarioNoCliente():
-    return list(item['idusuario'] for item in Usr.objects.exclude(idusuario__in=UsuarioCliente()).values('idusuario'))
+    return list(item['idusuario'] for item in Usr.objects.exclude(
+        idusuario__in=UsuarioCliente()).values('idusuario'))
+
 
 def UsrResponsables():
-    return [(item.pk, f"{item}") 
+    return [(item.pk, f"{item}")
         for item in Usr.objects.filter(idusuario__in=UsuarioNoCliente())]
 
 

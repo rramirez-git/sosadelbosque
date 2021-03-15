@@ -14,6 +14,7 @@ STATUS_TAREA = (
     ('OTRO', 'OTRO'),
 )
 
+
 class Tarea(models.Model):
     idtarea = models.AutoField(primary_key=True)
     titulo = models.CharField(max_length=250)
@@ -34,7 +35,7 @@ class Tarea(models.Model):
         User, on_delete=models.SET_NULL, related_name='+',
         null=True, blank=True, verbose_name="Actualizado por")
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = [
             'fecha_limite',
@@ -64,6 +65,7 @@ class Tarea(models.Model):
                 return "warning"
         return "primary"
 
+
 class Vinculo(models.Model):
     idvinculo = models.AutoField(primary_key=True)
     tarea = models.ForeignKey(
@@ -79,7 +81,7 @@ class Vinculo(models.Model):
         User, on_delete=models.SET_NULL, related_name='+',
         null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = [
             'tarea',
@@ -94,6 +96,7 @@ class Vinculo(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+
 class Historia(models.Model):
     idhistoria = models.AutoField(primary_key=True)
     tarea = models.ForeignKey(
@@ -105,7 +108,7 @@ class Historia(models.Model):
         User, on_delete=models.SET_NULL, related_name='+',
         null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = [
             'tarea',
@@ -118,6 +121,7 @@ class Historia(models.Model):
 
     def __unicode__(self):
         return self.__str__()
+
 
 class Comentario(models.Model):
     idcomentario = models.AutoField(primary_key=True)
@@ -132,7 +136,7 @@ class Comentario(models.Model):
         User, on_delete=models.SET_NULL, related_name='+',
         null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = [
             'tarea',

@@ -137,7 +137,9 @@ class HistoriaLaboral(models.Model):
         for reg in self.registros_supuesto.all():
             for det in reg.detalle.all():
                 for dt in pd.date_range(det.inicio, det.fin):
-                    df = df.append([{'fecha': dt, 'salario': det.salario_base}], ignore_index=True)
+                    df = df.append(
+                        [{'fecha': dt, 'salario': det.salario_base}],
+                        ignore_index=True)
         df.sort_values(by='fecha', ascending=False, inplace=True)
         df = df.head(dias_calculo)
         tope_uma = 25 * self.uma.valor
@@ -218,7 +220,8 @@ class HistoriaLaboralRegistro(models.Model):
     fecha_de_alta = models.DateField(null=True, blank=True)
     fecha_de_baja = models.DateField(null=True, blank=True)
     vigente = models.BooleanField(default=False, blank=True)
-    color = models.CharField(max_length=15, default=BootstrapColors[2][0], choices=BootstrapColors)
+    color = models.CharField(
+        max_length=15, default=BootstrapColors[2][0], choices=BootstrapColors)
     created_by = models.ForeignKey(
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")

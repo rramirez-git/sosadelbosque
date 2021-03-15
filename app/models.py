@@ -70,14 +70,14 @@ class AssocActTarea(models.Model):
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = [
             'actividad',
             'tarea',
             'created_at',
         ]
-        
+
     def __str__(self):
         return "{}-{}".format(self.actividad, self.tarea)
 
@@ -99,7 +99,7 @@ class AssocHistLabTarea(models.Model):
         Usr, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = [
             'historial',

@@ -1,5 +1,6 @@
 from calendar import LocaleHTMLCalendar
 
+
 def Num2Month(month):
     if 1 == month:
         return "Enero"
@@ -27,6 +28,7 @@ def Num2Month(month):
         return "Diciembre"
     return ""
 
+
 def NextMonthYear(year, month):
     next = {
         'year': year,
@@ -37,6 +39,7 @@ def NextMonthYear(year, month):
         next['year'] += 1
     return next
 
+
 def PrevMonthYear(year, month):
     prev = {
         'year': year,
@@ -46,6 +49,7 @@ def PrevMonthYear(year, month):
         prev['month'] = 12
         prev['year'] -= 1
     return prev
+
 
 class TaskCalendar(LocaleHTMLCalendar):
     tasks = []
@@ -59,7 +63,7 @@ class TaskCalendar(LocaleHTMLCalendar):
             return '<td class="noday day">&nbsp;</td>'
         content = ""
         for task in self.tasks:
-            if (task.fecha_limite.day == day 
+            if (task.fecha_limite.day == day
                     and task.fecha_limite.month == self.month):
                 content += f'<div class="task" data-id="{task.pk}">'
                 content += task
