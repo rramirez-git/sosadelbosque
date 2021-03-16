@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 import app.vw_cliente as views
 
@@ -50,4 +50,6 @@ urlpatterns = [
           name="{}_delete_detalle_supuesto".format(object_name)),
      path('reporte/alertas/', views.reporte_maestro_alertas,
           name="{}_reporte_maestro_alertas".format(object_name)),
+
+     path('control/', include('app.url_tmp_reportes_control')),
 ]

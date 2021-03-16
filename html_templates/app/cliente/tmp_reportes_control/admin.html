@@ -1,0 +1,191 @@
+{% extends "global/html_struct.html" %}
+{% load crispy_forms_tags %}
+{% load util_filters %}
+
+{% block content %}
+
+    <div id="control-accordion">
+        <div class="card">
+            <div class="card-header" id="encabezado_01">
+                <h5>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#cuerpo_01" aria-expanded="false"
+                            aria-controls="cuerpo_01">Recepción, Cartera en Espera y Otros
+                    </button>
+                </h5>
+            </div>
+            <div id="cuerpo_01" class="collapse" aria-labelledby="encabezado_01" data-parent="#control-accordion">
+                <div class="card-body">
+                    <table class="table table-striped table-sm table-responsive-md">
+                        <thead>
+                            <tr>
+                                <th>Ejecutivo</th>
+                                <th>Fecha de Contacto</th>
+                                <th>Comentarios</th>
+                                <th>
+                                    <button onclick="open_frm_recepcion_ultimo_contacto_add()" type="button" class="btn btn-outline-secondary">
+                                        <i class="far fa-plus-square"></i>
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for reg in data_ultimo_contacto %}
+                            <tr>
+                                <td>
+                                    {{ reg.autor }}
+                                </td>
+                                <td>
+                                    {{ reg.fecha_de_ultimo_contacto|date:'d/m/Y' }}
+                                </td>
+                                <td>
+                                    {{ reg.nota|as_paragraph|safe }}
+                                </td>
+                                <td>
+                                    <button onclick="open_frm_recepcion_ultimo_contacto_update({{ reg.pk }}, '{{ reg.fecha_de_ultimo_contacto|date:'Y-m-d' }}', `{{ reg.nota }}`)" type="button" class="btn btn-outline-secondary">
+                                        <i class="far fa-edit"></i>
+                                    </button>
+                                    <button onclick="open_frm_recepcion_ultimo_contacto_delete({{ reg.pk }})" type="button" class="btn btn-outline-secondary">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="encabezado_02">
+                <h5>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#cuerpo_02" aria-expanded="false"
+                            aria-controls="cuerpo_02">Pŕoximo a Pensión y/o Modalidad 40
+                    </button>
+                </h5>
+            </div>
+            <div id="cuerpo_02" class="collapse" aria-labelledby="encabezado_02" data-parent="#control-accordion">
+                <div class="card-body">Cuerpo 02</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="encabezado_03">
+                <h5>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#cuerpo_03" aria-expanded="false"
+                            aria-controls="cuerpo_03">Patron Sustituto
+                    </button>
+                </h5>
+            </div>
+            <div id="cuerpo_03" class="collapse" aria-labelledby="encabezado_03" data-parent="#control-accordion">
+                <div class="card-body">Cuerpo 03</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="encabezado_04">
+                <h5>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#cuerpo_04" aria-expanded="false"
+                            aria-controls="cuerpo_04">Inscripción a Modalidad 40
+                    </button>
+                </h5>
+            </div>
+            <div id="cuerpo_04" class="collapse" aria-labelledby="encabezado_04" data-parent="#control-accordion">
+                <div class="card-body">Cuerpo 04</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="encabezado_05">
+                <h5>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#cuerpo_05" aria-expanded="false"
+                            aria-controls="cuerpo_05">Pensión en Proceso
+                    </button>
+                </h5>
+            </div>
+            <div id="cuerpo_05" class="collapse" aria-labelledby="encabezado_05" data-parent="#control-accordion">
+                <div class="card-body">Cuerpo 05</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="encabezado_06">
+                <h5>
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#cuerpo_06" aria-expanded="false"
+                            aria-controls="cuerpo_06">Trámites y Correcciones
+                    </button>
+                </h5>
+            </div>
+            <div id="cuerpo_06" class="collapse" aria-labelledby="encabezado_06" data-parent="#control-accordion">
+                <div class="card-body">Cuerpo 06</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    let open_frm_recepcion_ultimo_contacto_add = () => {
+        App.openPanel($("#tpl-recepcion-ultimo-contacto-add").html(), "Captura Datos de Último Contacto" );
+    }
+    let open_frm_recepcion_ultimo_contacto_update = (id_record, fecha_de_ultimo_contacto, nota) => {
+        let template = Handlebars.compile($("#tpl-recepcion-ultimo-contacto-upd").html());
+        let html = template({id_record, fecha_de_ultimo_contacto, nota});
+        App.openPanel( html, "Actualización de Último Contacto");
+    }
+    let open_frm_recepcion_ultimo_contacto_delete = (id_record) => {
+        let template = Handlebars.compile($("#tpl-recepcion-ultimo-contacto-del").html());
+        let html = template({id_record});
+        App.openPanel( html, "Eliminar Registro de Último Contacto");
+    }
+    </script>
+
+    <script type="text/x-handlebars-template" id="tpl-recepcion-ultimo-contacto-add">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add-ultimo-contacto" />
+        <div class="row">
+            <div class="col-sm-6 form-group">
+                <label for="fecha_de_ultimo_contacto">Fecha de Ultimo Contacto:</label>
+                <input type="date" class="form-control" id="fecha_de_ultimo_contacto" name="fecha_de_ultimo_contacto" value="" required="required"/>
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="nota">Notas y/o Comentarios:</label>
+                <textarea name="nota" id="nota" class="form-control"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Guardar</button>
+    </form>
+    </script>
+
+    <script type="text/x-handlebars-template" id="tpl-recepcion-ultimo-contacto-upd">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update-ultimo-contacto" />
+        {% verbatim %}
+        <input type="hidden" name="id_record" value="{{ id_record }}" />
+        <div class="row">
+            <div class="col-sm-6 form-group">
+                <label for="fecha_de_ultimo_contacto">Fecha de Ultimo Contacto:</label>
+                <input type="date" class="form-control" id="fecha_de_ultimo_contacto" name="fecha_de_ultimo_contacto" value="{{ fecha_de_ultimo_contacto }}" required="required"/>
+            </div>
+            <div class="col-sm-6 form-group">
+                <label for="nota">Notas y/o Comentarios:</label>
+                <textarea name="nota" id="nota" class="form-control">{{ nota }}</textarea>
+            </div>
+        </div>
+        {% endverbatim %}
+        <button type="submit" class="btn btn-outline-primary">Guardar</button>
+    </form>
+    </script>
+
+    <script type="text/x-handlebars-template" id="tpl-recepcion-ultimo-contacto-del">
+    <form method="post" autocomplete="off" enctype="multipart/form-data" id="main-form" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete-ultimo-contacto" />
+        {% verbatim %}
+        <input type="hidden" name="id_record" value="{{ id_record }}" />
+        <div class="row">
+            <div class="col-sm-12">
+                Confirma que desea eliminar el registro de último contacto?
+            </div>
+        </div>
+        {% endverbatim %}
+        <button type="submit" class="btn btn-outline-primary">Sí, eliminar</button>
+    </form>
+    </script>
+
+{% endblock %}

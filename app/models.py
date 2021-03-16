@@ -25,6 +25,7 @@ from .models_documentos import *
 from .models_actividades import *
 from .models_cliente import *
 from .models_historialaboral import *
+from .models_reportes_control_tmp import *
 
 
 class AssocCteTarea(models.Model):

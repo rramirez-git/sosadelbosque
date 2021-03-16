@@ -1,0 +1,121 @@
+{% extends "global/html_struct.html" %}
+{% load i18n %}
+{% load util_filters %}
+
+{% block content %}
+
+    <div class="card card-body">
+        <form method="post" autocomplete="off" enctype="multipart/form-data" id="filter-form" action="">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-sm-2 form-group">
+                    <label for="ftr_tipo_expediente">Tipo de Expediente</label>
+                    <select name="ftr_tipo_expediente" id="ftr_tipo_expediente" class="form-control">
+                        <option value=""></option>
+                        {% for opt in combo_options.tipo_expediente %}
+                            <option value="{{ opt.pk }}" {% if opt.pk == filters.ftr_tipo_expediente %}selected="select"{% endif %}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-2 form-group">
+                    <label for="ftr_ejecutivo">Ejecutivo</label>
+                    <select name="ftr_ejecutivo" id="ftr_ejecutivo" class="form-control">
+                        <option value=""></option>
+                        {% for opt in combo_options.responsables %}
+                            <option value="{{ opt.0 }}" {% if opt.0 == filters.ftr_ejecutivo %}selected="select"{% endif %}>{{ opt.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-2 form-group">
+                    <label for="ftr_gestor">Gestor</label>
+                    <select name="ftr_gestor" id="ftr_gestor" class="form-control">
+                        <option value=""></option>
+                        {% for opt in combo_options.responsables %}
+                            <option value="{{ opt.0 }}" {% if opt.0 == filters.ftr_gestor %}selected="select"{% endif %}>{{ opt.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-3 form-group">
+                    <label for="ftr_fecha_ultimo_contacto_inicio">Fecha UC (inicio)</label>
+                    <input type="date" class="form-control" id="ftr_fecha_ultimo_contacto_inicio" name="ftr_fecha_ultimo_contacto_inicio" value="{{ filters.ftr_fecha_ultimo_contacto_inicio }}"/>
+                </div>
+                <div class="col-sm-3 form-group">
+                    <label for="ftr_fecha_ultimo_contacto_fin">Fecha UC (fin)</label>
+                    <input type="date" class="form-control" id="ftr_fecha_ultimo_contacto_fin" name="ftr_fecha_ultimo_contacto_fin" value="{{ filters.ftr_fecha_ultimo_contacto_fin }}"/>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary" id="btn-save" >Procesar</button>
+        </form>
+    </div>
+
+    {% if regs %}
+    <table id="data-grid-report" class="table table-striped table-sm table-responsive-md">
+        <thead>
+            <tr>
+                <th onclick="App.sortDataGridReport(0, 'str')" style="cursor: pointer;">
+                    <i class="fas fa-sort-down float-right d-none sort-sign-asc"></i>
+                    <i class="fas fa-sort-up float-right d-none sort-sign-desc"></i>
+                    Cliente
+                </th>
+                <th onclick="App.sortDataGridReport(1, 'str')" style="cursor: pointer;">
+                    <i class="fas fa-sort-down float-right d-none sort-sign-asc"></i>
+                    <i class="fas fa-sort-up float-right d-none sort-sign-desc"></i>
+                    Tipo de Expediente
+                </th>
+                <th onclick="App.sortDataGridReport(2, 'str')" style="cursor: pointer;">
+                    <i class="fas fa-sort-down float-right d-none sort-sign-asc"></i>
+                    <i class="fas fa-sort-up float-right d-none sort-sign-desc"></i>
+                    Ejecutivo
+                </th>
+                <th onclick="App.sortDataGridReport(3, 'str')" style="cursor: pointer;">
+                    <i class="fas fa-sort-down float-right d-none sort-sign-asc"></i>
+                    <i class="fas fa-sort-up float-right d-none sort-sign-desc"></i>
+                    Gestor
+                </th>
+                <th onclick="App.sortDataGridReport(4, 'number')" style="cursor: pointer;">
+                    <i class="fas fa-sort-down float-right d-none sort-sign-asc"></i>
+                    <i class="fas fa-sort-up float-right d-none sort-sign-desc"></i>
+                    Fecha de Último Contacto
+                </th>
+                <th>Nota</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Cliente</th>
+                <th>Tipo de Expediente</th>
+                <th>Ejecutivo</th>
+                <th>Gestor</th>
+                <th>Fecha de Último Contacto</th>
+                <th>Nota</th>
+            </tr>
+        </tfoot>
+        <tbody id="data-tbl">
+            {% for reg in regs %}
+            <tr>
+                <td data-rawsortvalue="{{ reg.cliente|lower }}">
+                    <a href="{% url 'cliente_see' pk=reg.cliente.pk %}">
+                        {{ reg.cliente }}
+                    </a>
+                </td>
+                <td data-rawsortvalue="{{ reg.cliente.tipo|lower }}">
+                    {{ reg.cliente.tipo }}
+                </td>
+                <td data-rawsortvalue="{{ reg.cliente.responsable|lower }}">
+                    {% if reg.cliente.responsable %}{{ reg.cliente.responsable }}{% endif %}
+                </td>
+                <td data-rawsortvalue="{{ reg.cliente.gestor|lower }}">
+                    {% if reg.cliente.gestor %}{{ reg.cliente.gestor }}{% endif %}
+                </td>
+                <td data-rawsortvalue="{{ reg.fecha_de_ultimo_contacto|date:'Ymd' }}">
+                    {{ reg.fecha_de_ultimo_contacto|date:'d/m/Y' }}
+                </td>
+                <td>
+                    {{ reg.nota|as_paragraph|safe }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% endblock %}

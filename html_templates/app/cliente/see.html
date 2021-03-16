@@ -13,7 +13,7 @@
             <h5>Documentos</h5>
             <ul class="list-group">
                 {% for docto in cte.documentos.all %}
-                <li class="list-group-item" 
+                <li class="list-group-item"
                     {% if docto.observaciones %}
                     data-toggle="tooltip" data-placement="right" data-html="true"
                     title="{{ docto.observaciones | as_paragraph }}"
@@ -25,7 +25,7 @@
                         </a>
                     </div>
                     {% endif %}
-                    <a href="{{ docto.anverso.url}}" 
+                    <a href="{{ docto.anverso.url}}"
                         target="_blank" download>
                         {{ docto }}
                     </a>
@@ -80,6 +80,10 @@
             </a>
             <p></p>
             {% endif %}
+            <a href="{% url 'tmp_reporte_control_admin' pk_cte=cte.pk %}" class="btn btn-outline-primary btn-block">
+                <i class="fas fa-wrench"></i>
+                Datos de Control
+            </a>
             {% if cperms.ver_actividad and cte.actividades_asociadas.all %}
             <h5>Actividades</h5>
             <div class="list-group">
@@ -142,7 +146,7 @@
         <div class="row">
             <div class="col">
                 <span class="text-muted">
-                    {{ nota.created_at | date:"d/m/Y" }}: 
+                    {{ nota.created_at | date:"d/m/Y" }}:
                 </span>
                 {{ nota.nota | as_paragraph | safe }}
                 <p class="blockquote-footer">{{ nota.created_by }}</p>

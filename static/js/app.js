@@ -69,7 +69,7 @@ class clsApp {
             $( `input[type="date"]` ).datepicker( {
                 changeMonth: true,
                 changeYear: true,
-                dateFormat : 'yy-mm-dd'  
+                dateFormat : 'yy-mm-dd'
             } );
         }
     }
@@ -122,6 +122,55 @@ class clsApp {
         }
         return true;
     }
+    sortDataGridReport(column_number, datatype) {
+        var table, rows, switching, i, x, y, x_data, y_data, shouldSwitch, dir, switchcount = 0;
+        $("#data-grid-report thead th .sort-sign-asc").addClass('d-none');
+        $("#data-grid-report thead th .sort-sign-desc").addClass('d-none');
+        table = $("#data-grid-report tbody");
+        switching = true;
+        dir = "asc";
+        while (switching) {
+            switching = false;
+            rows = table.find('tr');
+            for(i = 0; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = $($(rows[i]).find("td")[column_number]);
+                y = $($(rows[i + 1]).find("td")[column_number]);
+                x_data = ("number" === datatype ?
+                    Number(x.data('rawsortvalue'))
+                    : x.data('rawsortvalue'));
+                y_data = ("number" === datatype ?
+                    Number(y.data('rawsortvalue'))
+                    : y.data('rawsortvalue'));
+                if("asc" == dir) {
+                    if(x_data > y_data) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if("desc" == dir) {
+                    if(x_data < y_data) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if(shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+        if("asc" == dir) {
+            $($("#data-grid-report thead th .sort-sign-asc")[column_number]).removeClass('d-none');
+        } else if("desc" == dir) {
+            $($("#data-grid-report thead th .sort-sign-desc")[column_number]).removeClass('d-none');
+        }
+    }
 }
 
 class clsCliente {
@@ -150,8 +199,8 @@ let Cte = new clsCliente();
 let App = new clsApp();
 let ActividadHistoria = new clsActividadHistoria();
 
-$( document ).ready( () => { 
-    $('[data-toggle="tooltip"]').tooltip(); 
+$( document ).ready( () => {
+    $('[data-toggle="tooltip"]').tooltip();
     App.setUIControls();
 } );
 
